@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane prefHeight="650.0" prefWidth="800.0"
+            xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller.CrudMembresiaViewController">
+
+    <children>
+        <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="650.0" prefWidth="800.0">
+            <items>
+                <!-- FORMULARIO -->
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                    <children>
+                        <!-- FILA 1 -->
+                        <Label layoutX="50.0" layoutY="32.0" text="Código:" />
+                        <TextField fx:id="txtCodigo" editable="false" layoutX="120.0" layoutY="28.0" prefWidth="150.0" />
+
+                        <Label layoutX="300.0" layoutY="32.0" text="Tipo:" />
+                        <ComboBox fx:id="comboTipoMembresia" layoutX="340.0" layoutY="28.0" prefWidth="150.0" promptText="Seleccione tipo" />
+
+                        <!-- FILA 2 -->
+                        <Label layoutX="50.0" layoutY="82.0" text="Usuario:" />
+                        <ComboBox fx:id="comboUsuario" layoutX="120.0" layoutY="78.0" prefWidth="150.0" promptText="Seleccione usuario" />
+
+                        <Label layoutX="300.0" layoutY="82.0" text="Duración:" />
+                        <ComboBox fx:id="comboDuracion" layoutX="370.0" layoutY="78.0" prefWidth="150.0" promptText="Seleccione duración" />
+
+                        <!-- FILA 3 -->
+                        <Label layoutX="50.0" layoutY="132.0" text="Costo:" />
+                        <TextField fx:id="txtCosto" layoutX="120.0" layoutY="128.0" prefWidth="150.0" />
+
+                        <!-- BOTONES -->
+                        <Button fx:id="btnNuevaMembresia" layoutX="50.0" layoutY="190.0" text="Nueva"
+                                onAction="#onActionNuevaMembresia" prefWidth="100.0" />
+
+                        <Button fx:id="btnCrearMembresia" layoutX="170.0" layoutY="190.0" text="Crear"
+                                onAction="#onActionCrearMembresia" prefWidth="100.0" />
+
+                        <Button fx:id="btnActualizarMembresia" layoutX="290.0" layoutY="190.0" text="Actualizar"
+                                onAction="#onActionActualizarMembresia" prefWidth="100.0" />
+
+                        <Button fx:id="btnEliminarMembresia" layoutX="410.0" layoutY="190.0" text="Eliminar"
+                                onAction="#onActionEliminarMembresia" prefWidth="100.0" />
+                    </children>
+                </AnchorPane>
+
+                <!-- TABLA -->
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                    <children>
+                        <TableView fx:id="tableMembresia" layoutX="14.0" layoutY="14.0" prefHeight="279.0" prefWidth="772.0">
+                            <columns>
+                                <TableColumn fx:id="tcCodigo" prefWidth="100.0" text="Código" />
+                                <TableColumn fx:id="tcUsuario" prefWidth="150.0" text="Usuario" />
+                                <TableColumn fx:id="tcTipo" prefWidth="120.0" text="Tipo" />
+                                <TableColumn fx:id="tcDuracion" prefWidth="100.0" text="Duración" />
+                                <TableColumn fx:id="tcCosto" prefWidth="100.0" text="Costo" />
+                                <TableColumn fx:id="tcEstado" prefWidth="100.0" text="Estado" />
+                            </columns>
+                        </TableView>
+                    </children>
+                </AnchorPane>
+            </items>
+        </SplitPane>
+    </children>
+</AnchorPane>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="713.0" prefWidth="893.0"
+            xmlns="http://javafx.com/javafx/20.0.2"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller.GimnasioViewController">
+
+    <children>
+        <TabPane layoutX="14.0" layoutY="14.0"
+                 prefHeight="698.0" prefWidth="873.0"
+                 tabClosingPolicy="UNAVAILABLE">
+
+            <tabs>
+                <!-- TAB USUARIOS -->
+                <Tab text="Crud Usuario">
+                    <content>
+                        <AnchorPane>
+                            <children>
+                                <SplitPane orientation="VERTICAL"
+                                           layoutX="14.0" layoutY="7.0"
+                                           prefHeight="621.0" prefWidth="931.0">
+                                    <items>
+                                        <fx:include source="CrudUsuarioView.fxml"/>
+                                    </items>
+                                </SplitPane>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+
+
+
+                <Tab text="Crud Membresia">
+                    <content>
+                        <AnchorPane>
+                            <children>
+                                <SplitPane orientation="VERTICAL"
+                                           layoutX="14.0" layoutY="7.0"
+                                           prefHeight="621.0" prefWidth="931.0">
+                                    <items>
+                                        <fx:include source="MembresiaView.fxml"/>
+                                    </items>
+                                </SplitPane>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+
+
+            </tabs>
+        </TabPane>
+    </children>
+</AnchorPane>
