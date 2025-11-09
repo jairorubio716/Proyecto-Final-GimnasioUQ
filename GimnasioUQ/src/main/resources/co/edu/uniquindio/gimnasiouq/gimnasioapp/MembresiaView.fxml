@@ -4,13 +4,13 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.geometry.Insets?>
 
-<AnchorPane prefHeight="650.0" prefWidth="800.0"
+<AnchorPane prefHeight="650.0" prefWidth="900.0"
             xmlns="http://javafx.com/javafx/25"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller.CrudMembresiaViewController">
 
     <children>
-        <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="650.0" prefWidth="800.0">
+        <SplitPane dividerPositions="0.4" orientation="VERTICAL" prefHeight="650.0" prefWidth="900.0">
             <items>
                 <!-- FORMULARIO -->
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
@@ -31,7 +31,8 @@
 
                         <!-- FILA 3 -->
                         <Label layoutX="50.0" layoutY="132.0" text="Costo:" />
-                        <TextField fx:id="txtCosto" layoutX="120.0" layoutY="128.0" prefWidth="150.0" />
+                        <TextField fx:id="txtCosto" editable="false" layoutX="120.0" layoutY="128.0" prefWidth="150.0"
+                                   style="-fx-background-color: #f0f0f0;"/>
 
                         <!-- BOTONES -->
                         <Button fx:id="btnNuevaMembresia" layoutX="50.0" layoutY="190.0" text="Nueva"
@@ -51,14 +52,16 @@
                 <!-- TABLA -->
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                     <children>
-                        <TableView fx:id="tableMembresia" layoutX="14.0" layoutY="14.0" prefHeight="279.0" prefWidth="772.0">
+                        <TableView fx:id="tableMembresia" layoutX="14.0" layoutY="14.0" prefHeight="350.0" prefWidth="872.0">
                             <columns>
-                                <TableColumn fx:id="tcCodigo" prefWidth="100.0" text="Código" />
-                                <TableColumn fx:id="tcUsuario" prefWidth="150.0" text="Usuario" />
-                                <TableColumn fx:id="tcTipo" prefWidth="120.0" text="Tipo" />
-                                <TableColumn fx:id="tcDuracion" prefWidth="100.0" text="Duración" />
-                                <TableColumn fx:id="tcCosto" prefWidth="100.0" text="Costo" />
-                                <TableColumn fx:id="tcEstado" prefWidth="100.0" text="Estado" />
+                                <TableColumn fx:id="tcCodigo" prefWidth="80.0" text="Código" />
+                                <TableColumn fx:id="tcUsuario" prefWidth="120.0" text="Usuario" />
+                                <TableColumn fx:id="tcTipo" prefWidth="100.0" text="Tipo" />
+                                <TableColumn fx:id="tcDuracion" prefWidth="90.0" text="Duración" />
+                                <TableColumn fx:id="tcCosto" prefWidth="90.0" text="Costo" />
+                                <TableColumn fx:id="tcFechaInicio" prefWidth="100.0" text="Fecha Inicio" />
+                                <TableColumn fx:id="tcFechaFin" prefWidth="100.0" text="Fecha Fin" />
+                                <TableColumn fx:id="tcEstado" prefWidth="80.0" text="Estado" />
                             </columns>
                         </TableView>
                     </children>

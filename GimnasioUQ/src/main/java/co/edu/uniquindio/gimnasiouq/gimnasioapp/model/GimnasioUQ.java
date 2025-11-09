@@ -65,6 +65,53 @@ public class GimnasioUQ {
         return buscarUsuario(identificacion);
     }
 
+
+
+    //                   CRUD MEMBRESIAS
+
+    public boolean crearMembresia(Membresia membresia) {
+        if (buscarMembresia(membresia.getCodigo()) != null) {
+            return false;
+        }
+        return listaMembresias.add(membresia);
+    }
+
+    public boolean actualizarMembresia(Membresia membresiaActualizada) {
+        Membresia existente = buscarMembresia(membresiaActualizada.getCodigo());
+        if (existente != null) {
+            listaMembresias.remove(existente);
+            return listaMembresias.add(membresiaActualizada);
+        }
+        return false;
+    }
+
+    public boolean eliminarMembresia(String codigo) {
+        Membresia m = buscarMembresia(codigo);
+        if (m != null) {
+            return listaMembresias.remove(m);
+        }
+        return false;
+    }
+
+    public Membresia buscarMembresia(String codigo) {
+        for (Membresia m : listaMembresias) {
+            if (m.getCodigo().equals(codigo)) {
+                return m;
+            }
+        }
+        return null;
+    }
+
+    public Membresia obtenerMembresia(String codigo) {
+        return buscarMembresia(codigo);
+    }
+
+
+
+
+
+
+
     public String getNombre() {
         return nombre;
     }

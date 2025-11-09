@@ -15,9 +15,7 @@ public class UsuarioController {
         this.modelFactory = ModelFactory.getInstancia();
     }
 
-    // ============================================================
-    //                     CRUD USUARIOS (SIMPLIFICADO)
-    // ============================================================
+
 
     public boolean crearUsuario(Usuario usuario) {
         return modelFactory.crearUsuario(usuario);

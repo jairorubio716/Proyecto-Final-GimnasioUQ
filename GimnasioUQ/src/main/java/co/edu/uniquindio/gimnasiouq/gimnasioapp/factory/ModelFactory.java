@@ -17,6 +17,8 @@ public class ModelFactory {
 
     // ✅ LISTAS OBSERVABLES COMPARTIDAS
     private ObservableList<Usuario> usuariosObservable = FXCollections.observableArrayList();
+    private ObservableList<Membresia> membresiasObservable = FXCollections.observableArrayList();
+
 
     public static ModelFactory getInstancia() {
         if (instancia == null) {
@@ -33,6 +35,7 @@ public class ModelFactory {
     // ✅ ACTUALIZAR LISTAS OBSERVABLES
     private void actualizarListasObservables() {
         usuariosObservable.setAll(gimnasio.getListaUsuarios());
+        membresiasObservable.setAll(gimnasio.getListaMembresias());
 
     }
 
@@ -86,6 +89,66 @@ public class ModelFactory {
 
     public List<Usuario> obtenerUsuarios() {
         return gimnasio.getListaUsuarios();
+    }
+
+    // CRUD MEMBRESIAS
+
+    public boolean crearMembresia(Membresia membresia) {
+        if (obtenerMembresia(membresia.getCodigo()) != null) {
+            return false;
+        }
+
+        boolean resultado = gimnasio.crearMembresia(membresia);
+        if (resultado) {
+            membresiasObservable.setAll(gimnasio.getListaMembresias());
+        }
+        return resultado;
+    }
+
+    public boolean actualizarMembresia(Membresia membresia) {
+        if (obtenerMembresia(membresia.getCodigo()) == null) {
+            return false;
+        }
+
+        boolean resultado = gimnasio.actualizarMembresia(membresia);
+        if (resultado) {
+            membresiasObservable.setAll(gimnasio.getListaMembresias());
+        }
+        return resultado;
+    }
+
+    public boolean eliminarMembresia(String codigo) {
+        if (obtenerMembresia(codigo) == null) {
+            return false;
+        }
+
+        boolean resultado = gimnasio.eliminarMembresia(codigo);
+        if (resultado) {
+            membresiasObservable.setAll(gimnasio.getListaMembresias());
+        }
+        return resultado;
+    }
+
+    public Membresia obtenerMembresia(String codigo) {
+        return gimnasio.obtenerMembresia(codigo);
+    }
+
+    public List<Membresia> obtenerMembresias() {
+        return gimnasio.getListaMembresias();
+    }
+
+    public ObservableList<Membresia> getMembresiasObservable() {
+        return membresiasObservable;
+    }
+
+    public boolean usuarioTieneMembresiaActiva(String identificacionUsuario) {
+        for (Membresia membresia : gimnasio.getListaMembresias()) {
+            if (membresia.getIdentificacionUsuario().equals(identificacionUsuario) &&
+                    membresia.estaActiva()) {
+                return true;
+            }
+        }
+        return false;
     }
 
 

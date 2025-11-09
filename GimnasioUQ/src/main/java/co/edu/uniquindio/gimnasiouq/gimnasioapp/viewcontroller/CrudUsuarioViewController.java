@@ -177,7 +177,7 @@ public class CrudUsuarioViewController implements Initializable {
         if (usuarioSeleccionado != null && validarFormulario()) {
             // Crear nuevo usuario con los datos actualizados
             Usuario usuarioActualizado = crearUsuarioDesdeFormulario();
-            usuarioActualizado.setIdentificacion(usuarioSeleccionado.getIdentificacion()); // Mantener misma ID
+            usuarioActualizado.setIdentificacion(usuarioSeleccionado.getIdentificacion());
 
             if (usuarioController.actualizarUsuario(usuarioActualizado)) {
                 tableUsuario.refresh();
@@ -215,9 +215,8 @@ public class CrudUsuarioViewController implements Initializable {
         }
     }
 
-    // ============================================================
+
     //                   MÉTODOS AUXILIARES
-    // ============================================================
 
     private Usuario crearUsuarioDesdeFormulario() {
         String tipoUsuario = comboTipoUsuario.getValue();
@@ -264,7 +263,7 @@ public class CrudUsuarioViewController implements Initializable {
     }
 
     private boolean validarFormulario() {
-        // Validaciones básicas
+       
         if (txtNombre.getText().isEmpty()) {
             mostrarAlerta("Validación", "El nombre es obligatorio");
             return false;
@@ -278,7 +277,6 @@ public class CrudUsuarioViewController implements Initializable {
             return false;
         }
 
-        // Validaciones específicas por tipo
         String tipoUsuario = comboTipoUsuario.getValue();
         switch (tipoUsuario) {
             case "Estudiante":
