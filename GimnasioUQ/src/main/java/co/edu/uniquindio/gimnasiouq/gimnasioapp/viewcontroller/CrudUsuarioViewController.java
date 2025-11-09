@@ -263,7 +263,7 @@ public class CrudUsuarioViewController implements Initializable {
     }
 
     private boolean validarFormulario() {
-       
+
         if (txtNombre.getText().isEmpty()) {
             mostrarAlerta("Validación", "El nombre es obligatorio");
             return false;

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller.CrudEntrenadorViewController">
+    <children>
+        <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="600.0" prefWidth="800.0">
+            <items>
+
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                    <children>
+                        <TextField fx:id="txtNombre" layoutX="123.0" layoutY="48.0" prefWidth="200.0" />
+                        <Label layoutX="46.0" layoutY="48.0" prefHeight="25.0" prefWidth="54.0" text="Nombre:" />
+                        <Label layoutX="46.0" layoutY="100.0" prefHeight="25.0" prefWidth="98.0" text="Identificación:" />
+                        <Label layoutX="46.0" layoutY="148.0" prefHeight="25.0" prefWidth="54.0" text="Teléfono:" />
+                        <Label layoutX="46.0" layoutY="193.0" prefHeight="25.0" prefWidth="54.0" text="Correo:" />
+                        <Label layoutX="385.0" layoutY="52.0" prefHeight="25.0" prefWidth="89.0" text="Especialidad:" />
+                        <Label layoutX="385.0" layoutY="104.0" prefHeight="25.0" prefWidth="89.0" text="Sueldo:" />
+                        <TextField fx:id="txtIdentificacion" layoutX="123.0" layoutY="100.0" prefWidth="200.0" />
+                        <TextField fx:id="txtTelefono" layoutX="123.0" layoutY="148.0" prefWidth="200.0" />
+                        <TextField fx:id="txtCorreo" layoutX="123.0" layoutY="193.0" prefWidth="200.0" />
+                        <ComboBox fx:id="comboEspecialidad" layoutX="474.0" layoutY="52.0" prefWidth="150.0" />
+                        <TextField fx:id="txtSueldo" layoutX="474.0" layoutY="104.0" prefWidth="150.0" />
+
+
+                        <Button fx:id="btnNuevo" layoutX="46.0" layoutY="250.0" text="Nuevo" onAction="#onActionNuevo" prefWidth="100.0" />
+                        <Button fx:id="btnCrear" layoutX="156.0" layoutY="250.0" text="Crear" onAction="#onActionCrear" prefWidth="100.0" />
+                        <Button fx:id="btnActualizar" layoutX="266.0" layoutY="250.0" text="Actualizar" onAction="#onActionActualizar" prefWidth="100.0" />
+                        <Button fx:id="btnEliminar" layoutX="376.0" layoutY="250.0" text="Eliminar" onAction="#onActionEliminar" prefWidth="100.0" />
+                    </children>
+                </AnchorPane>
+
+
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                    <children>
+                        <TableView fx:id="tableEntrenador" layoutX="14.0" layoutY="14.0" prefHeight="250.0" prefWidth="772.0">
+                            <columns>
+                                <TableColumn fx:id="tcIdentificacion" prefWidth="100.0" text="Identificación" />
+                                <TableColumn fx:id="tcNombre" prefWidth="150.0" text="Nombre" />
+                                <TableColumn fx:id="tcTelefono" prefWidth="120.0" text="Teléfono" />
+                                <TableColumn fx:id="tcCorreo" prefWidth="150.0" text="Correo" />
+                                <TableColumn fx:id="tcEspecialidad" prefWidth="120.0" text="Especialidad" />
+                                <TableColumn fx:id="tcSueldo" prefWidth="100.0" text="Sueldo" />
+                            </columns>
+                        </TableView>
+                    </children>
+                </AnchorPane>
+            </items>
+        </SplitPane>
+    </children>
+</AnchorPane>

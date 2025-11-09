@@ -18,7 +18,7 @@ public class ModelFactory {
     // ✅ LISTAS OBSERVABLES COMPARTIDAS
     private ObservableList<Usuario> usuariosObservable = FXCollections.observableArrayList();
     private ObservableList<Membresia> membresiasObservable = FXCollections.observableArrayList();
-
+    private ObservableList<Entrenador> entrenadoresObservable = FXCollections.observableArrayList();
 
     public static ModelFactory getInstancia() {
         if (instancia == null) {
@@ -36,6 +36,7 @@ public class ModelFactory {
     private void actualizarListasObservables() {
         usuariosObservable.setAll(gimnasio.getListaUsuarios());
         membresiasObservable.setAll(gimnasio.getListaMembresias());
+        entrenadoresObservable.setAll(gimnasio.getListaEntrenadores());
 
     }
 
@@ -150,6 +151,57 @@ public class ModelFactory {
         }
         return false;
     }
+
+
+
+    // Métodos de entrenadores
+    public boolean crearEntrenador(Entrenador entrenador) {
+        if (obtenerEntrenador(entrenador.getIdentificacion()) != null) {
+            return false;
+        }
+        boolean resultado = gimnasio.crearEntrenador(entrenador);
+        if (resultado) {
+            entrenadoresObservable.setAll(gimnasio.getListaEntrenadores());
+        }
+        return resultado;
+    }
+
+    public boolean actualizarEntrenador(Entrenador entrenador) {
+        if (obtenerEntrenador(entrenador.getIdentificacion()) == null) {
+            return false;
+        }
+        boolean resultado = gimnasio.actualizarEntrenador(entrenador);
+        if (resultado) {
+            entrenadoresObservable.setAll(gimnasio.getListaEntrenadores());
+        }
+        return resultado;
+    }
+
+    public boolean eliminarEntrenador(String identificacion) {
+        if (obtenerEntrenador(identificacion) == null) {
+            return false;
+        }
+        boolean resultado = gimnasio.eliminarEntrenador(identificacion);
+        if (resultado) {
+            entrenadoresObservable.setAll(gimnasio.getListaEntrenadores());
+        }
+        return resultado;
+    }
+
+    public Entrenador obtenerEntrenador(String identificacion) {
+        return gimnasio.obtenerEntrenador(identificacion);
+    }
+
+    public List<Entrenador> obtenerEntrenadores() {
+        return gimnasio.getListaEntrenadores();
+    }
+
+    public ObservableList<Entrenador> getEntrenadoresObservable() {
+        return entrenadoresObservable;
+    }
+
+
+
 
 
     // ============================================================

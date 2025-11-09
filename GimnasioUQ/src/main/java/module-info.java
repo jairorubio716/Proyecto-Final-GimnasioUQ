@@ -2,6 +2,7 @@ module co.edu.uniquindio.gimnasiouq.gimnasiouqapp {
 
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.desktop;
 
 
     opens co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller to javafx.fxml;

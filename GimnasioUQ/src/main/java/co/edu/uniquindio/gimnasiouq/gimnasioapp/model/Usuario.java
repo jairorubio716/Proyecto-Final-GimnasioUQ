@@ -28,5 +28,4 @@ public abstract class Usuario {
     public String getTelefono() { return telefono; }
     public void setTelefono(String telefono) { this.telefono = telefono; }
 
-    // ❌ ELIMINADO: toString() - No se usa en JavaFX/FXML
 }

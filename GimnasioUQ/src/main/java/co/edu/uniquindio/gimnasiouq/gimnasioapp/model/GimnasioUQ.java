@@ -111,6 +111,54 @@ public class GimnasioUQ {
 
 
 
+    // Métodos de entrenadores
+    public boolean crearEntrenador(Entrenador entrenador) {
+        if (buscarEntrenador(entrenador.getIdentificacion()) != null) {
+            return false;
+        }
+        return listaEntrenadores.add(entrenador);
+    }
+
+    public boolean actualizarEntrenador(Entrenador entrenadorActualizado) {
+        Entrenador existente = buscarEntrenador(entrenadorActualizado.getIdentificacion());
+        if (existente != null) {
+            listaEntrenadores.remove(existente);
+            return listaEntrenadores.add(entrenadorActualizado);
+        }
+        return false;
+    }
+
+    public boolean eliminarEntrenador(String identificacion) {
+        Entrenador e = buscarEntrenador(identificacion);
+        if (e != null) {
+            return listaEntrenadores.remove(e);
+        }
+        return false;
+    }
+
+    public Entrenador buscarEntrenador(String identificacion) {
+        for (Entrenador e : listaEntrenadores) {
+            if (e.getIdentificacion().equals(identificacion)) {
+                return e;
+            }
+        }
+        return null;
+    }
+
+    public Entrenador obtenerEntrenador(String identificacion) {
+        return buscarEntrenador(identificacion);
+    }
+
+
+
+
+
+
+
+
+
+
+
 
     public String getNombre() {
         return nombre;
