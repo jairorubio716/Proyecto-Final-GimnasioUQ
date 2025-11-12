@@ -1,29 +1,24 @@
 package co.edu.uniquindio.gimnasiouq.gimnasioapp.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Entrenador {
     private String identificacion;
     private String nombre;
     private String telefono;
     private String correo;
-    private String especialidad;
     private double sueldo;
-    private List<Clase> clasesAsignadas;
+    private boolean disponible;
 
     public Entrenador() {
-        this.clasesAsignadas = new ArrayList<>();
+        this.disponible = true; // Disponible por defecto
     }
 
     public Entrenador(String identificacion, String nombre, String telefono,
-                      String correo, String especialidad, double sueldo) {
+                      String correo, double sueldo) {
         this();
         this.identificacion = identificacion;
         this.nombre = nombre;
         this.telefono = telefono;
         this.correo = correo;
-        this.especialidad = especialidad;
         this.sueldo = sueldo;
     }
 
@@ -40,12 +35,9 @@ public class Entrenador {
     public String getCorreo() { return correo; }
     public void setCorreo(String correo) { this.correo = correo; }
 
-    public String getEspecialidad() { return especialidad; }
-    public void setEspecialidad(String especialidad) { this.especialidad = especialidad; }
-
     public double getSueldo() { return sueldo; }
     public void setSueldo(double sueldo) { this.sueldo = sueldo; }
 
-    public List<Clase> getClasesAsignadas() { return clasesAsignadas; }
-    public void setClasesAsignadas(List<Clase> clasesAsignadas) { this.clasesAsignadas = clasesAsignadas; }
+    public boolean isDisponible() { return disponible; }
+    public void setDisponible(boolean disponible) { this.disponible = disponible; }
 }

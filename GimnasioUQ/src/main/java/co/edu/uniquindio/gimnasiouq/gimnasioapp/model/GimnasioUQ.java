@@ -111,7 +111,7 @@ public class GimnasioUQ {
 
 
 
-    // Métodos de entrenadores
+    // Métodos de entrenadores (se mantienen igual, solo cambia la estructura de la clase)
     public boolean crearEntrenador(Entrenador entrenador) {
         if (buscarEntrenador(entrenador.getIdentificacion()) != null) {
             return false;
@@ -153,6 +153,52 @@ public class GimnasioUQ {
 
 
 
+
+    // ============================================================
+    //                     CRUD RESERVAS
+    // ============================================================
+
+    public boolean crearReserva(Reserva reserva) {
+        // Validar que no exista una reserva con el mismo código
+        if (obtenerReserva(reserva.getCodigoReserva()) != null) {
+            return false;
+        }
+
+        // Validar que el usuario existe
+        if (obtenerUsuario(reserva.getIdentificacionUsuario()) == null) {
+            return false;
+        }
+
+        // Agregar la reserva a la lista
+        return listaReservas.add(reserva);
+    }
+
+    public boolean cancelarReserva(String codigoReserva) {
+        Reserva reserva = obtenerReserva(codigoReserva);
+        if (reserva != null && reserva.getEstado().equals("ACTIVA")) {
+            reserva.setEstado("CANCELADA");
+            return true;
+        }
+        return false;
+    }
+
+    public boolean registrarAsistencia(String codigoReserva) {
+        Reserva reserva = obtenerReserva(codigoReserva);
+        if (reserva != null && reserva.getEstado().equals("ACTIVA")) {
+            reserva.setEstado("COMPLETADA");
+            return true;
+        }
+        return false;
+    }
+
+    public Reserva obtenerReserva(String codigoReserva) {
+        for (Reserva reserva : listaReservas) {
+            if (reserva.getCodigoReserva().equals(codigoReserva)) {
+                return reserva;
+            }
+        }
+        return null;
+    }
 
 
 

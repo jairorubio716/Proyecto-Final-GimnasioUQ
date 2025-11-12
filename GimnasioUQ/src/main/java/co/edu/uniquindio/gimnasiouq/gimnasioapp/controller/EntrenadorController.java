@@ -7,10 +7,14 @@ import javafx.collections.ObservableList;
 import java.util.List;
 
 public class EntrenadorController {
-    ModelFactory modelFactory;
+    private ModelFactory modelFactory;
 
     public EntrenadorController() {
         this.modelFactory = ModelFactory.getInstancia();
+    }
+
+    public ObservableList<Entrenador> obtenerEntrenadores() {
+        return modelFactory.getEntrenadoresObservable();
     }
 
     public boolean crearEntrenador(Entrenador entrenador) {
@@ -25,15 +29,7 @@ public class EntrenadorController {
         return modelFactory.eliminarEntrenador(identificacion);
     }
 
-    public List<Entrenador> obtenerEntrenadores() {
-        return modelFactory.obtenerEntrenadores();
-    }
-
-    public ObservableList<Entrenador> obtenerEntrenadoresObservable() {
-        return modelFactory.getEntrenadoresObservable();
-    }
-
-    public List<String> obtenerEspecialidadesDisponibles() {
-        return List.of("Yoga", "Spinning", "Pilates", "Boxeo", "Musculación"); // Temporal
+    public List<Entrenador> obtenerEntrenadoresDisponibles() {
+        return modelFactory.obtenerEntrenadoresDisponibles();
     }
 }

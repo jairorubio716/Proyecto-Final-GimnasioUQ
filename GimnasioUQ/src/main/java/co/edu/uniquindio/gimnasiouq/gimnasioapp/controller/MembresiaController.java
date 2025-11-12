@@ -5,17 +5,20 @@ import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.Membresia;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.Usuario;
 import javafx.collections.ObservableList;
 
-import java.util.List;
-
 public class MembresiaController {
-    ModelFactory modelFactory;
+
+    private ModelFactory modelFactory;
 
     public MembresiaController() {
         this.modelFactory = ModelFactory.getInstancia();
     }
 
-    public boolean crearMembresia(Membresia membresia) {
-        return modelFactory.crearMembresia(membresia);
+    public ObservableList<Membresia> obtenerMembresias() {
+        return modelFactory.getMembresiasObservable();
+    }
+
+    public boolean crearMembresia(Membresia membresia, Usuario usuario) {
+        return modelFactory.crearMembresia(membresia, usuario);
     }
 
     public boolean actualizarMembresia(Membresia membresia) {
@@ -26,19 +29,15 @@ public class MembresiaController {
         return modelFactory.eliminarMembresia(codigo);
     }
 
-    public List<Membresia> obtenerMembresias() {
-        return modelFactory.obtenerMembresias();
-    }
-
-    public ObservableList<Membresia> obtenerMembresiasObservable() {
-        return modelFactory.getMembresiasObservable();
-    }
-
-    public ObservableList<Usuario> obtenerUsuariosObservable() {
-        return modelFactory.getUsuariosObservable();
+    public Membresia obtenerMembresia(String codigo) {
+        return modelFactory.obtenerMembresia(codigo);
     }
 
     public boolean usuarioTieneMembresiaActiva(String identificacionUsuario) {
         return modelFactory.usuarioTieneMembresiaActiva(identificacionUsuario);
+    }
+
+    public Membresia obtenerMembresiaActivaUsuario(String identificacionUsuario) {
+        return modelFactory.obtenerMembresiaActivaUsuario(identificacionUsuario);
     }
 }

@@ -1,334 +1,283 @@
 package co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller;
 
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.controller.MembresiaController;
+import co.edu.uniquindio.gimnasiouq.gimnasioapp.controller.UsuarioController;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.*;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.net.URL;
+import java.time.LocalDate;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.UUID;
 
-public class CrudMembresiaViewController implements Initializable {
+public class CrudMembresiaViewController {
 
-    // ============================================================
-    //                     COMPONENTES FXML
-    // ============================================================
+    // Controllers
+    MembresiaController membresiaController;
+    UsuarioController usuarioController;
 
+    // Observable Lists - Se obtienen directamente del controller, no se inicializan aquí.
+    ObservableList<Membresia> listaMembresias;
+    ObservableList<Usuario> listaUsuarios;
+
+    // Selection
+    Membresia membresiaSeleccionada;
+
+    @FXML private ResourceBundle resources;
+    @FXML private URL location;
+
+    // FXML Components
     @FXML private TextField txtCodigo;
-    @FXML private TextField txtCosto;
-    @FXML private ComboBox<Usuario> comboUsuario;
     @FXML private ComboBox<TipoMembresia> comboTipoMembresia;
+    @FXML private ComboBox<Usuario> comboUsuario;
     @FXML private ComboBox<TipoMembresiaDuracion> comboDuracion;
+    @FXML private TextField txtCosto;
+    @FXML private ComboBox<EstadoMembresia> comboEstado;
     @FXML private TableView<Membresia> tableMembresia;
-    @FXML private TableColumn<Membresia, String> tcCodigo;
-    @FXML private TableColumn<Membresia, String> tcUsuario;
-    @FXML private TableColumn<Membresia, String> tcTipo;
-    @FXML private TableColumn<Membresia, String> tcDuracion;
-    @FXML private TableColumn<Membresia, String> tcCosto;
-    @FXML private TableColumn<Membresia, String> tcFechaInicio;
-    @FXML private TableColumn<Membresia, String> tcFechaFin;
-    @FXML private TableColumn<Membresia, String> tcEstado;
+    @FXML private TableColumn<Membresia, String> tcCodigo, tcUsuario, tcTipo, tcDuracion, tcCosto;
+    @FXML private TableColumn<Membresia, String> tcFechaInicio, tcFechaFin, tcEstado;
+    @FXML private Button btnNuevo, btnAgregar, btnActualizar, btnEliminar;
 
-    // ============================================================
-    //                     VARIABLES
-    // ============================================================
-
-    private MembresiaController membresiaController;
-    private ObservableList<Membresia> listaMembresiasObservable;
-    private ObservableList<Usuario> listaUsuariosObservable;
-
-    // ============================================================
-    //                     INITIALIZE
-    // ============================================================
-
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
+    @FXML
+    void initialize() {
         membresiaController = new MembresiaController();
-        listaMembresiasObservable = membresiaController.obtenerMembresiasObservable();
-        listaUsuariosObservable = membresiaController.obtenerUsuariosObservable();
-
-        configurarCombos();
-        configurarTabla();
-        generarCodigoAutomatico();
-
-        // Listener para selección en tabla
-        tableMembresia.getSelectionModel().selectedItemProperty().addListener(
-                (observable, oldValue, newValue) -> {
-                    if (newValue != null) {
-                        llenarFormularioConMembresia(newValue);
-                    }
-                }
-        );
+        usuarioController = new UsuarioController();
+        initView();
     }
 
-    // ============================================================
-    //                     CONFIGURACIONES
-    // ============================================================
+    private void initView() {
+        // Obtener las listas directamente de los controllers.
+        // Así, cualquier cambio en otra parte de la app se reflejará aquí.
+        listaUsuarios = usuarioController.obtenerUsuarios();
+        listaMembresias = membresiaController.obtenerMembresias();
+
+        initDataBinding();
+        configurarCombos();
+
+        // Asignar las listas a los componentes de la UI
+        comboUsuario.setItems(listaUsuarios);
+        tableMembresia.setItems(listaMembresias);
+
+        listenerSelection();
+        limpiarFormulario();
+    }
+
+    private void initDataBinding() {
+        tcCodigo.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCodigo()));
+        tcUsuario.setCellValueFactory(cellData -> {
+            String idUsuario = cellData.getValue().getIdentificacionUsuario();
+            return new SimpleStringProperty(
+                listaUsuarios.stream()
+                    .filter(u -> u.getIdentificacion().equals(idUsuario))
+                    .map(Usuario::getNombre)
+                    .findFirst()
+                    .orElse(idUsuario)
+            );
+        });
+        tcTipo.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTipo().getNombre()));
+        tcDuracion.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getDuracion().toString()));
+        tcCosto.setCellValueFactory(cellData -> new SimpleStringProperty(String.format("$%,.0f", cellData.getValue().getCosto())));
+        tcFechaInicio.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFechaInicio()));
+        tcFechaFin.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFechaVencimiento()));
+        tcEstado.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEstado().toString()));
+    }
 
     private void configurarCombos() {
         comboTipoMembresia.getItems().setAll(TipoMembresia.values());
         comboDuracion.getItems().setAll(TipoMembresiaDuracion.values());
-        comboUsuario.setItems(listaUsuariosObservable);
+        comboEstado.getItems().setAll(EstadoMembresia.values());
 
-        // PERSONALIZAR COMBOBOX DE USUARIOS
-        comboUsuario.setCellFactory(param -> new ListCell<Usuario>() {
+        comboUsuario.setCellFactory(param -> new ListCell<>() {
             @Override
-            protected void updateItem(Usuario usuario, boolean empty) {
-                super.updateItem(usuario, empty);
-                if (empty || usuario == null) {
-                    setText(null);
-                } else {
-                    setText(usuario.getNombre() + " - " + usuario.getIdentificacion());
-                }
+            protected void updateItem(Usuario item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getNombre() + " (" + item.getIdentificacion() + ")");
+            }
+        });
+        comboUsuario.setButtonCell(new ListCell<>() {
+             @Override
+            protected void updateItem(Usuario item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "Seleccione un usuario" : item.getNombre());
             }
         });
 
-        comboUsuario.setButtonCell(new ListCell<Usuario>() {
-            @Override
-            protected void updateItem(Usuario usuario, boolean empty) {
-                super.updateItem(usuario, empty);
-                if (empty || usuario == null) {
-                    setText("Seleccione usuario");
-                } else {
-                    setText(usuario.getNombre() + " - " + usuario.getIdentificacion());
-                }
+        comboTipoMembresia.valueProperty().addListener((obs, oldV, newV) -> actualizarCostoEnUI());
+        comboDuracion.valueProperty().addListener((obs, oldV, newV) -> actualizarCostoEnUI());
+        comboUsuario.valueProperty().addListener((obs, oldV, newV) -> actualizarCostoEnUI());
+    }
+
+    private void listenerSelection() {
+        tableMembresia.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            membresiaSeleccionada = newSelection;
+            mostrarInformacion(membresiaSeleccionada);
+        });
+    }
+
+    private void mostrarInformacion(Membresia membresia) {
+        if (membresia != null) {
+            txtCodigo.setText(membresia.getCodigo());
+            comboUsuario.setValue(
+                listaUsuarios.stream()
+                    .filter(u -> u.getIdentificacion().equals(membresia.getIdentificacionUsuario()))
+                    .findFirst().orElse(null)
+            );
+            comboTipoMembresia.setValue(membresia.getTipo());
+            comboDuracion.setValue(membresia.getDuracion());
+            comboEstado.setValue(membresia.getEstado());
+            actualizarCostoEnUI();
+            
+            txtCodigo.setDisable(true);
+            comboUsuario.setDisable(true);
+        }
+    }
+
+    @FXML void onActionNuevo(ActionEvent event) { limpiarFormulario(); }
+    @FXML void onActionAgregar(ActionEvent event) { crearMembresia(); }
+    @FXML void onActionActualizar(ActionEvent event) { actualizarMembresia(); }
+    @FXML void onActionEliminar(ActionEvent event) { eliminarMembresia(); }
+
+    private void crearMembresia() {
+        if (validarCampos()) {
+            Usuario usuarioSeleccionado = comboUsuario.getValue();
+            if (membresiaController.usuarioTieneMembresiaActiva(usuarioSeleccionado.getIdentificacion())) {
+                mostrarMensaje("Validación", "Membresía Existente", "El usuario seleccionado ya tiene una membresía activa.", Alert.AlertType.WARNING);
+                return;
             }
-        });
 
-        // Escuchar cambios para calcular costo automático
-        comboTipoMembresia.valueProperty().addListener((obs, oldVal, newVal) -> actualizarCosto());
-        comboDuracion.valueProperty().addListener((obs, oldVal, newVal) -> actualizarCosto());
-    }
-
-    private void configurarTabla() {
-        tableMembresia.setItems(listaMembresiasObservable);
-
-        tcCodigo.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getCodigo()));
-
-        tcUsuario.setCellValueFactory(cellData -> {
-            String idUsuario = cellData.getValue().getIdentificacionUsuario();
-            for (Usuario usuario : listaUsuariosObservable) {
-                if (usuario.getIdentificacion().equals(idUsuario)) {
-                    return new SimpleStringProperty(usuario.getNombre());
-                }
-            }
-            return new SimpleStringProperty(idUsuario);
-        });
-
-        tcTipo.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getTipo().getNombre()));
-        tcDuracion.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getDuracion().toString()));
-        tcCosto.setCellValueFactory(cellData ->
-                new SimpleStringProperty(String.format("$%,.0f", cellData.getValue().getCosto())));
-        tcFechaInicio.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getFechaInicio()));
-        tcFechaFin.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getFechaVencimiento()));
-        tcEstado.setCellValueFactory(cellData -> {
-            Membresia membresia = cellData.getValue();
-            return new SimpleStringProperty(membresia.estaActiva() ? "ACTIVA" : "VENCIDA");
-        });
-    }
-
-    // ============================================================
-    //                     MÉTODOS DE ACCIÓN
-    // ============================================================
-
-    @FXML
-    private void onActionNuevaMembresia() {
-        limpiarFormulario();
-    }
-
-    @FXML
-    private void onActionCrearMembresia() {
-        if(validarFormularioCrear()) {
-            Membresia membresia = crearMembresiaDesdeFormulario();
-
-            if (membresiaController.crearMembresia(membresia)) {
-                mostrarAlerta("Éxito", "Membresía creada correctamente");
+            Membresia nuevaMembresia = crearMembresiaDesdeFormulario();
+            if (membresiaController.crearMembresia(nuevaMembresia, usuarioSeleccionado)) {
+                // La lista se actualiza sola, no es necesario un .add() aquí.
+                mostrarMensaje("Notificación", "Creación Exitosa", "La membresía ha sido creada.", Alert.AlertType.INFORMATION);
                 limpiarFormulario();
-                tableMembresia.setItems(membresiaController.obtenerMembresiasObservable());
             } else {
-                mostrarAlerta("Error", "No se pudo crear la membresía");
+                mostrarMensaje("Error", "Error de Creación", "No se pudo crear la membresía.", Alert.AlertType.ERROR);
             }
         }
     }
 
-    @FXML
-    private void onActionActualizarMembresia() {
-        Membresia membresiaSeleccionada = tableMembresia.getSelectionModel().getSelectedItem();
-        if (membresiaSeleccionada != null && validarFormularioActualizar(membresiaSeleccionada)) {
+    private void actualizarMembresia() {
+        if (membresiaSeleccionada != null && validarCampos()) {
             Membresia membresiaActualizada = crearMembresiaDesdeFormulario();
             membresiaActualizada.setCodigo(membresiaSeleccionada.getCodigo());
+            membresiaActualizada.setIdentificacionUsuario(membresiaSeleccionada.getIdentificacionUsuario());
 
             if (membresiaController.actualizarMembresia(membresiaActualizada)) {
-                tableMembresia.refresh();
+                // La tabla se actualiza sola, no es necesario un .set() o .refresh() aquí.
+                mostrarMensaje("Notificación", "Actualización Exitosa", "La membresía ha sido actualizada.", Alert.AlertType.INFORMATION);
                 limpiarFormulario();
-                mostrarAlerta("Éxito", "Membresía actualizada correctamente");
             } else {
-                mostrarAlerta("Error", "No se pudo actualizar la membresía");
+                mostrarMensaje("Error", "Error de Actualización", "No se pudo actualizar la membresía.", Alert.AlertType.ERROR);
             }
-        } else {
-            mostrarAlerta("Advertencia", "Seleccione una membresía para actualizar");
+        } else if (membresiaSeleccionada == null) {
+            mostrarMensaje("Advertencia", "Sin Selección", "Debe seleccionar una membresía para actualizar.", Alert.AlertType.WARNING);
         }
     }
 
-    @FXML
-    private void onActionEliminarMembresia() {
-        Membresia membresiaSeleccionada = tableMembresia.getSelectionModel().getSelectedItem();
+    private void eliminarMembresia() {
         if (membresiaSeleccionada != null) {
-            Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-            confirmacion.setTitle("Confirmar eliminación");
-            confirmacion.setHeaderText("Eliminar Membresía");
-            confirmacion.setContentText("¿Está seguro de eliminar la membresía " + membresiaSeleccionada.getCodigo() + "?");
-
-            if (confirmacion.showAndWait().get() == ButtonType.OK) {
+            if (mostrarMensajeConfirmacion("¿Está seguro de que desea eliminar la membresía " + membresiaSeleccionada.getCodigo() + "?")) {
                 if (membresiaController.eliminarMembresia(membresiaSeleccionada.getCodigo())) {
+                    // La lista se actualiza sola, no es necesario un .remove() aquí.
                     limpiarFormulario();
-                    mostrarAlerta("Éxito", "Membresía eliminada correctamente");
-                    tableMembresia.setItems(membresiaController.obtenerMembresiasObservable());
+                    mostrarMensaje("Notificación", "Eliminación Exitosa", "La membresía ha sido eliminada.", Alert.AlertType.INFORMATION);
                 } else {
-                    mostrarAlerta("Error", "No se pudo eliminar la membresía");
+                    mostrarMensaje("Error", "Error de Eliminación", "No se pudo eliminar la membresía.", Alert.AlertType.ERROR);
                 }
             }
         } else {
-            mostrarAlerta("Advertencia", "Seleccione una membresía para eliminar");
+            mostrarMensaje("Advertencia", "Sin Selección", "Debe seleccionar una membresía para eliminar.", Alert.AlertType.WARNING);
         }
-    }
-
-    // ============================================================
-    //                     MÉTODOS AUXILIARES
-    // ============================================================
-
-    private boolean validarFormularioCrear() {
-        if (comboUsuario.getValue() == null) {
-            mostrarAlerta("Error", "Seleccione un usuario");
-            return false;
-        }
-
-        if (comboTipoMembresia.getValue() == null) {
-            mostrarAlerta("Error", "Seleccione el tipo de membresía");
-            return false;
-        }
-
-        if (comboDuracion.getValue() == null) {
-            mostrarAlerta("Error", "Seleccione la duración");
-            return false;
-        }
-
-        // ✅ VALIDACIÓN DE REGLA DE NEGOCIO: Usuario no debe tener membresía activa
-        String identificacionUsuario = comboUsuario.getValue().getIdentificacion();
-        if (membresiaController.usuarioTieneMembresiaActiva(identificacionUsuario)) {
-            mostrarAlerta("Error", "El usuario ya tiene una membresía activa. No puede tener más de una membresía activa al mismo tiempo.");
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean validarFormularioActualizar(Membresia membresiaOriginal) {
-        if (comboUsuario.getValue() == null) {
-            mostrarAlerta("Error", "Seleccione un usuario");
-            return false;
-        }
-
-        if (comboTipoMembresia.getValue() == null) {
-            mostrarAlerta("Error", "Seleccione el tipo de membresía");
-            return false;
-        }
-
-        if (comboDuracion.getValue() == null) {
-            mostrarAlerta("Error", "Seleccione la duración");
-            return false;
-        }
-
-
-        String identificacionUsuario = comboUsuario.getValue().getIdentificacion();
-        if (!identificacionUsuario.equals(membresiaOriginal.getIdentificacionUsuario()) &&
-                membresiaController.usuarioTieneMembresiaActiva(identificacionUsuario)) {
-            mostrarAlerta("Error", "El usuario ya tiene una membresía activa. No puede tener más de una membresía activa al mismo tiempo.");
-            return false;
-        }
-
-        return true;
-    }
-
-    private void limpiarFormulario() {
-        txtCodigo.clear();
-        txtCosto.clear();
-        comboUsuario.getSelectionModel().clearSelection();
-        comboTipoMembresia.getSelectionModel().clearSelection();
-        comboDuracion.getSelectionModel().clearSelection();
-        generarCodigoAutomatico();
     }
 
     private Membresia crearMembresiaDesdeFormulario() {
         String codigo = txtCodigo.getText();
-        String identificacionUsuario = comboUsuario.getValue().getIdentificacion();
+        String idUsuario = comboUsuario.getValue().getIdentificacion();
         TipoMembresia tipo = comboTipoMembresia.getValue();
         TipoMembresiaDuracion duracion = comboDuracion.getValue();
-
-        double costo = calcularCosto(tipo, duracion);
-        String fechaInicio = java.time.LocalDate.now().toString();
-        String fechaVencimiento = java.time.LocalDate.now().plusMonths(duracion.getMeses()).toString();
-
-        return new Membresia(codigo, identificacionUsuario, tipo, duracion, costo,
-                fechaInicio, fechaVencimiento, EstadoMembresia.ACTIVA);
+        
+        // SOLUCIÓN 1: Calcular el costo de nuevo, en lugar de parsear el texto.
+        double costo = calcularCosto(); 
+        
+        LocalDate fechaInicio = LocalDate.now();
+        LocalDate fechaFin = fechaInicio.plusMonths(duracion.getMeses());
+        
+        return new Membresia(codigo, idUsuario, tipo, duracion, costo, fechaInicio.toString(), fechaFin.toString(), comboEstado.getValue());
     }
 
-    private double calcularCosto(TipoMembresia tipo, TipoMembresiaDuracion duracion) {
-        double costoBase = tipo.getCostoMensual();
-        int meses = duracion.getMeses();
-
-        switch (duracion) {
-            case TRIMESTRAL:
-                return (costoBase * meses);
-            case ANUAL:
-                return (costoBase * meses);
-            case MENSUAL:
-            default:
-                return costoBase * meses;
+    private boolean validarCampos() {
+        if (comboUsuario.getValue() == null) {
+            mostrarMensaje("Validación", "Campo Requerido", "Debe seleccionar un usuario.", Alert.AlertType.WARNING);
+            return false;
         }
+        if (comboTipoMembresia.getValue() == null) {
+            mostrarMensaje("Validación", "Campo Requerido", "Debe seleccionar un tipo de membresía.", Alert.AlertType.WARNING);
+            return false;
+        }
+        if (comboDuracion.getValue() == null) {
+            mostrarMensaje("Validación", "Campo Requerido", "Debe seleccionar una duración.", Alert.AlertType.WARNING);
+            return false;
+        }
+        return true;
     }
 
-    private void actualizarCosto() {
-        if (comboTipoMembresia.getValue() != null && comboDuracion.getValue() != null) {
-            double costo = calcularCosto(comboTipoMembresia.getValue(), comboDuracion.getValue());
+    private void limpiarFormulario() {
+        txtCodigo.setText("MEM-" + UUID.randomUUID().toString().substring(0, 4).toUpperCase());
+        txtCosto.clear();
+        comboUsuario.getSelectionModel().clearSelection();
+        comboTipoMembresia.getSelectionModel().clearSelection();
+        comboDuracion.getSelectionModel().clearSelection();
+        comboEstado.setValue(EstadoMembresia.ACTIVA);
+        tableMembresia.getSelectionModel().clearSelection();
+        
+        txtCodigo.setDisable(true);
+        comboUsuario.setDisable(false);
+        membresiaSeleccionada = null;
+    }
+
+    private double calcularCosto() {
+        TipoMembresia tipo = comboTipoMembresia.getValue();
+        TipoMembresiaDuracion duracion = comboDuracion.getValue();
+        Usuario usuario = comboUsuario.getValue();
+
+        if (tipo != null && duracion != null && usuario != null) {
+            double costoBase = tipo.getCostoMensual() * duracion.getMeses();
+            double descuento = 1.0;
+            if (usuario instanceof Estudiante) descuento = 0.8; // 20%
+            else if (usuario instanceof Trabajador) descuento = 0.9; // 10%
+            return costoBase * descuento;
+        }
+        return 0.0;
+    }
+
+    private void actualizarCostoEnUI() {
+        double costo = calcularCosto();
+        if (costo > 0) {
             txtCosto.setText(String.format("$%,.0f", costo));
+        } else {
+            txtCosto.clear();
         }
     }
 
-    private void generarCodigoAutomatico() {
-        String nuevoCodigo = "MEM" + (listaMembresiasObservable.size() + 1);
-        txtCodigo.setText(nuevoCodigo);
-    }
-
-    private void llenarFormularioConMembresia(Membresia membresia) {
-        txtCodigo.setText(membresia.getCodigo());
-
-        for (Usuario usuario : comboUsuario.getItems()) {
-            if (usuario.getIdentificacion().equals(membresia.getIdentificacionUsuario())) {
-                comboUsuario.setValue(usuario);
-                break;
-            }
-        }
-
-        comboTipoMembresia.setValue(membresia.getTipo());
-        comboDuracion.setValue(membresia.getDuracion());
-        txtCosto.setText(String.format("$%,.0f", membresia.getCosto()));
-    }
-
-    private void mostrarAlerta(String titulo, String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+    private void mostrarMensaje(String titulo, String header, String contenido, Alert.AlertType alertType) {
+        Alert alert = new Alert(alertType);
         alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
+        alert.setHeaderText(header);
+        alert.setContentText(contenido);
         alert.showAndWait();
+    }
+
+    private boolean mostrarMensajeConfirmacion(String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setHeaderText(null);
+        alert.setTitle("Confirmación");
+        alert.setContentText(mensaje);
+        Optional<ButtonType> action = alert.showAndWait();
+        return action.isPresent() && action.get() == ButtonType.OK;
     }
 }

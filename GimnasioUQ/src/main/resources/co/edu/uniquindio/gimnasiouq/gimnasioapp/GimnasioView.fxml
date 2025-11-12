@@ -67,6 +67,26 @@
                     </content>
                 </Tab>
 
+
+
+
+                <Tab text="Reservas">
+                    <content>
+                        <AnchorPane>
+                            <children>
+                                <SplitPane orientation="VERTICAL" layoutX="14.0" layoutY="7.0" prefHeight="621.0" prefWidth="931.0">
+                                    <items>
+                                        <fx:include source="CrudReservaView.fxml"/>
+                                    </items>
+                                </SplitPane>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+
+
+
+
             </tabs>
         </TabPane>
     </children>

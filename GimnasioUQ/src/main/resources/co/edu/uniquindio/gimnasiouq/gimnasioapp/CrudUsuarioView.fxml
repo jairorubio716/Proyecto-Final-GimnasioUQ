@@ -40,23 +40,22 @@
                                   prefHeight="26.0" prefWidth="204.0"/>
 
                         <!-- BOTONES -->
-                        <Button fx:id="btnNuevoUsuario" layoutX="80.0" layoutY="180.0"
+                        <Button fx:id="btnNuevo" layoutX="80.0" layoutY="180.0"
                                 prefHeight="26.0" prefWidth="133.0" text="Nuevo"
-                                onAction="#onActionNuevoUsuario"/>
+                                onAction="#onActionNuevo"/>
 
-                        <Button fx:id="btnCrearUsuario" layoutX="316.0" layoutY="180.0"
-                                prefHeight="26.0" prefWidth="133.0" text="Crear"
-                                onAction="#onActionCrearUsuario"/>
+                        <Button fx:id="btnAgregar" layoutX="316.0" layoutY="180.0"
+                                prefHeight="26.0" prefWidth="133.0" text="Agregar"
+                                onAction="#onActionAgregar"/>
 
-                        <Button fx:id="btnActualizarUsuario" layoutX="524.0" layoutY="180.0"
+                        <Button fx:id="btnActualizar" layoutX="524.0" layoutY="180.0"
                                 prefHeight="26.0" prefWidth="133.0" text="Actualizar"
-                                onAction="#onActionActualizarUsuario"/>
+                                onAction="#onActionActualizar"/>
 
-                        <Button fx:id="btnEliminarUsuario" layoutX="316.0" layoutY="220.0"
+                        <Button fx:id="btnEliminar" layoutX="316.0" layoutY="220.0"
                                 prefHeight="26.0" prefWidth="133.0" text="Eliminar"
-                                onAction="#onActionEliminarUsuario" />
+                                onAction="#onActionEliminar" />
 
-                        <!-- PANELES ESPECÍFICOS -->
                         <!-- Panel Estudiante -->
                         <AnchorPane fx:id="panelEstudiante" layoutX="55.0" layoutY="260.0"
                                     prefWidth="664.0" prefHeight="80.0" style="-fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 10;">
@@ -69,7 +68,7 @@
                             </children>
                         </AnchorPane>
 
-                        <!-- Panel Trabajador -->
+
                         <AnchorPane fx:id="panelTrabajador" layoutX="55.0" layoutY="260.0"
                                     prefWidth="664.0" prefHeight="80.0" style="-fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 10;">
                             <children>
@@ -79,7 +78,7 @@
                             </children>
                         </AnchorPane>
 
-                        <!-- Panel Externo -->
+
                         <AnchorPane fx:id="panelExterno" layoutX="55.0" layoutY="260.0"
                                     prefWidth="664.0" prefHeight="80.0" style="-fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 10;">
                             <children>

@@ -14,6 +14,19 @@ public enum TipoMembresiaDuracion {
         this.meses = meses;
     }
 
-    public String getNombre() { return nombre; }
-    public int getMeses() { return meses; }
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public int getMeses() {
+        return meses;
+    }
+
+    public void setMeses(int meses) {
+        this.meses = meses;
+    }
 }

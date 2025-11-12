@@ -3,162 +3,198 @@ package co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.controller.EntrenadorController;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.Entrenador;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
-public class CrudEntrenadorViewController implements Initializable {
+public class CrudEntrenadorViewController {
 
+    EntrenadorController entrenadorController;
+    ObservableList<Entrenador> listaEntrenadores = FXCollections.observableArrayList();
+    Entrenador entrenadorSeleccionado;
+
+    @FXML
+    private ResourceBundle resources;
+
+    @FXML
+    private URL location;
+
+    // FXML Components
     @FXML private TextField txtIdentificacion;
     @FXML private TextField txtNombre;
     @FXML private TextField txtTelefono;
     @FXML private TextField txtCorreo;
-    @FXML private ComboBox<String> comboEspecialidad;
     @FXML private TextField txtSueldo;
+    @FXML private CheckBox checkDisponible;
+
     @FXML private TableView<Entrenador> tableEntrenador;
     @FXML private TableColumn<Entrenador, String> tcIdentificacion;
     @FXML private TableColumn<Entrenador, String> tcNombre;
     @FXML private TableColumn<Entrenador, String> tcTelefono;
     @FXML private TableColumn<Entrenador, String> tcCorreo;
-    @FXML private TableColumn<Entrenador, String> tcEspecialidad;
     @FXML private TableColumn<Entrenador, String> tcSueldo;
+    @FXML private TableColumn<Entrenador, String> tcDisponible;
 
-    private EntrenadorController entrenadorController;
-    private ObservableList<Entrenador> listaEntrenadoresObservable;
+    @FXML private Button btnNuevo;
+    @FXML private Button btnAgregar;
+    @FXML private Button btnActualizar;
+    @FXML private Button btnEliminar;
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
+    @FXML
+    void initialize() {
         entrenadorController = new EntrenadorController();
-        listaEntrenadoresObservable = entrenadorController.obtenerEntrenadoresObservable();
-
-        configurarCombos();
-        configurarTabla();
-
-        tableEntrenador.getSelectionModel().selectedItemProperty().addListener(
-                (observable, oldValue, newValue) -> {
-                    if (newValue != null) {
-                        llenarFormularioConEntrenador(newValue);
-                    }
-                }
-        );
+        initView();
     }
 
-    private void configurarCombos() {
-        comboEspecialidad.getItems().setAll(entrenadorController.obtenerEspecialidadesDisponibles());
+    private void initView() {
+        initDataBinding();
+        obtenerEntrenadores();
+        tableEntrenador.getItems().clear();
+        tableEntrenador.setItems(listaEntrenadores);
+        listenerSelection();
     }
 
-    private void configurarTabla() {
-        tableEntrenador.setItems(listaEntrenadoresObservable);
+    private void initDataBinding() {
+        tcIdentificacion.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getIdentificacion()));
+        tcNombre.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNombre()));
+        tcTelefono.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTelefono()));
+        tcCorreo.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCorreo()));
+        tcSueldo.setCellValueFactory(cellData -> new SimpleStringProperty(String.format("$%,.0f", cellData.getValue().getSueldo())));
+        tcDisponible.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().isDisponible() ? "SÍ" : "NO"));
+    }
 
-        tcIdentificacion.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getIdentificacion()));
-        tcNombre.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getNombre()));
-        tcTelefono.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getTelefono()));
-        tcCorreo.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getCorreo()));
-        tcEspecialidad.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getEspecialidad()));
-        tcSueldo.setCellValueFactory(cellData ->
-                new SimpleStringProperty(String.format("$%,.0f", cellData.getValue().getSueldo())));
+    private void obtenerEntrenadores() {
+        listaEntrenadores.addAll(entrenadorController.obtenerEntrenadores());
+    }
+
+    private void listenerSelection() {
+        tableEntrenador.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            entrenadorSeleccionado = newSelection;
+            mostrarInformacion(entrenadorSeleccionado);
+        });
+    }
+
+    private void mostrarInformacion(Entrenador entrenador) {
+        if (entrenador != null) {
+            txtIdentificacion.setText(entrenador.getIdentificacion());
+            txtNombre.setText(entrenador.getNombre());
+            txtTelefono.setText(entrenador.getTelefono());
+            txtCorreo.setText(entrenador.getCorreo());
+            txtSueldo.setText(String.valueOf(entrenador.getSueldo()));
+            checkDisponible.setSelected(entrenador.isDisponible());
+            txtIdentificacion.setDisable(true); // No se puede editar la identificación
+        } else {
+            limpiarFormulario();
+        }
     }
 
     @FXML
-    private void onActionNuevo() {
+    void onActionAgregar(ActionEvent event) {
+        crearEntrenador();
+    }
+
+    @FXML
+    void onActionActualizar(ActionEvent event) {
+        actualizarEntrenador();
+    }
+
+    @FXML
+    void onActionNuevo(ActionEvent event) {
         limpiarFormulario();
     }
 
     @FXML
-    private void onActionCrear() {
-        if (validarFormulario()) {
+    void onActionEliminar(ActionEvent event) {
+        eliminarEntrenador();
+    }
+
+    private void crearEntrenador() {
+        if (validarCampos(true)) { // Validar con identificación
             Entrenador entrenador = crearEntrenadorDesdeFormulario();
             if (entrenadorController.crearEntrenador(entrenador)) {
-                mostrarAlerta("Éxito", "Entrenador creado correctamente");
+                listaEntrenadores.add(entrenador);
+                mostrarMensaje("Notificación", "Creación de Entrenador", "Entrenador creado con éxito", Alert.AlertType.CONFIRMATION);
                 limpiarFormulario();
-                tableEntrenador.setItems(entrenadorController.obtenerEntrenadoresObservable());
             } else {
-                mostrarAlerta("Error", "No se pudo crear el entrenador");
+                mostrarMensaje("Notificación", "Creación de Entrenador", "El entrenador no pudo ser creado (posiblemente identificación duplicada)", Alert.AlertType.WARNING);
             }
         }
     }
 
-    @FXML
-    private void onActionActualizar() {
-        Entrenador entrenadorSeleccionado = tableEntrenador.getSelectionModel().getSelectedItem();
-        if (entrenadorSeleccionado != null && validarFormulario()) {
-            Entrenador entrenadorActualizado = crearEntrenadorDesdeFormulario();
-            entrenadorActualizado.setIdentificacion(entrenadorSeleccionado.getIdentificacion());
-
-            if (entrenadorController.actualizarEntrenador(entrenadorActualizado)) {
-                tableEntrenador.refresh();
-                limpiarFormulario();
-                mostrarAlerta("Éxito", "Entrenador actualizado correctamente");
-            } else {
-                mostrarAlerta("Error", "No se pudo actualizar el entrenador");
-            }
-        } else {
-            mostrarAlerta("Advertencia", "Seleccione un entrenador para actualizar");
-        }
-    }
-
-    @FXML
-    private void onActionEliminar() {
-        Entrenador entrenadorSeleccionado = tableEntrenador.getSelectionModel().getSelectedItem();
+    private void actualizarEntrenador() {
         if (entrenadorSeleccionado != null) {
-            Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-            confirmacion.setTitle("Confirmar eliminación");
-            confirmacion.setHeaderText("Eliminar Entrenador");
-            confirmacion.setContentText("¿Está seguro de eliminar al entrenador " + entrenadorSeleccionado.getNombre() + "?");
+            if (validarCampos(false)) { // Validar sin identificación
+                Entrenador entrenadorActualizado = crearEntrenadorDesdeFormulario();
+                entrenadorActualizado.setIdentificacion(entrenadorSeleccionado.getIdentificacion()); // Mantener la ID original
 
-            if (confirmacion.showAndWait().get() == ButtonType.OK) {
-                if (entrenadorController.eliminarEntrenador(entrenadorSeleccionado.getIdentificacion())) {
+                if (entrenadorController.actualizarEntrenador(entrenadorActualizado)) {
+                    int index = listaEntrenadores.indexOf(entrenadorSeleccionado);
+                    if (index != -1) {
+                        listaEntrenadores.set(index, entrenadorActualizado);
+                        tableEntrenador.refresh();
+                    }
+                    mostrarMensaje("Notificación", "Actualización de Entrenador", "Entrenador actualizado con éxito", Alert.AlertType.INFORMATION);
                     limpiarFormulario();
-                    mostrarAlerta("Éxito", "Entrenador eliminado correctamente");
-                    tableEntrenador.setItems(entrenadorController.obtenerEntrenadoresObservable());
                 } else {
-                    mostrarAlerta("Error", "No se pudo eliminar el entrenador");
+                    mostrarMensaje("Notificación", "Actualización de Entrenador", "El entrenador no pudo ser actualizado", Alert.AlertType.ERROR);
                 }
             }
         } else {
-            mostrarAlerta("Advertencia", "Seleccione un entrenador para eliminar");
+            mostrarMensaje("Notificación", "Selección de Entrenador", "Debe seleccionar un entrenador para actualizar", Alert.AlertType.WARNING);
         }
     }
 
-    // Métodos auxiliares
-    private boolean validarFormulario() {
-        if (txtIdentificacion.getText().isEmpty()) {
-            mostrarAlerta("Error", "Ingrese la identificación");
+    private void eliminarEntrenador() {
+        if (entrenadorSeleccionado != null) {
+            if (mostrarMensajeConfirmacion("¿Está seguro de que desea eliminar al entrenador " + entrenadorSeleccionado.getNombre() + "?")) {
+                if (entrenadorController.eliminarEntrenador(entrenadorSeleccionado.getIdentificacion())) {
+                    listaEntrenadores.remove(entrenadorSeleccionado);
+                    limpiarFormulario();
+                    mostrarMensaje("Notificación", "Eliminación de Entrenador", "Entrenador eliminado con éxito", Alert.AlertType.INFORMATION);
+                } else {
+                    mostrarMensaje("Notificación", "Eliminación de Entrenador", "El entrenador no pudo ser eliminado", Alert.AlertType.ERROR);
+                }
+            }
+        } else {
+            mostrarMensaje("Notificación", "Selección de Entrenador", "Debe seleccionar un entrenador para eliminar", Alert.AlertType.WARNING);
+        }
+    }
+
+    private Entrenador crearEntrenadorDesdeFormulario() {
+        Entrenador entrenador = new Entrenador(
+                txtIdentificacion.getText(),
+                txtNombre.getText(),
+                txtTelefono.getText(),
+                txtCorreo.getText(),
+                Double.parseDouble(txtSueldo.getText())
+        );
+        entrenador.setDisponible(checkDisponible.isSelected());
+        return entrenador;
+    }
+
+    private boolean validarCampos(boolean validarId) {
+        if (validarId && txtIdentificacion.getText().isEmpty()) {
+            mostrarMensaje("Validación", "Campo Vacío", "La identificación es obligatoria.", Alert.AlertType.WARNING);
             return false;
         }
         if (txtNombre.getText().isEmpty()) {
-            mostrarAlerta("Error", "Ingrese el nombre");
-            return false;
-        }
-        if (txtTelefono.getText().isEmpty()) {
-            mostrarAlerta("Error", "Ingrese el teléfono");
-            return false;
-        }
-        if (txtCorreo.getText().isEmpty()) {
-            mostrarAlerta("Error", "Ingrese el correo");
-            return false;
-        }
-        if (comboEspecialidad.getValue() == null) {
-            mostrarAlerta("Error", "Seleccione la especialidad");
+            mostrarMensaje("Validación", "Campo Vacío", "El nombre es obligatorio.", Alert.AlertType.WARNING);
             return false;
         }
         if (txtSueldo.getText().isEmpty()) {
-            mostrarAlerta("Error", "Ingrese el sueldo");
+            mostrarMensaje("Validación", "Campo Vacío", "El sueldo es obligatorio.", Alert.AlertType.WARNING);
             return false;
         }
         try {
             Double.parseDouble(txtSueldo.getText());
         } catch (NumberFormatException e) {
-            mostrarAlerta("Error", "El sueldo debe ser un número válido");
+            mostrarMensaje("Validación", "Formato Incorrecto", "El sueldo debe ser un número válido.", Alert.AlertType.WARNING);
             return false;
         }
         return true;
@@ -169,38 +205,27 @@ public class CrudEntrenadorViewController implements Initializable {
         txtNombre.clear();
         txtTelefono.clear();
         txtCorreo.clear();
-        comboEspecialidad.getSelectionModel().clearSelection();
         txtSueldo.clear();
-
-        // ✅ AGREGAR ESTO: Deseleccionar cualquier fila de la tabla
+        checkDisponible.setSelected(true);
         tableEntrenador.getSelectionModel().clearSelection();
+        txtIdentificacion.setDisable(false);
+        entrenadorSeleccionado = null;
     }
 
-    private Entrenador crearEntrenadorDesdeFormulario() {
-        return new Entrenador(
-                txtIdentificacion.getText(),
-                txtNombre.getText(),
-                txtTelefono.getText(),
-                txtCorreo.getText(),
-                comboEspecialidad.getValue(),
-                Double.parseDouble(txtSueldo.getText())
-        );
-    }
-
-    private void llenarFormularioConEntrenador(Entrenador entrenador) {
-        txtIdentificacion.setText(entrenador.getIdentificacion());
-        txtNombre.setText(entrenador.getNombre());
-        txtTelefono.setText(entrenador.getTelefono());
-        txtCorreo.setText(entrenador.getCorreo());
-        comboEspecialidad.setValue(entrenador.getEspecialidad());
-        txtSueldo.setText(String.valueOf(entrenador.getSueldo()));
-    }
-
-    private void mostrarAlerta(String titulo, String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+    private void mostrarMensaje(String titulo, String header, String contenido, Alert.AlertType alertType) {
+        Alert alert = new Alert(alertType);
         alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
+        alert.setHeaderText(header);
+        alert.setContentText(contenido);
         alert.showAndWait();
+    }
+
+    private boolean mostrarMensajeConfirmacion(String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setHeaderText(null);
+        alert.setTitle("Confirmación");
+        alert.setContentText(mensaje);
+        Optional<ButtonType> action = alert.showAndWait();
+        return action.isPresent() && action.get() == ButtonType.OK;
     }
 }

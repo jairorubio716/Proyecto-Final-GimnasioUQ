@@ -57,35 +57,17 @@ public class Membresia {
     public String getFechaCompra() { return fechaCompra; }
     public void setFechaCompra(String fechaCompra) { this.fechaCompra = fechaCompra; }
 
-    /**
-     * ✅ Valida si la membresía está activa y vigente
-     */
-    public boolean estaActiva() {
-        if (estado != EstadoMembresia.ACTIVA) {
-            return false;
-        }
-
+    public boolean estaVencida() {
         try {
-            LocalDate vencimiento = LocalDate.parse(fechaVencimiento);
-            return !vencimiento.isBefore(LocalDate.now());
+            LocalDate fechaVencimiento = LocalDate.parse(this.fechaVencimiento);
+            return LocalDate.now().isAfter(fechaVencimiento);
         } catch (Exception e) {
             return false;
         }
     }
 
-    /**
-     * ✅ Valida si la membresía está próxima a vencer (7 días)
-     */
-    public boolean estaPorVencer() {
-        if (!estaActiva()) return false;
-
-        try {
-            LocalDate vencimiento = LocalDate.parse(fechaVencimiento);
-            LocalDate enUnaSemana = LocalDate.now().plusDays(7);
-            return !vencimiento.isAfter(enUnaSemana);
-        } catch (Exception e) {
-            return false;
-        }
+    public boolean estaActiva() {
+        return this.estado == EstadoMembresia.ACTIVA && !estaVencida();
     }
 
 }
