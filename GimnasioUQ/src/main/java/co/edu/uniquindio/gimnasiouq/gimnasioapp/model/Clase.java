@@ -11,19 +11,20 @@ public class Clase {
     private DayOfWeek dia;
     private LocalTime horario;
     private int cupoMaximo;
+    private Entrenador entrenadorPorDefecto; // Re-introducido como el entrenador por defecto
 
     public Clase() {}
 
-    // Constructor SIN entrenador
-    public Clase(String codigo, String nombre, DayOfWeek dia, LocalTime horario, int cupoMaximo) {
+    public Clase(String codigo, String nombre, DayOfWeek dia, LocalTime horario, int cupoMaximo, Entrenador entrenadorPorDefecto) {
         this.codigo = codigo;
         this.nombre = nombre;
         this.dia = dia;
         this.horario = horario;
         this.cupoMaximo = cupoMaximo;
+        this.entrenadorPorDefecto = entrenadorPorDefecto;
     }
 
-    // Getters y Setters (sin los de entrenador)
+    // Getters y Setters
     public String getCodigo() { return codigo; }
     public void setCodigo(String codigo) { this.codigo = codigo; }
 
@@ -39,13 +40,19 @@ public class Clase {
     public int getCupoMaximo() { return cupoMaximo; }
     public void setCupoMaximo(int cupoMaximo) { this.cupoMaximo = cupoMaximo; }
 
+    public Entrenador getEntrenadorPorDefecto() { return entrenadorPorDefecto; }
+    public void setEntrenadorPorDefecto(Entrenador entrenadorPorDefecto) { this.entrenadorPorDefecto = entrenadorPorDefecto; }
+
     @Override
     public String toString() {
-        // Formato amigable para mostrar en ComboBoxes
         if (nombre == null || dia == null || horario == null) {
             return "Clase no definida";
         }
         String diaSemana = dia.getDisplayName(TextStyle.FULL, new Locale("es", "ES"));
-        return nombre + " - " + diaSemana.substring(0, 1).toUpperCase() + diaSemana.substring(1) + " " + horario;
+        String texto = nombre + " - " + diaSemana.substring(0, 1).toUpperCase() + diaSemana.substring(1) + " " + horario;
+        if (entrenadorPorDefecto != null) {
+            texto += " (con " + entrenadorPorDefecto.getNombre() + ")";
+        }
+        return texto;
     }
 }

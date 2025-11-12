@@ -5,7 +5,9 @@ import co.edu.uniquindio.gimnasiouq.gimnasioapp.utils.DataUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,9 +39,31 @@ public class ModelFactory {
         clasesObservable.setAll(gimnasio.getListaClases());
         verificarMembresiasVencidas();
     }
+    
+    // ============================================================
+    //        NUEVO MÉTODO INTELIGENTE
+    // ============================================================
+    
+    public List<Entrenador> obtenerEntrenadoresDisponiblesParaHorario(DayOfWeek dia, LocalTime horario) {
+        // 1. Obtener todos los entrenadores que están disponibles en general.
+        List<Entrenador> entrenadoresDisponiblesGeneral = entrenadoresObservable.stream()
+                .filter(Entrenador::isDisponible)
+                .collect(Collectors.toList());
 
-    //        CONSULTAS DE MEMBRESÍA
+        // 2. Obtener la lista de entrenadores que ya están OCUPADOS a esa hora.
+        List<Entrenador> entrenadoresOcupados = clasesObservable.stream()
+                .filter(clase -> clase.getDia() == dia && clase.getHorario().equals(horario))
+                .map(Clase::getEntrenadorPorDefecto)
+                .collect(Collectors.toList());
 
+        // 3. Devolver solo los que están disponibles en general y NO están en la lista de ocupados.
+        return entrenadoresDisponiblesGeneral.stream()
+                .filter(entrenador -> !entrenadoresOcupados.contains(entrenador))
+                .collect(Collectors.toList());
+    }
+
+
+    //<editor-fold desc="El resto de los métodos">
     public boolean usuarioTieneMembresiaActiva(String identificacionUsuario) {
         return membresiasObservable.stream().anyMatch(m -> m.getIdentificacionUsuario().equals(identificacionUsuario) && m.estaActiva());
     }
@@ -49,10 +73,26 @@ public class ModelFactory {
                 .filter(m -> m.getIdentificacionUsuario().equals(identificacionUsuario) && m.estaActiva())
                 .findFirst().orElse(null);
     }
-
-
+    
     public ObservableList<Clase> getClasesObservable() {
         return clasesObservable;
+    }
+
+    public boolean crearClase(Clase clase) {
+        boolean resultado = gimnasio.crearClase(clase);
+        if (resultado) {
+            clasesObservable.add(clase);
+        }
+        return resultado;
+    }
+
+    public boolean eliminarClase(String codigo) {
+        boolean resultado = gimnasio.eliminarClase(codigo);
+        if (resultado) {
+            clasesObservable.removeIf(clase -> clase.getCodigo().equals(codigo));
+            reservasObservable.setAll(gimnasio.getListaReservas());
+        }
+        return resultado;
     }
 
     public ObservableList<Reserva> getReservasObservable() {
@@ -82,6 +122,20 @@ public class ModelFactory {
         return resultado;
     }
 
+    public boolean registrarAsistencia(String codigoReserva) {
+        boolean resultado = gimnasio.registrarAsistencia(codigoReserva);
+        if (resultado) {
+            reservasObservable.stream()
+                .filter(r -> r.getCodigo().equals(codigoReserva))
+                .findFirst()
+                .ifPresent(r -> {
+                    r.setEstado("COMPLETADA");
+                    int index = reservasObservable.indexOf(r);
+                    reservasObservable.set(index, r);
+                });
+        }
+        return resultado;
+    }
 
     public boolean usuarioPuedeReservar(String identificacionUsuario) {
         return membresiasObservable.stream().anyMatch(m ->
@@ -267,11 +321,5 @@ public class ModelFactory {
     public ObservableList<Entrenador> getEntrenadoresObservable() {
         return entrenadoresObservable;
     }
-
-    public List<Entrenador> obtenerEntrenadoresDisponibles() {
-        return gimnasio.getListaEntrenadores().stream()
-                .filter(Entrenador::isDisponible)
-                .collect(Collectors.toList());
-    }
-
+    //</editor-fold>
 }

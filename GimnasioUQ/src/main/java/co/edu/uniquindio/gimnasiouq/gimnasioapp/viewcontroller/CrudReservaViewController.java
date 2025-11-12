@@ -22,19 +22,20 @@ import java.util.UUID;
 
 public class CrudReservaViewController {
 
-
+    // Controllers
     ReservaController reservaController;
     UsuarioController usuarioController;
     MembresiaController membresiaController;
     ClaseController claseController;
     EntrenadorController entrenadorController;
 
-    // listas observables
+    // Observable Lists
     ObservableList<Reserva> listaReservas;
     ObservableList<Usuario> listaUsuarios;
     ObservableList<Clase> listaClases;
     FilteredList<Entrenador> entrenadoresDisponibles;
 
+    // Selection
     Reserva reservaSeleccionada;
     Usuario usuarioSeleccionado;
 
@@ -99,9 +100,10 @@ public class CrudReservaViewController {
 
     private void configurarCombos() {
         comboUsuario.setItems(listaUsuarios);
-        comboClase.setItems(listaClases.filtered(c -> !c.getCodigo().equals("C-VIP")));
+        comboClase.setItems(listaClases);
         comboEntrenador.setItems(entrenadoresDisponibles);
 
+        // AHORA SÍ: CellFactories para mostrar texto legible, dentro de configurarCombos()
         comboUsuario.setCellFactory(param -> new ListCell<>() {
             @Override
             protected void updateItem(Usuario item, boolean empty) {
@@ -157,7 +159,8 @@ public class CrudReservaViewController {
             reservaSeleccionada = newV;
             actualizarEstadoBotonesAccion();
         });
-        comboClase.valueProperty().addListener((obs, oldV, newV) -> actualizarCuposDisponibles());
+        
+        comboClase.valueProperty().addListener((obs, oldV, newV) -> actualizarEntrenadoresDisponibles());
         dateFechaClase.valueProperty().addListener((obs, oldV, newV) -> actualizarCuposDisponibles());
     }
 
@@ -205,10 +208,10 @@ public class CrudReservaViewController {
         }
 
         Clase claseSeleccionada = comboClase.getValue();
-        Entrenador entrenadorSeleccionado = null;
+        Entrenador entrenadorFinal = claseSeleccionada.getEntrenadorPorDefecto();
         
-        if (panelEntrenadorVip.isVisible()) {
-            entrenadorSeleccionado = comboEntrenador.getValue();
+        if (panelEntrenadorVip.isVisible() && comboEntrenador.getValue() != null) {
+            entrenadorFinal = comboEntrenador.getValue();
         }
 
         Reserva nuevaReserva = new Reserva(
@@ -216,7 +219,7 @@ public class CrudReservaViewController {
             usuarioSeleccionado,
             claseSeleccionada,
             dateFechaClase.getValue(),
-            entrenadorSeleccionado
+            entrenadorFinal
         );
 
         if (reservaController.crearReserva(nuevaReserva)) {
@@ -248,7 +251,7 @@ public class CrudReservaViewController {
             mostrarMensaje("Validación", "Fecha Inválida", "La fecha no puede ser en el pasado.", Alert.AlertType.WARNING);
             return false;
         }
-        if (fechaSeleccionada.getDayOfWeek() != claseSeleccionada.getDia()) {
+        if (claseSeleccionada.getDia() != null && fechaSeleccionada.getDayOfWeek() != claseSeleccionada.getDia()) {
             mostrarMensaje("Validación", "Día Incorrecto", "La clase seleccionada no se dicta ese día de la semana.", Alert.AlertType.WARNING);
             return false;
         }
@@ -267,6 +270,20 @@ public class CrudReservaViewController {
         Clase clase = comboClase.getValue();
         LocalDate fecha = dateFechaClase.getValue();
         lblCuposDisponibles.setText(clase != null && fecha != null ? String.valueOf(reservaController.cuposDisponibles(clase, fecha)) : "-");
+    }
+    
+    private void actualizarEntrenadoresDisponibles() {
+        Clase claseSeleccionada = comboClase.getValue();
+        if (claseSeleccionada != null) {
+            ObservableList<Entrenador> disponibles = entrenadorController.obtenerEntrenadoresDisponiblesParaHorario(
+                claseSeleccionada.getDia(),
+                claseSeleccionada.getHorario()
+            );
+            comboEntrenador.setItems(disponibles);
+        } else {
+            comboEntrenador.getItems().clear();
+        }
+        actualizarCuposDisponibles();
     }
     
     private void actualizarEstadoBotonesAccion() {
