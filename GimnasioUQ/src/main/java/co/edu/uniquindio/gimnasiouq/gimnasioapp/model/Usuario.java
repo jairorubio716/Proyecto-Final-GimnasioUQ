@@ -5,6 +5,7 @@ public abstract class Usuario {
     private String identificacion;
     private String edad;
     private String telefono;
+    private Entrenador entrenadorAsignado; // NUEVO CAMPO
 
     public Usuario() {}
 
@@ -13,6 +14,7 @@ public abstract class Usuario {
         this.identificacion = identificacion;
         this.edad = edad;
         this.telefono = telefono;
+        this.entrenadorAsignado = null; // Por defecto no tiene
     }
 
     // Getters y Setters
@@ -28,4 +30,6 @@ public abstract class Usuario {
     public String getTelefono() { return telefono; }
     public void setTelefono(String telefono) { this.telefono = telefono; }
 
+    public Entrenador getEntrenadorAsignado() { return entrenadorAsignado; } // NUEVO GETTER
+    public void setEntrenadorAsignado(Entrenador entrenadorAsignado) { this.entrenadorAsignado = entrenadorAsignado; } // NUEVO SETTER
 }

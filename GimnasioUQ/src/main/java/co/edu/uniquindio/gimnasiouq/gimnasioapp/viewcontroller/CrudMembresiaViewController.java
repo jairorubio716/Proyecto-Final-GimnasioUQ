@@ -17,21 +17,17 @@ import java.util.UUID;
 
 public class CrudMembresiaViewController {
 
-    // Controllers
     MembresiaController membresiaController;
     UsuarioController usuarioController;
 
-    // Observable Lists - Se obtienen directamente del controller, no se inicializan aquí.
     ObservableList<Membresia> listaMembresias;
     ObservableList<Usuario> listaUsuarios;
 
-    // Selection
     Membresia membresiaSeleccionada;
 
     @FXML private ResourceBundle resources;
     @FXML private URL location;
 
-    // FXML Components
     @FXML private TextField txtCodigo;
     @FXML private ComboBox<TipoMembresia> comboTipoMembresia;
     @FXML private ComboBox<Usuario> comboUsuario;
@@ -51,15 +47,13 @@ public class CrudMembresiaViewController {
     }
 
     private void initView() {
-        // Obtener las listas directamente de los controllers.
-        // Así, cualquier cambio en otra parte de la app se reflejará aquí.
+
         listaUsuarios = usuarioController.obtenerUsuarios();
         listaMembresias = membresiaController.obtenerMembresias();
 
         initDataBinding();
         configurarCombos();
 
-        // Asignar las listas a los componentes de la UI
         comboUsuario.setItems(listaUsuarios);
         tableMembresia.setItems(listaMembresias);
 
@@ -152,7 +146,6 @@ public class CrudMembresiaViewController {
 
             Membresia nuevaMembresia = crearMembresiaDesdeFormulario();
             if (membresiaController.crearMembresia(nuevaMembresia, usuarioSeleccionado)) {
-                // La lista se actualiza sola, no es necesario un .add() aquí.
                 mostrarMensaje("Notificación", "Creación Exitosa", "La membresía ha sido creada.", Alert.AlertType.INFORMATION);
                 limpiarFormulario();
             } else {
@@ -168,7 +161,6 @@ public class CrudMembresiaViewController {
             membresiaActualizada.setIdentificacionUsuario(membresiaSeleccionada.getIdentificacionUsuario());
 
             if (membresiaController.actualizarMembresia(membresiaActualizada)) {
-                // La tabla se actualiza sola, no es necesario un .set() o .refresh() aquí.
                 mostrarMensaje("Notificación", "Actualización Exitosa", "La membresía ha sido actualizada.", Alert.AlertType.INFORMATION);
                 limpiarFormulario();
             } else {
@@ -183,7 +175,6 @@ public class CrudMembresiaViewController {
         if (membresiaSeleccionada != null) {
             if (mostrarMensajeConfirmacion("¿Está seguro de que desea eliminar la membresía " + membresiaSeleccionada.getCodigo() + "?")) {
                 if (membresiaController.eliminarMembresia(membresiaSeleccionada.getCodigo())) {
-                    // La lista se actualiza sola, no es necesario un .remove() aquí.
                     limpiarFormulario();
                     mostrarMensaje("Notificación", "Eliminación Exitosa", "La membresía ha sido eliminada.", Alert.AlertType.INFORMATION);
                 } else {
@@ -200,13 +191,12 @@ public class CrudMembresiaViewController {
         String idUsuario = comboUsuario.getValue().getIdentificacion();
         TipoMembresia tipo = comboTipoMembresia.getValue();
         TipoMembresiaDuracion duracion = comboDuracion.getValue();
-        
-        // SOLUCIÓN 1: Calcular el costo de nuevo, en lugar de parsear el texto.
-        double costo = calcularCosto(); 
-        
+
+        double costo = calcularCosto();
+
         LocalDate fechaInicio = LocalDate.now();
         LocalDate fechaFin = fechaInicio.plusMonths(duracion.getMeses());
-        
+
         return new Membresia(codigo, idUsuario, tipo, duracion, costo, fechaInicio.toString(), fechaFin.toString(), comboEstado.getValue());
     }
 

@@ -88,7 +88,7 @@ public class CrudEntrenadorViewController {
             txtCorreo.setText(entrenador.getCorreo());
             txtSueldo.setText(String.valueOf(entrenador.getSueldo()));
             checkDisponible.setSelected(entrenador.isDisponible());
-            txtIdentificacion.setDisable(true); // No se puede editar la identificación
+            txtIdentificacion.setDisable(true);
         } else {
             limpiarFormulario();
         }
@@ -115,7 +115,7 @@ public class CrudEntrenadorViewController {
     }
 
     private void crearEntrenador() {
-        if (validarCampos(true)) { // Validar con identificación
+        if (validarCampos(true)) {
             Entrenador entrenador = crearEntrenadorDesdeFormulario();
             if (entrenadorController.crearEntrenador(entrenador)) {
                 listaEntrenadores.add(entrenador);
@@ -129,7 +129,7 @@ public class CrudEntrenadorViewController {
 
     private void actualizarEntrenador() {
         if (entrenadorSeleccionado != null) {
-            if (validarCampos(false)) { // Validar sin identificación
+            if (validarCampos(false)) {
                 Entrenador entrenadorActualizado = crearEntrenadorDesdeFormulario();
                 entrenadorActualizado.setIdentificacion(entrenadorSeleccionado.getIdentificacion()); // Mantener la ID original
 

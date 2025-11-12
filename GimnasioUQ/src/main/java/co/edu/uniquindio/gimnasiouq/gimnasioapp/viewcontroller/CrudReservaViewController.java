@@ -1,5 +1,7 @@
 package co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller;
 
+import co.edu.uniquindio.gimnasiouq.gimnasioapp.controller.ClaseController;
+import co.edu.uniquindio.gimnasiouq.gimnasioapp.controller.EntrenadorController;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.controller.MembresiaController;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.controller.ReservaController;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.controller.UsuarioController;
@@ -20,71 +22,86 @@ import java.util.UUID;
 
 public class CrudReservaViewController {
 
-    // Controllers
+
     ReservaController reservaController;
     UsuarioController usuarioController;
     MembresiaController membresiaController;
+    ClaseController claseController;
+    EntrenadorController entrenadorController;
 
-    // Observable Lists - Se obtienen directamente del controller.
+    // listas observables
     ObservableList<Reserva> listaReservas;
     ObservableList<Usuario> listaUsuarios;
-    FilteredList<Reserva> reservasFiltradas;
+    ObservableList<Clase> listaClases;
+    FilteredList<Entrenador> entrenadoresDisponibles;
 
-    // Selection
     Reserva reservaSeleccionada;
     Usuario usuarioSeleccionado;
-
-    @FXML private ResourceBundle resources;
-    @FXML private URL location;
 
     // FXML Components
     @FXML private ComboBox<Usuario> comboUsuario;
     @FXML private Label lblTipoMembresia, lblEstadoMembresia;
-    @FXML private Label lblMaquinas, lblClases, lblSpa, lblEntrenador;
+    
     @FXML private VBox panelReservaClases;
-    @FXML private ComboBox<TipoClase> comboTipoClase;
+    @FXML private ComboBox<Clase> comboClase;
     @FXML private DatePicker dateFechaClase;
-    @FXML private Label lblCuposDisponibles, lblMensajeReserva;
+    @FXML private Label lblCuposDisponibles;
+    
+    @FXML private VBox panelEntrenadorVip;
+    @FXML private ComboBox<Entrenador> comboEntrenador;
+    
+    @FXML private Button btnCrearReserva;
     @FXML private TableView<Reserva> tableReserva;
     @FXML private TableColumn<Reserva, String> tcCodigo, tcClase, tcFechaClase, tcFechaReserva, tcEstado;
-    @FXML private Button btnCrearReserva, btnCancelarReserva, btnRegistrarAsistencia;
+    @FXML private Button btnCancelarReserva;
 
     @FXML
     void initialize() {
         reservaController = new ReservaController();
         usuarioController = new UsuarioController();
         membresiaController = new MembresiaController();
+        claseController = new ClaseController();
+        entrenadorController = new EntrenadorController();
         initView();
     }
 
     private void initView() {
-        // SOLUCIÓN: Obtener las listas "vivas" directamente de los controllers.
         listaUsuarios = usuarioController.obtenerUsuarios();
         listaReservas = reservaController.obtenerReservas();
+        listaClases = claseController.obtenerClases();
+        
+        entrenadoresDisponibles = new FilteredList<>(entrenadorController.obtenerEntrenadores());
+        entrenadoresDisponibles.setPredicate(Entrenador::isDisponible);
 
         initDataBinding();
         configurarCombos();
-
-        // Asignar las listas a los componentes de la UI
-        comboUsuario.setItems(listaUsuarios);
-
         listenerSelection();
         limpiarTodaLaVista();
     }
 
     private void initDataBinding() {
-        reservasFiltradas = new FilteredList<>(listaReservas, p -> true);
-        tableReserva.setItems(reservasFiltradas);
-
-        tcCodigo.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCodigoReserva()));
-        tcClase.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTipoClase().getNombre()));
-        tcFechaClase.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFechaClase()));
-        tcFechaReserva.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFechaReserva()));
+        tableReserva.setItems(listaReservas.filtered(r -> usuarioSeleccionado != null && r.getUsuario().getIdentificacion().equals(usuarioSeleccionado.getIdentificacion())));
+        tcCodigo.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCodigo()));
+        
+        tcClase.setCellValueFactory(cellData -> {
+            Reserva reserva = cellData.getValue();
+            String textoClase = reserva.getClase().getNombre();
+            if (reserva.getEntrenador() != null) {
+                textoClase += " con " + reserva.getEntrenador().getNombre();
+            }
+            return new SimpleStringProperty(textoClase);
+        });
+        
+        tcFechaClase.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFechaClase().toString()));
+        tcFechaReserva.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFechaReserva().toString()));
         tcEstado.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEstado()));
     }
 
     private void configurarCombos() {
-        comboTipoClase.getItems().setAll(TipoClase.values());
+        comboUsuario.setItems(listaUsuarios);
+        comboClase.setItems(listaClases.filtered(c -> !c.getCodigo().equals("C-VIP")));
+        comboEntrenador.setItems(entrenadoresDisponibles);
+
         comboUsuario.setCellFactory(param -> new ListCell<>() {
             @Override
             protected void updateItem(Usuario item, boolean empty) {
@@ -99,6 +116,36 @@ public class CrudReservaViewController {
                 setText(empty || item == null ? "Seleccione un usuario" : item.getNombre());
             }
         });
+
+        comboClase.setCellFactory(param -> new ListCell<>() {
+            @Override
+            protected void updateItem(Clase item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.toString());
+            }
+        });
+        comboClase.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Clase item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "Seleccione una clase" : item.getNombre());
+            }
+        });
+
+        comboEntrenador.setCellFactory(param -> new ListCell<>() {
+            @Override
+            protected void updateItem(Entrenador item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getNombre());
+            }
+        });
+        comboEntrenador.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Entrenador item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "Seleccione un entrenador" : item.getNombre());
+            }
+        });
     }
 
     private void listenerSelection() {
@@ -106,33 +153,38 @@ public class CrudReservaViewController {
             usuarioSeleccionado = newV;
             actualizarVistaUsuarioSeleccionado();
         });
-
         tableReserva.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
             reservaSeleccionada = newV;
             actualizarEstadoBotonesAccion();
         });
-
-        comboTipoClase.valueProperty().addListener((obs, oldV, newV) -> actualizarCuposDisponibles());
+        comboClase.valueProperty().addListener((obs, oldV, newV) -> actualizarCuposDisponibles());
         dateFechaClase.valueProperty().addListener((obs, oldV, newV) -> actualizarCuposDisponibles());
     }
 
     private void actualizarVistaUsuarioSeleccionado() {
+        panelReservaClases.setVisible(false);
+        panelReservaClases.setManaged(false);
+        panelEntrenadorVip.setVisible(false);
+        panelEntrenadorVip.setManaged(false);
+        
         if (usuarioSeleccionado == null) {
             limpiarTodaLaVista();
             return;
         }
 
+        tableReserva.setItems(listaReservas.filtered(r -> r.getUsuario().getIdentificacion().equals(usuarioSeleccionado.getIdentificacion())));
         Membresia membresia = membresiaController.obtenerMembresiaActivaUsuario(usuarioSeleccionado.getIdentificacion());
-        boolean puedeReservar = reservaController.usuarioPuedeReservar(usuarioSeleccionado.getIdentificacion());
-
         actualizarInfoMembresia(membresia);
-        actualizarBeneficios(membresia);
-        panelReservaClases.setVisible(puedeReservar);
-        panelReservaClases.setManaged(puedeReservar);
-        lblMensajeReserva.setText(puedeReservar ? "Usuario habilitado para reservar." : "El plan del usuario no permite reservar clases.");
-        
-        reservasFiltradas.setPredicate(reserva -> reserva.getIdentificacionUsuario().equals(usuarioSeleccionado.getIdentificacion()));
-        limpiarFormularioReserva();
+
+        if (membresia != null && membresia.estaActiva()) {
+            boolean esPremiumOVip = membresia.getTipo() == TipoMembresia.PREMIUM || membresia.getTipo() == TipoMembresia.VIP;
+            panelReservaClases.setVisible(esPremiumOVip);
+            panelReservaClases.setManaged(esPremiumOVip);
+
+            boolean esVip = membresia.getTipo() == TipoMembresia.VIP;
+            panelEntrenadorVip.setVisible(esVip);
+            panelEntrenadorVip.setManaged(esVip);
+        }
     }
 
     private void actualizarInfoMembresia(Membresia membresia) {
@@ -147,120 +199,96 @@ public class CrudReservaViewController {
         }
     }
 
-    private void actualizarBeneficios(Membresia membresia) {
-        lblMaquinas.setText("❌"); lblClases.setText("❌"); lblSpa.setText("❌"); lblEntrenador.setText("❌");
-
-        if (membresia != null && membresia.estaActiva()) {
-            lblMaquinas.setText("✅");
-            if (membresia.getTipo() == TipoMembresia.PREMIUM || membresia.getTipo() == TipoMembresia.VIP) {
-                lblClases.setText("✅");
-            }
-            if (membresia.getTipo() == TipoMembresia.VIP) {
-                lblSpa.setText("✅");
-                lblEntrenador.setText("✅");
-            }
-        }
-    }
-
     @FXML void onActionCrearReserva(ActionEvent event) {
-        if (validarCamposReserva()) {
-            Reserva nuevaReserva = crearReservaDesdeFormulario();
-            if (reservaController.crearReserva(nuevaReserva)) {
-                mostrarMensaje("Notificación", "Reserva Exitosa", "La reserva ha sido creada.", Alert.AlertType.INFORMATION);
-                limpiarFormularioReserva();
-            } else {
-                mostrarMensaje("Error", "Error de Creación", "No se pudo crear la reserva.", Alert.AlertType.ERROR);
-            }
+        if (!validarCamposReserva()) {
+            return;
+        }
+
+        Clase claseSeleccionada = comboClase.getValue();
+        Entrenador entrenadorSeleccionado = null;
+        
+        if (panelEntrenadorVip.isVisible()) {
+            entrenadorSeleccionado = comboEntrenador.getValue();
+        }
+
+        Reserva nuevaReserva = new Reserva(
+            "RES-" + UUID.randomUUID().toString().substring(0, 4).toUpperCase(),
+            usuarioSeleccionado,
+            claseSeleccionada,
+            dateFechaClase.getValue(),
+            entrenadorSeleccionado
+        );
+
+        if (reservaController.crearReserva(nuevaReserva)) {
+            mostrarMensaje("Notificación", "Reserva Exitosa", "La reserva ha sido creada.", Alert.AlertType.INFORMATION);
+            limpiarFormularioReserva();
+        } else {
+            mostrarMensaje("Error", "Error de Creación", "No se pudo crear la reserva.", Alert.AlertType.ERROR);
         }
     }
 
     @FXML void onActionCancelarReserva(ActionEvent event) {
         if (reservaSeleccionada != null) {
-            if (mostrarMensajeConfirmacion("¿Desea cancelar la reserva " + reservaSeleccionada.getCodigoReserva() + "?")) {
-                if (reservaController.cancelarReserva(reservaSeleccionada.getCodigoReserva())) {
+            if (mostrarMensajeConfirmacion("¿Desea cancelar la reserva " + reservaSeleccionada.getCodigo() + "?")) {
+                if (reservaController.cancelarReserva(reservaSeleccionada.getCodigo())) {
                     tableReserva.refresh();
-                    actualizarEstadoBotonesAccion();
-                    mostrarMensaje("Notificación", "Reserva Cancelada", "La reserva ha sido cancelada.", Alert.AlertType.INFORMATION);
                 }
             }
         }
     }
 
-    @FXML void onActionRegistrarAsistencia(ActionEvent event) {
-        if (reservaSeleccionada != null) {
-            if (reservaController.registrarAsistencia(reservaSeleccionada.getCodigoReserva())) {
-                tableReserva.refresh();
-                actualizarEstadoBotonesAccion();
-                mostrarMensaje("Notificación", "Asistencia Registrada", "La asistencia ha sido registrada.", Alert.AlertType.INFORMATION);
-            }
-        }
-    }
-
-    private Reserva crearReservaDesdeFormulario() {
-        return new Reserva(
-            "RES-" + UUID.randomUUID().toString().substring(0, 4).toUpperCase(),
-            usuarioSeleccionado.getIdentificacion(),
-            comboTipoClase.getValue(),
-            dateFechaClase.getValue().toString()
-        );
-    }
-
     private boolean validarCamposReserva() {
-        if (comboTipoClase.getValue() == null || dateFechaClase.getValue() == null) {
-            mostrarMensaje("Validación", "Campos Incompletos", "Debe seleccionar un tipo de clase y una fecha.", Alert.AlertType.WARNING);
+        Clase claseSeleccionada = comboClase.getValue();
+        LocalDate fechaSeleccionada = dateFechaClase.getValue();
+        if (claseSeleccionada == null || fechaSeleccionada == null) {
+            mostrarMensaje("Validación", "Campos Incompletos", "Debe seleccionar una clase y una fecha.", Alert.AlertType.WARNING);
             return false;
         }
-        if (dateFechaClase.getValue().isBefore(LocalDate.now())) {
-            mostrarMensaje("Validación", "Fecha Inválida", "La fecha de la clase no puede ser en el pasado.", Alert.AlertType.WARNING);
+        if (fechaSeleccionada.isBefore(LocalDate.now())) {
+            mostrarMensaje("Validación", "Fecha Inválida", "La fecha no puede ser en el pasado.", Alert.AlertType.WARNING);
             return false;
         }
-        if (reservaController.cuposDisponibles(comboTipoClase.getValue(), dateFechaClase.getValue().toString()) <= 0) {
-            mostrarMensaje("Validación", "Sin Cupos", "No hay cupos disponibles para esta clase en la fecha seleccionada.", Alert.AlertType.WARNING);
+        if (fechaSeleccionada.getDayOfWeek() != claseSeleccionada.getDia()) {
+            mostrarMensaje("Validación", "Día Incorrecto", "La clase seleccionada no se dicta ese día de la semana.", Alert.AlertType.WARNING);
             return false;
         }
-        if (reservaController.usuarioTieneReservaMismoHorario(usuarioSeleccionado.getIdentificacion(), comboTipoClase.getValue(), dateFechaClase.getValue().toString())) {
-            mostrarMensaje("Validación", "Reserva Duplicada", "El usuario ya tiene una reserva para esta clase en la misma fecha.", Alert.AlertType.WARNING);
+        if (reservaController.cuposDisponibles(claseSeleccionada, fechaSeleccionada) <= 0) {
+            mostrarMensaje("Validación", "Sin Cupos", "No hay cupos disponibles para esta clase.", Alert.AlertType.WARNING);
+            return false;
+        }
+        if (reservaController.usuarioTieneReservaMismoHorario(usuarioSeleccionado.getIdentificacion(), claseSeleccionada, fechaSeleccionada)) {
+            mostrarMensaje("Validación", "Reserva Duplicada", "Ya tiene una reserva para esta clase en la misma fecha.", Alert.AlertType.WARNING);
             return false;
         }
         return true;
     }
 
     private void actualizarCuposDisponibles() {
-        if (comboTipoClase.getValue() != null && dateFechaClase.getValue() != null) {
-            int cupos = reservaController.cuposDisponibles(comboTipoClase.getValue(), dateFechaClase.getValue().toString());
-            lblCuposDisponibles.setText(String.valueOf(cupos));
-            if (cupos > 5) lblCuposDisponibles.setStyle("-fx-text-fill: #27ae60;");
-            else if (cupos > 0) lblCuposDisponibles.setStyle("-fx-text-fill: #f39c12;");
-            else lblCuposDisponibles.setStyle("-fx-text-fill: #e74c3c;");
-        } else {
-            lblCuposDisponibles.setText("-");
-            lblCuposDisponibles.setStyle("-fx-text-fill: black;");
-        }
+        Clase clase = comboClase.getValue();
+        LocalDate fecha = dateFechaClase.getValue();
+        lblCuposDisponibles.setText(clase != null && fecha != null ? String.valueOf(reservaController.cuposDisponibles(clase, fecha)) : "-");
     }
     
     private void actualizarEstadoBotonesAccion() {
         boolean esActiva = reservaSeleccionada != null && "ACTIVA".equals(reservaSeleccionada.getEstado());
         btnCancelarReserva.setDisable(!esActiva);
-        btnRegistrarAsistencia.setDisable(!esActiva);
     }
 
     private void limpiarFormularioReserva() {
-        comboTipoClase.getSelectionModel().clearSelection();
+        comboClase.getSelectionModel().clearSelection();
+        comboEntrenador.getSelectionModel().clearSelection();
         dateFechaClase.setValue(null);
         lblCuposDisponibles.setText("-");
-        lblCuposDisponibles.setStyle("-fx-text-fill: black;");
         tableReserva.getSelectionModel().clearSelection();
         actualizarEstadoBotonesAccion();
     }
 
     private void limpiarTodaLaVista() {
         comboUsuario.getSelectionModel().clearSelection();
-        reservasFiltradas.setPredicate(p -> true);
         actualizarInfoMembresia(null);
-        actualizarBeneficios(null);
         panelReservaClases.setVisible(false);
         panelReservaClases.setManaged(false);
-        lblMensajeReserva.setText("Seleccione un usuario para ver su información.");
+        tableReserva.setItems(null);
         limpiarFormularioReserva();
     }
 

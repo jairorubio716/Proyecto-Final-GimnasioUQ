@@ -2,9 +2,11 @@ package co.edu.uniquindio.gimnasiouq.gimnasioapp.controller;
 
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.factory.ModelFactory;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.Entrenador;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class EntrenadorController {
     private ModelFactory modelFactory;
@@ -27,9 +29,5 @@ public class EntrenadorController {
 
     public boolean eliminarEntrenador(String identificacion) {
         return modelFactory.eliminarEntrenador(identificacion);
-    }
-
-    public List<Entrenador> obtenerEntrenadoresDisponibles() {
-        return modelFactory.obtenerEntrenadoresDisponibles();
     }
 }

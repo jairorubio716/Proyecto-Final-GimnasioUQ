@@ -1,10 +1,11 @@
 package co.edu.uniquindio.gimnasiouq.gimnasioapp.controller;
 
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.factory.ModelFactory;
+import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.Clase;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.Reserva;
-import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.TipoClase;
 import javafx.collections.ObservableList;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class ReservaController {
@@ -27,24 +28,15 @@ public class ReservaController {
         return modelFactory.cancelarReserva(codigoReserva);
     }
 
-    public boolean registrarAsistencia(String codigoReserva) {
-        return modelFactory.registrarAsistencia(codigoReserva);
-    }
-
-    public List<Reserva> obtenerReservasUsuario(String identificacionUsuario) {
-        return modelFactory.obtenerReservasUsuario(identificacionUsuario);
-    }
-
-    // Validaciones
     public boolean usuarioPuedeReservar(String identificacionUsuario) {
         return modelFactory.usuarioPuedeReservar(identificacionUsuario);
     }
 
-    public int cuposDisponibles(TipoClase tipoClase, String fechaClase) {
-        return modelFactory.cuposDisponibles(tipoClase, fechaClase);
+    public int cuposDisponibles(Clase clase, LocalDate fecha) {
+        return modelFactory.cuposDisponibles(clase, fecha);
     }
 
-    public boolean usuarioTieneReservaMismoHorario(String identificacionUsuario, TipoClase tipoClase, String fechaClase) {
-        return modelFactory.usuarioTieneReservaMismoHorario(identificacionUsuario, tipoClase, fechaClase);
+    public boolean usuarioTieneReservaMismoHorario(String identificacionUsuario, Clase clase, LocalDate fecha) {
+        return modelFactory.usuarioTieneReservaMismoHorario(identificacionUsuario, clase, fecha);
     }
 }

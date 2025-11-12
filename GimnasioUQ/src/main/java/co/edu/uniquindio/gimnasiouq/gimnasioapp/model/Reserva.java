@@ -3,40 +3,44 @@ package co.edu.uniquindio.gimnasiouq.gimnasioapp.model;
 import java.time.LocalDate;
 
 public class Reserva {
-    private String codigoReserva;
-    private String identificacionUsuario;
-    private TipoClase tipoClase;
-    private String fechaReserva;
-    private String fechaClase;
+    private String codigo;
+    private Usuario usuario;
+    private Clase clase;
+    private Entrenador entrenador; // NUEVO: El entrenador específico para esta reserva
+    private LocalDate fechaReserva;
+    private LocalDate fechaClase;
     private String estado;
 
     public Reserva() {}
 
-    public Reserva(String codigoReserva, String identificacionUsuario,
-                   TipoClase tipoClase, String fechaClase) {
-        this.codigoReserva = codigoReserva;
-        this.identificacionUsuario = identificacionUsuario;
-        this.tipoClase = tipoClase;
-        this.fechaReserva = LocalDate.now().toString();
+    public Reserva(String codigo, Usuario usuario, Clase clase, LocalDate fechaClase, Entrenador entrenador) {
+        this.codigo = codigo;
+        this.usuario = usuario;
+        this.clase = clase;
         this.fechaClase = fechaClase;
-        this.estado = "CONFIRMADA";
+        this.entrenador = entrenador; // Puede ser null si es una clase sin entrenador asignado
+        this.fechaReserva = LocalDate.now();
+        this.estado = "ACTIVA";
     }
 
     // Getters y Setters
-    public String getCodigoReserva() { return codigoReserva; }
-    public void setCodigoReserva(String codigoReserva) { this.codigoReserva = codigoReserva; }
+    public String getCodigo() { return codigo; }
+    public void setCodigo(String codigo) { this.codigo = codigo; }
 
-    public String getIdentificacionUsuario() { return identificacionUsuario; }
-    public void setIdentificacionUsuario(String identificacionUsuario) { this.identificacionUsuario = identificacionUsuario; }
+    public Usuario getUsuario() { return usuario; }
+    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 
-    public TipoClase getTipoClase() { return tipoClase; }
-    public void setTipoClase(TipoClase tipoClase) { this.tipoClase = tipoClase; }
+    public Clase getClase() { return clase; }
+    public void setClase(Clase clase) { this.clase = clase; }
 
-    public String getFechaReserva() { return fechaReserva; }
-    public void setFechaReserva(String fechaReserva) { this.fechaReserva = fechaReserva; }
+    public Entrenador getEntrenador() { return entrenador; }
+    public void setEntrenador(Entrenador entrenador) { this.entrenador = entrenador; }
 
-    public String getFechaClase() { return fechaClase; }
-    public void setFechaClase(String fechaClase) { this.fechaClase = fechaClase; }
+    public LocalDate getFechaReserva() { return fechaReserva; }
+    public void setFechaReserva(LocalDate fechaReserva) { this.fechaReserva = fechaReserva; }
+
+    public LocalDate getFechaClase() { return fechaClase; }
+    public void setFechaClase(LocalDate fechaClase) { this.fechaClase = fechaClase; }
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }

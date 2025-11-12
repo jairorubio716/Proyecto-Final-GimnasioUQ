@@ -15,11 +15,11 @@ public class ModelFactory {
     private static ModelFactory instancia;
     private GimnasioUQ gimnasio;
 
-    // ✅ LISTAS OBSERVABLES COMPARTIDAS
     private final ObservableList<Usuario> usuariosObservable = FXCollections.observableArrayList();
     private final ObservableList<Membresia> membresiasObservable = FXCollections.observableArrayList();
     private final ObservableList<Entrenador> entrenadoresObservable = FXCollections.observableArrayList();
     private final ObservableList<Reserva> reservasObservable = FXCollections.observableArrayList();
+    private final ObservableList<Clase> clasesObservable = FXCollections.observableArrayList();
 
     public static ModelFactory getInstancia() {
         if (instancia == null) {
@@ -30,18 +30,86 @@ public class ModelFactory {
 
     private ModelFactory() {
         gimnasio = DataUtil.inicializarDatos();
-        // Cargar las listas observables con los datos iniciales del gimnasio
         usuariosObservable.setAll(gimnasio.getListaUsuarios());
         membresiasObservable.setAll(gimnasio.getListaMembresias());
         entrenadoresObservable.setAll(gimnasio.getListaEntrenadores());
         reservasObservable.setAll(gimnasio.getListaReservas());
+        clasesObservable.setAll(gimnasio.getListaClases());
         verificarMembresiasVencidas();
     }
 
-    // ============================================================
-    //                     CRUD USUARIOS
-    // ============================================================
+    //        CONSULTAS DE MEMBRESÍA
 
+    public boolean usuarioTieneMembresiaActiva(String identificacionUsuario) {
+        return membresiasObservable.stream().anyMatch(m -> m.getIdentificacionUsuario().equals(identificacionUsuario) && m.estaActiva());
+    }
+
+    public Membresia obtenerMembresiaActivaUsuario(String identificacionUsuario) {
+        return membresiasObservable.stream()
+                .filter(m -> m.getIdentificacionUsuario().equals(identificacionUsuario) && m.estaActiva())
+                .findFirst().orElse(null);
+    }
+
+
+    public ObservableList<Clase> getClasesObservable() {
+        return clasesObservable;
+    }
+
+    public ObservableList<Reserva> getReservasObservable() {
+        return reservasObservable;
+    }
+
+    public boolean crearReserva(Reserva reserva) {
+        boolean resultado = gimnasio.crearReserva(reserva);
+        if (resultado) {
+            reservasObservable.add(reserva);
+        }
+        return resultado;
+    }
+
+    public boolean cancelarReserva(String codigoReserva) {
+        boolean resultado = gimnasio.cancelarReserva(codigoReserva);
+        if (resultado) {
+            reservasObservable.stream()
+                .filter(r -> r.getCodigo().equals(codigoReserva))
+                .findFirst()
+                .ifPresent(r -> {
+                    r.setEstado("CANCELADA");
+                    int index = reservasObservable.indexOf(r);
+                    reservasObservable.set(index, r);
+                });
+        }
+        return resultado;
+    }
+
+
+    public boolean usuarioPuedeReservar(String identificacionUsuario) {
+        return membresiasObservable.stream().anyMatch(m ->
+            m.getIdentificacionUsuario().equals(identificacionUsuario) &&
+            m.estaActiva() &&
+            (m.getTipo() == TipoMembresia.PREMIUM || m.getTipo() == TipoMembresia.VIP)
+        );
+    }
+
+    public int cuposDisponibles(Clase clase, LocalDate fecha) {
+        if (clase == null || fecha == null) return 0;
+        long cuposOcupados = reservasObservable.stream().filter(reserva ->
+            reserva.getClase().getCodigo().equals(clase.getCodigo()) &&
+            reserva.getFechaClase().equals(fecha) &&
+            "ACTIVA".equals(reserva.getEstado())
+        ).count();
+        return Math.max(0, clase.getCupoMaximo() - (int) cuposOcupados);
+    }
+
+    public boolean usuarioTieneReservaMismoHorario(String identificacionUsuario, Clase clase, LocalDate fecha) {
+        return reservasObservable.stream().anyMatch(reserva ->
+            reserva.getUsuario().getIdentificacion().equals(identificacionUsuario) &&
+            reserva.getClase().getCodigo().equals(clase.getCodigo()) &&
+            reserva.getFechaClase().equals(fecha) &&
+            "ACTIVA".equals(reserva.getEstado())
+        );
+    }
+    
     public boolean crearUsuario(Usuario usuario) {
         boolean resultado = gimnasio.crearUsuario(usuario);
         if (resultado) {
@@ -65,31 +133,24 @@ public class ModelFactory {
     }
 
     public boolean eliminarUsuario(String identificacion) {
-        // 1. Eliminar membresías asociadas
         List<Membresia> membresiasAEliminar = membresiasObservable.stream()
                 .filter(m -> m.getIdentificacionUsuario().equals(identificacion))
                 .collect(Collectors.toList());
         for (Membresia membresia : membresiasAEliminar) {
             eliminarMembresia(membresia.getCodigo());
         }
-
-        // 2. Eliminar reservas asociadas
         List<Reserva> reservasAEliminar = reservasObservable.stream()
-                .filter(r -> r.getIdentificacionUsuario().equals(identificacion))
+                .filter(r -> r.getUsuario().getIdentificacion().equals(identificacion))
                 .collect(Collectors.toList());
         for (Reserva reserva : reservasAEliminar) {
-            // Asumimos que cancelar es suficiente, o creamos un método eliminarReserva si es necesario.
-            cancelarReserva(reserva.getCodigoReserva());
+            cancelarReserva(reserva.getCodigo());
         }
-
-        // 3. Eliminar el usuario
         boolean resultado = gimnasio.eliminarUsuario(identificacion);
         if (resultado) {
             usuariosObservable.removeIf(u -> u.getIdentificacion().equals(identificacion));
         }
         return resultado;
     }
-
 
     public Usuario obtenerUsuario(String identificacion) {
         return gimnasio.obtenerUsuario(identificacion);
@@ -103,31 +164,16 @@ public class ModelFactory {
         return gimnasio.obtenerUsuario(identificacion) != null;
     }
 
-
-    // ============================================================
-    //                     CRUD MEMBRESIAS
-    // ============================================================
-
     private double calcularPrecioConDescuento(TipoMembresia tipoMembresia, TipoMembresiaDuracion duracion, Usuario usuario) {
         double precioBase = tipoMembresia.getCostoMensual() * duracion.getMeses();
-
-        if (usuario instanceof Estudiante) {
-            return precioBase * 0.8; // 20% descuento
-        } else if (usuario instanceof Trabajador) {
-            return precioBase * 0.9; // 10% descuento
-        } else {
-            return precioBase; // Precio normal
-        }
+        if (usuario instanceof Estudiante) return precioBase * 0.8;
+        else if (usuario instanceof Trabajador) return precioBase * 0.9;
+        else return precioBase;
     }
 
     public boolean crearMembresia(Membresia membresia, Usuario usuario) {
-        double precioConDescuento = calcularPrecioConDescuento(
-                membresia.getTipo(),
-                membresia.getDuracion(),
-                usuario
-        );
+        double precioConDescuento = calcularPrecioConDescuento(membresia.getTipo(), membresia.getDuracion(), usuario);
         membresia.setCosto(precioConDescuento);
-
         boolean resultado = gimnasio.crearMembresia(membresia);
         if (resultado) {
             membresiasObservable.add(membresia);
@@ -178,25 +224,11 @@ public class ModelFactory {
         return membresiasObservable;
     }
 
-    public boolean usuarioTieneMembresiaActiva(String identificacionUsuario) {
-        return gimnasio.getListaMembresias().stream().anyMatch(m -> m.getIdentificacionUsuario().equals(identificacionUsuario) && m.estaActiva());
-    }
-
-    public Membresia obtenerMembresiaActivaUsuario(String identificacionUsuario) {
-        return gimnasio.getListaMembresias().stream()
-                .filter(m -> m.getIdentificacionUsuario().equals(identificacionUsuario) && m.estaActiva())
-                .findFirst().orElse(null);
-    }
-
     public List<Reserva> obtenerReservasUsuario(String identificacionUsuario) {
         return gimnasio.getListaReservas().stream()
-                .filter(r -> r.getIdentificacionUsuario().equals(identificacionUsuario))
+                .filter(r -> r.getUsuario().getIdentificacion().equals(identificacionUsuario))
                 .collect(Collectors.toList());
     }
-
-    // ============================================================
-    //                     CRUD ENTRENADORES
-    // ============================================================
 
     public boolean crearEntrenador(Entrenador entrenador) {
         boolean resultado = gimnasio.crearEntrenador(entrenador);
@@ -242,95 +274,4 @@ public class ModelFactory {
                 .collect(Collectors.toList());
     }
 
-    // ============================================================
-    //                     CRUD RESERVAS
-    // ============================================================
-
-    public boolean crearReserva(Reserva reserva) {
-        boolean resultado = gimnasio.crearReserva(reserva);
-        if (resultado) {
-            reservasObservable.add(reserva);
-        }
-        return resultado;
-    }
-
-    public boolean cancelarReserva(String codigoReserva) {
-        boolean resultado = gimnasio.cancelarReserva(codigoReserva);
-        if (resultado) {
-            Optional<Reserva> reservaOpt = reservasObservable.stream()
-                    .filter(r -> r.getCodigoReserva().equals(codigoReserva))
-                    .findFirst();
-            reservaOpt.ifPresent(reserva -> {
-                reserva.setEstado("CANCELADA");
-                int index = reservasObservable.indexOf(reserva);
-                reservasObservable.set(index, reserva);
-            });
-        }
-        return resultado;
-    }
-
-    public boolean registrarAsistencia(String codigoReserva) {
-        boolean resultado = gimnasio.registrarAsistencia(codigoReserva);
-        if (resultado) {
-            Optional<Reserva> reservaOpt = reservasObservable.stream()
-                    .filter(r -> r.getCodigoReserva().equals(codigoReserva))
-                    .findFirst();
-            reservaOpt.ifPresent(reserva -> {
-                reserva.setEstado("COMPLETADA");
-                int index = reservasObservable.indexOf(reserva);
-                reservasObservable.set(index, reserva);
-            });
-        }
-        return resultado;
-    }
-
-    public Reserva obtenerReserva(String codigoReserva) {
-        return gimnasio.obtenerReserva(codigoReserva);
-    }
-
-    public ObservableList<Reserva> getReservasObservable() {
-        return reservasObservable;
-    }
-
-    // ============================================================
-    //                     VALIDACIONES DE RESERVAS
-    // ============================================================
-
-    public boolean usuarioPuedeReservar(String identificacionUsuario) {
-        return gimnasio.getListaMembresias().stream().anyMatch(m ->
-                m.getIdentificacionUsuario().equals(identificacionUsuario) &&
-                m.estaActiva() &&
-                (m.getTipo() == TipoMembresia.PREMIUM || m.getTipo() == TipoMembresia.VIP)
-        );
-    }
-
-    public int cuposDisponibles(TipoClase tipoClase, String fechaClase) {
-        long cuposOcupados = gimnasio.getListaReservas().stream().filter(r ->
-                r.getTipoClase() == tipoClase &&
-                r.getFechaClase().equals(fechaClase) &&
-                r.getEstado().equals("ACTIVA")
-        ).count();
-
-        return Math.max(0, obtenerCupoMaximoClase(tipoClase) - (int) cuposOcupados);
-    }
-
-    private int obtenerCupoMaximoClase(TipoClase tipoClase) {
-        switch (tipoClase) {
-            case YOGA: return 20;
-            case SPINNING: return 15;
-            case ZUMBA: return 25;
-            case PILATES: return 10;
-            case CROSSFIT: return 12;
-            default: return 15;
-        }
-    }
-
-    public boolean usuarioTieneReservaMismoHorario(String identificacionUsuario, TipoClase tipoClase, String fechaClase) {
-        return gimnasio.getListaReservas().stream().anyMatch(r ->
-                r.getIdentificacionUsuario().equals(identificacionUsuario) &&
-                r.getTipoClase() == tipoClase &&
-                r.getFechaClase().equals(fechaClase) &&
-                r.getEstado().equals("ACTIVA")
-        );
-    }
 }
