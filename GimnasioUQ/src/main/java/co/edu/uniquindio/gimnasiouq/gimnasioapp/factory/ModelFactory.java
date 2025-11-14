@@ -4,145 +4,205 @@ import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.*;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.utils.DataUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ModelFactory {
-
-    private static ModelFactory instancia;
+    private static ModelFactory modelFactory;
     private GimnasioUQ gimnasio;
 
     private final ObservableList<Usuario> usuariosObservable = FXCollections.observableArrayList();
-    private final ObservableList<Membresia> membresiasObservable = FXCollections.observableArrayList();
-    private final ObservableList<Entrenador> entrenadoresObservable = FXCollections.observableArrayList();
-    private final ObservableList<Reserva> reservasObservable = FXCollections.observableArrayList();
     private final ObservableList<Clase> clasesObservable = FXCollections.observableArrayList();
+    private final ObservableList<Entrenador> entrenadoresObservable = FXCollections.observableArrayList();
+    private final ObservableList<Membresia> membresiasObservable = FXCollections.observableArrayList();
+    private final ObservableList<Reserva> reservasObservable = FXCollections.observableArrayList();
 
     public static ModelFactory getInstancia() {
-        if (instancia == null) {
-            instancia = new ModelFactory();
+        if(modelFactory == null) {
+            modelFactory = new ModelFactory();
         }
-        return instancia;
+        return modelFactory;
     }
 
-    private ModelFactory() {
+    private ModelFactory(){
         gimnasio = DataUtil.inicializarDatos();
+        // Cargar las listas vivas con los datos iniciales
         usuariosObservable.setAll(gimnasio.getListaUsuarios());
-        membresiasObservable.setAll(gimnasio.getListaMembresias());
-        entrenadoresObservable.setAll(gimnasio.getListaEntrenadores());
-        reservasObservable.setAll(gimnasio.getListaReservas());
         clasesObservable.setAll(gimnasio.getListaClases());
-        verificarMembresiasVencidas();
+        entrenadoresObservable.setAll(gimnasio.getListaEntrenadores());
+        membresiasObservable.setAll(gimnasio.getListaMembresias());
+        reservasObservable.setAll(gimnasio.getListaReservas());
+    }
+
+    // --- GETTERS DE LISTAS VIVAS ---
+    public ObservableList<Usuario> getUsuariosObservable() { return usuariosObservable; }
+    public ObservableList<Clase> getClasesObservable() { return clasesObservable; }
+    public ObservableList<Entrenador> getEntrenadoresObservable() { return entrenadoresObservable; }
+    public ObservableList<Membresia> getMembresiasObservable() { return membresiasObservable; }
+    public ObservableList<Reserva> getReservasObservable() { return reservasObservable; }
+
+    // --- LÓGICA DE NEGOCIO ---
+
+    //<editor-fold desc="CRUDs">
+    public boolean crearUsuario(String nombre, String id, String edad, String tel, String tipo, String... args) {
+        boolean fueCreado = gimnasio.crearUsuario(nombre, id, edad, tel, tipo, args);
+        if (fueCreado) {
+            usuariosObservable.setAll(gimnasio.getListaUsuarios()); // Recargar para reflejar el cambio
+        }
+        return fueCreado;
+    }
+    public boolean actualizarUsuario(String id, Usuario u) {
+        boolean fueActualizado = gimnasio.actualizarUsuario(id, u);
+        if (fueActualizado) {
+            usuariosObservable.setAll(gimnasio.getListaUsuarios());
+        }
+        return fueActualizado;
+    }
+    public boolean eliminarUsuario(String id) {
+        boolean fueEliminado = gimnasio.eliminarUsuario(id);
+        if (fueEliminado) {
+            usuariosObservable.removeIf(user -> user.getIdentificacion().equals(id));
+            membresiasObservable.removeIf(m -> m.getIdentificacionUsuario().equals(id));
+            reservasObservable.removeIf(r -> r.getUsuario().getIdentificacion().equals(id));
+            return true;
+        }
+        return false;
+    }
+
+    public boolean crearClase(String codigo, String nombre, DayOfWeek dia, LocalTime horario, LocalTime horaFin, int cupo, Entrenador entrenador) {
+        boolean fueCreada = gimnasio.crearClase(codigo, nombre, dia, horario, horaFin, cupo, entrenador);
+        if (fueCreada) {
+            clasesObservable.setAll(gimnasio.getListaClases());
+            return true;
+        }
+        return false;
+    }
+    public boolean actualizarClase(String codigo, Clase c) {
+        if (gimnasio.actualizarClase(codigo, c)) {
+            clasesObservable.setAll(gimnasio.getListaClases());
+            return true;
+        }
+        return false;
+    }
+    public boolean eliminarClase(String codigo) {
+        if (gimnasio.eliminarClase(codigo)) {
+            clasesObservable.removeIf(clase -> clase.getCodigo().equals(codigo));
+            reservasObservable.removeIf(reserva -> reserva.getClase().getCodigo().equals(codigo)); // Eliminar reservas huérfanas
+            return true;
+        }
+        return false;
     }
     
-    // ============================================================
-    //        NUEVO MÉTODO INTELIGENTE
-    // ============================================================
+    public boolean crearEntrenador(String id, String nombre, String tel, String correo, double sueldo, boolean disponible) {
+        boolean fueCreado = gimnasio.crearEntrenador(id, nombre, tel, correo, sueldo, disponible);
+        if(fueCreado) {
+            entrenadoresObservable.setAll(gimnasio.getListaEntrenadores());
+        }
+        return fueCreado;
+    }
+    public boolean actualizarEntrenador(String id, Entrenador e) {
+        if(gimnasio.actualizarEntrenador(id, e)) {
+            entrenadoresObservable.setAll(gimnasio.getListaEntrenadores());
+            return true;
+        }
+        return false;
+    }
+    public boolean eliminarEntrenador(String id) {
+        if(gimnasio.eliminarEntrenador(id)) {
+            entrenadoresObservable.removeIf(ent -> ent.getIdentificacion().equals(id));
+            return true;
+        }
+        return false;
+    }
+
+    public boolean crearMembresia(String codigo, Usuario usuario, TipoMembresia tipo, TipoMembresiaDuracion duracion, String fechaInicio, String fechaFin, EstadoMembresia estado) {
+        double costo = calcularPrecioConDescuento(tipo, duracion, usuario);
+        boolean fueCreada = gimnasio.crearMembresia(codigo, usuario.getIdentificacion(), tipo, duracion, costo, fechaInicio, fechaFin, estado);
+        if(fueCreada) {
+            membresiasObservable.setAll(gimnasio.getListaMembresias());
+        }
+        return fueCreada;
+    }
+    public boolean actualizarMembresia(String codigo, Membresia data) {
+        if(gimnasio.actualizarMembresia(codigo, data)) {
+            membresiasObservable.setAll(gimnasio.getListaMembresias());
+            return true;
+        }
+        return false;
+    }
+    public boolean eliminarMembresia(String codigo) {
+        if(gimnasio.eliminarMembresia(codigo)) {
+            membresiasObservable.removeIf(m -> m.getCodigo().equals(codigo));
+            return true;
+        }
+        return false;
+    }
+
+    public boolean crearReserva(String codigo, Usuario usuario, Clase clase, LocalDate fecha, Entrenador entrenador) {
+        boolean fueCreada = gimnasio.crearReserva(codigo, usuario, clase, fecha, entrenador);
+        if(fueCreada) {
+            reservasObservable.setAll(gimnasio.getListaReservas());
+        }
+        return fueCreada;
+    }
+    public boolean cancelarReserva(String codigo) {
+        boolean fueCancelada = gimnasio.cancelarReserva(codigo);
+        if(fueCancelada) {
+            reservasObservable.stream()
+                .filter(r -> r.getCodigo().equals(codigo))
+                .findFirst()
+                .ifPresent(r -> r.setEstado("CANCELADA"));
+            return true;
+        }
+        return false;
+    }
+    //</editor-fold>
     
-    public List<Entrenador> obtenerEntrenadoresDisponiblesParaHorario(DayOfWeek dia, LocalTime horario) {
+    //<editor-fold desc="Lógica Adicional">
+    public Membresia obtenerMembresiaActivaUsuario(String id) {
+        return membresiasObservable.stream()
+                .filter(m -> m.getIdentificacionUsuario().equals(id) && m.estaActiva())
+                .findFirst().orElse(null);
+    }
+    
+    public List<Entrenador> obtenerEntrenadoresDisponiblesParaHorario(DayOfWeek dia, LocalTime horario, LocalDate fechaClase, Clase claseSeleccionada) {
         // 1. Obtener todos los entrenadores que están disponibles en general.
         List<Entrenador> entrenadoresDisponiblesGeneral = entrenadoresObservable.stream()
                 .filter(Entrenador::isDisponible)
                 .collect(Collectors.toList());
 
-        // 2. Obtener la lista de entrenadores que ya están OCUPADOS a esa hora.
-        List<Entrenador> entrenadoresOcupados = clasesObservable.stream()
-                .filter(clase -> clase.getDia() == dia && clase.getHorario().equals(horario))
+        // 2. Obtener la lista de entrenadores que ya están OCUPADOS por CLASES GRUPALES a esa hora.
+        List<Entrenador> entrenadoresOcupadosClasesGrupales = clasesObservable.stream()
+                .filter(clase -> clase.getDia() == dia &&
+                                 clase.getHorario().isBefore(horario.plusMinutes(1)) && // Solapamiento de inicio
+                                 clase.getHoraFin().isAfter(horario.plusMinutes(1)) && // Solapamiento de fin
+                                 clase.getEntrenadorPorDefecto() != null)
                 .map(Clase::getEntrenadorPorDefecto)
                 .collect(Collectors.toList());
 
-        // 3. Devolver solo los que están disponibles en general y NO están en la lista de ocupados.
-        return entrenadoresDisponiblesGeneral.stream()
-                .filter(entrenador -> !entrenadoresOcupados.contains(entrenador))
+        // 3. Obtener la lista de entrenadores que ya están OCUPADOS por RESERVAS ACTIVAS a esa hora y fecha.
+        List<Entrenador> entrenadoresOcupadosPorReservas = reservasObservable.stream()
+                .filter(reserva -> "ACTIVA".equals(reserva.getEstado()) &&
+                                   reserva.getFechaClase().equals(fechaClase) &&
+                                   reserva.getClase().getHorario().isBefore(horario.plusMinutes(1)) && // Solapamiento de inicio
+                                   reserva.getClase().getHoraFin().isAfter(horario.plusMinutes(1)) && // Solapamiento de fin
+                                   reserva.getEntrenador() != null)
+                .map(Reserva::getEntrenador)
                 .collect(Collectors.toList());
-    }
 
+        // 4. Combinar las listas de entrenadores ocupados.
+        List<Entrenador> entrenadoresOcupadosTotal = new java.util.ArrayList<>();
+        entrenadoresOcupadosTotal.addAll(entrenadoresOcupadosClasesGrupales);
+        entrenadoresOcupadosTotal.addAll(entrenadoresOcupadosPorReservas);
 
-    //<editor-fold desc="El resto de los métodos">
-    public boolean usuarioTieneMembresiaActiva(String identificacionUsuario) {
-        return membresiasObservable.stream().anyMatch(m -> m.getIdentificacionUsuario().equals(identificacionUsuario) && m.estaActiva());
-    }
-
-    public Membresia obtenerMembresiaActivaUsuario(String identificacionUsuario) {
-        return membresiasObservable.stream()
-                .filter(m -> m.getIdentificacionUsuario().equals(identificacionUsuario) && m.estaActiva())
-                .findFirst().orElse(null);
-    }
-    
-    public ObservableList<Clase> getClasesObservable() {
-        return clasesObservable;
-    }
-
-    public boolean crearClase(Clase clase) {
-        boolean resultado = gimnasio.crearClase(clase);
-        if (resultado) {
-            clasesObservable.add(clase);
-        }
-        return resultado;
-    }
-
-    public boolean eliminarClase(String codigo) {
-        boolean resultado = gimnasio.eliminarClase(codigo);
-        if (resultado) {
-            clasesObservable.removeIf(clase -> clase.getCodigo().equals(codigo));
-            reservasObservable.setAll(gimnasio.getListaReservas());
-        }
-        return resultado;
-    }
-
-    public ObservableList<Reserva> getReservasObservable() {
-        return reservasObservable;
-    }
-
-    public boolean crearReserva(Reserva reserva) {
-        boolean resultado = gimnasio.crearReserva(reserva);
-        if (resultado) {
-            reservasObservable.add(reserva);
-        }
-        return resultado;
-    }
-
-    public boolean cancelarReserva(String codigoReserva) {
-        boolean resultado = gimnasio.cancelarReserva(codigoReserva);
-        if (resultado) {
-            reservasObservable.stream()
-                .filter(r -> r.getCodigo().equals(codigoReserva))
-                .findFirst()
-                .ifPresent(r -> {
-                    r.setEstado("CANCELADA");
-                    int index = reservasObservable.indexOf(r);
-                    reservasObservable.set(index, r);
-                });
-        }
-        return resultado;
-    }
-
-    public boolean registrarAsistencia(String codigoReserva) {
-        boolean resultado = gimnasio.registrarAsistencia(codigoReserva);
-        if (resultado) {
-            reservasObservable.stream()
-                .filter(r -> r.getCodigo().equals(codigoReserva))
-                .findFirst()
-                .ifPresent(r -> {
-                    r.setEstado("COMPLETADA");
-                    int index = reservasObservable.indexOf(r);
-                    reservasObservable.set(index, r);
-                });
-        }
-        return resultado;
-    }
-
-    public boolean usuarioPuedeReservar(String identificacionUsuario) {
-        return membresiasObservable.stream().anyMatch(m ->
-            m.getIdentificacionUsuario().equals(identificacionUsuario) &&
-            m.estaActiva() &&
-            (m.getTipo() == TipoMembresia.PREMIUM || m.getTipo() == TipoMembresia.VIP)
-        );
+        // 5. Devolver solo los que están disponibles en general y NO están en la lista de ocupados totales.
+        return entrenadoresDisponiblesGeneral.stream()
+                .filter(entrenador -> !entrenadoresOcupadosTotal.contains(entrenador))
+                .filter(entrenador -> claseSeleccionada == null || claseSeleccionada.getEntrenadorPorDefecto() == null || !claseSeleccionada.getEntrenadorPorDefecto().equals(entrenador))
+                .collect(Collectors.toList());
     }
 
     public int cuposDisponibles(Clase clase, LocalDate fecha) {
@@ -155,6 +215,7 @@ public class ModelFactory {
         return Math.max(0, clase.getCupoMaximo() - (int) cuposOcupados);
     }
 
+    // SOLUCIÓN: Añadir el método usuarioTieneReservaMismoHorario al ModelFactory
     public boolean usuarioTieneReservaMismoHorario(String identificacionUsuario, Clase clase, LocalDate fecha) {
         return reservasObservable.stream().anyMatch(reserva ->
             reserva.getUsuario().getIdentificacion().equals(identificacionUsuario) &&
@@ -164,162 +225,11 @@ public class ModelFactory {
         );
     }
     
-    public boolean crearUsuario(Usuario usuario) {
-        boolean resultado = gimnasio.crearUsuario(usuario);
-        if (resultado) {
-            usuariosObservable.add(usuario);
-        }
-        return resultado;
-    }
-
-    public boolean actualizarUsuario(Usuario usuario) {
-        boolean resultado = gimnasio.actualizarUsuario(usuario);
-        if (resultado) {
-            Optional<Usuario> usuarioExistente = usuariosObservable.stream()
-                    .filter(u -> u.getIdentificacion().equals(usuario.getIdentificacion()))
-                    .findFirst();
-            usuarioExistente.ifPresent(u -> {
-                int index = usuariosObservable.indexOf(u);
-                usuariosObservable.set(index, usuario);
-            });
-        }
-        return resultado;
-    }
-
-    public boolean eliminarUsuario(String identificacion) {
-        List<Membresia> membresiasAEliminar = membresiasObservable.stream()
-                .filter(m -> m.getIdentificacionUsuario().equals(identificacion))
-                .collect(Collectors.toList());
-        for (Membresia membresia : membresiasAEliminar) {
-            eliminarMembresia(membresia.getCodigo());
-        }
-        List<Reserva> reservasAEliminar = reservasObservable.stream()
-                .filter(r -> r.getUsuario().getIdentificacion().equals(identificacion))
-                .collect(Collectors.toList());
-        for (Reserva reserva : reservasAEliminar) {
-            cancelarReserva(reserva.getCodigo());
-        }
-        boolean resultado = gimnasio.eliminarUsuario(identificacion);
-        if (resultado) {
-            usuariosObservable.removeIf(u -> u.getIdentificacion().equals(identificacion));
-        }
-        return resultado;
-    }
-
-    public Usuario obtenerUsuario(String identificacion) {
-        return gimnasio.obtenerUsuario(identificacion);
-    }
-
-    public ObservableList<Usuario> getUsuariosObservable() {
-        return usuariosObservable;
-    }
-
-    public boolean existeUsuario(String identificacion) {
-        return gimnasio.obtenerUsuario(identificacion) != null;
-    }
-
-    private double calcularPrecioConDescuento(TipoMembresia tipoMembresia, TipoMembresiaDuracion duracion, Usuario usuario) {
-        double precioBase = tipoMembresia.getCostoMensual() * duracion.getMeses();
+    private double calcularPrecioConDescuento(TipoMembresia tipo, TipoMembresiaDuracion duracion, Usuario usuario) {
+        double precioBase = tipo.getCostoMensual() * duracion.getMeses();
         if (usuario instanceof Estudiante) return precioBase * 0.8;
-        else if (usuario instanceof Trabajador) return precioBase * 0.9;
-        else return precioBase;
-    }
-
-    public boolean crearMembresia(Membresia membresia, Usuario usuario) {
-        double precioConDescuento = calcularPrecioConDescuento(membresia.getTipo(), membresia.getDuracion(), usuario);
-        membresia.setCosto(precioConDescuento);
-        boolean resultado = gimnasio.crearMembresia(membresia);
-        if (resultado) {
-            membresiasObservable.add(membresia);
-        }
-        return resultado;
-    }
-
-    public boolean actualizarMembresia(Membresia membresia) {
-        boolean resultado = gimnasio.actualizarMembresia(membresia);
-        if (resultado) {
-            Optional<Membresia> membresiaExistente = membresiasObservable.stream()
-                    .filter(m -> m.getCodigo().equals(membresia.getCodigo()))
-                    .findFirst();
-            membresiaExistente.ifPresent(m -> {
-                int index = membresiasObservable.indexOf(m);
-                membresiasObservable.set(index, membresia);
-            });
-        }
-        return resultado;
-    }
-
-    public boolean eliminarMembresia(String codigo) {
-        boolean resultado = gimnasio.eliminarMembresia(codigo);
-        if (resultado) {
-            membresiasObservable.removeIf(m -> m.getCodigo().equals(codigo));
-        }
-        return resultado;
-    }
-
-    public void verificarMembresiasVencidas() {
-        boolean hayCambios = false;
-        for (Membresia membresia : gimnasio.getListaMembresias()) {
-            if (membresia.getEstado() == EstadoMembresia.ACTIVA && membresia.estaVencida()) {
-                membresia.setEstado(EstadoMembresia.INACTIVA);
-                hayCambios = true;
-            }
-        }
-        if (hayCambios) {
-            membresiasObservable.setAll(gimnasio.getListaMembresias());
-        }
-    }
-
-    public Membresia obtenerMembresia(String codigo) {
-        return gimnasio.obtenerMembresia(codigo);
-    }
-
-    public ObservableList<Membresia> getMembresiasObservable() {
-        return membresiasObservable;
-    }
-
-    public List<Reserva> obtenerReservasUsuario(String identificacionUsuario) {
-        return gimnasio.getListaReservas().stream()
-                .filter(r -> r.getUsuario().getIdentificacion().equals(identificacionUsuario))
-                .collect(Collectors.toList());
-    }
-
-    public boolean crearEntrenador(Entrenador entrenador) {
-        boolean resultado = gimnasio.crearEntrenador(entrenador);
-        if (resultado) {
-            entrenadoresObservable.add(entrenador);
-        }
-        return resultado;
-    }
-
-    public boolean actualizarEntrenador(Entrenador entrenador) {
-        boolean resultado = gimnasio.actualizarEntrenador(entrenador);
-        if (resultado) {
-            Optional<Entrenador> entrenadorExistente = entrenadoresObservable.stream()
-                    .filter(e -> e.getIdentificacion().equals(entrenador.getIdentificacion()))
-                    .findFirst();
-            entrenadorExistente.ifPresent(e -> {
-                int index = entrenadoresObservable.indexOf(e);
-                entrenadoresObservable.set(index, entrenador);
-            });
-        }
-        return resultado;
-    }
-
-    public boolean eliminarEntrenador(String identificacion) {
-        boolean resultado = gimnasio.eliminarEntrenador(identificacion);
-        if (resultado) {
-            entrenadoresObservable.removeIf(e -> e.getIdentificacion().equals(identificacion));
-        }
-        return resultado;
-    }
-
-    public Entrenador obtenerEntrenador(String identificacion) {
-        return gimnasio.obtenerEntrenador(identificacion);
-    }
-
-    public ObservableList<Entrenador> getEntrenadoresObservable() {
-        return entrenadoresObservable;
+        if (usuario instanceof Trabajador) return precioBase * 0.9;
+        return precioBase;
     }
     //</editor-fold>
 }

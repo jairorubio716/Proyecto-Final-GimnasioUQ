@@ -1,5 +1,7 @@
 package co.edu.uniquindio.gimnasiouq.gimnasioapp.model;
 
+import java.util.Objects;
+
 public class Entrenador {
     private String identificacion;
     private String nombre;
@@ -40,4 +42,18 @@ public class Entrenador {
 
     public boolean isDisponible() { return disponible; }
     public void setDisponible(boolean disponible) { this.disponible = disponible; }
+
+    // SOLUCIÓN: Implementar equals y hashCode basados en la identificación
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Entrenador that = (Entrenador) o;
+        return Objects.equals(identificacion, that.identificacion);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(identificacion);
+    }
 }

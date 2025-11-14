@@ -9,17 +9,19 @@ public class Clase {
     private String codigo;
     private String nombre;
     private DayOfWeek dia;
-    private LocalTime horario;
+    private LocalTime horario; // Hora de inicio
+    private LocalTime horaFin;   // NUEVO: Hora de fin
     private int cupoMaximo;
-    private Entrenador entrenadorPorDefecto; // Re-introducido como el entrenador por defecto
+    private Entrenador entrenadorPorDefecto;
 
     public Clase() {}
 
-    public Clase(String codigo, String nombre, DayOfWeek dia, LocalTime horario, int cupoMaximo, Entrenador entrenadorPorDefecto) {
+    public Clase(String codigo, String nombre, DayOfWeek dia, LocalTime horario, LocalTime horaFin, int cupoMaximo, Entrenador entrenadorPorDefecto) {
         this.codigo = codigo;
         this.nombre = nombre;
         this.dia = dia;
         this.horario = horario;
+        this.horaFin = horaFin;
         this.cupoMaximo = cupoMaximo;
         this.entrenadorPorDefecto = entrenadorPorDefecto;
     }
@@ -34,8 +36,11 @@ public class Clase {
     public DayOfWeek getDia() { return dia; }
     public void setDia(DayOfWeek dia) { this.dia = dia; }
 
-    public LocalTime getHorario() { return horario; }
+    public LocalTime getHorario() { return horario; } // Hora de inicio
     public void setHorario(LocalTime horario) { this.horario = horario; }
+
+    public LocalTime getHoraFin() { return horaFin; } // NUEVO: Hora de fin
+    public void setHoraFin(LocalTime horaFin) { this.horaFin = horaFin; }
 
     public int getCupoMaximo() { return cupoMaximo; }
     public void setCupoMaximo(int cupoMaximo) { this.cupoMaximo = cupoMaximo; }
@@ -45,11 +50,11 @@ public class Clase {
 
     @Override
     public String toString() {
-        if (nombre == null || dia == null || horario == null) {
+        if (nombre == null || dia == null || horario == null || horaFin == null) {
             return "Clase no definida";
         }
         String diaSemana = dia.getDisplayName(TextStyle.FULL, new Locale("es", "ES"));
-        String texto = nombre + " - " + diaSemana.substring(0, 1).toUpperCase() + diaSemana.substring(1) + " " + horario;
+        String texto = nombre + " - " + diaSemana.substring(0, 1).toUpperCase() + diaSemana.substring(1) + " " + horario + "-" + horaFin;
         if (entrenadorPorDefecto != null) {
             texto += " (con " + entrenadorPorDefecto.getNombre() + ")";
         }

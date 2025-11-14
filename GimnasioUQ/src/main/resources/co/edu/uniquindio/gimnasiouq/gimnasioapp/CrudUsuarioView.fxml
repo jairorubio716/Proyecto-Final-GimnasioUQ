@@ -14,10 +14,10 @@
                    orientation="VERTICAL" prefHeight="572.0" prefWidth="772.0">
 
             <items>
-                <!-- FORMULARIO SUPERIOR -->
+
                 <AnchorPane prefHeight="300.0" prefWidth="770.0">
                     <children>
-                        <!-- DATOS BÁSICOS -->
+
                         <Label layoutX="55.0" layoutY="33.0" text="Nombre:" />
                         <Label layoutX="410.0" layoutY="33.0" text="Identificación:" />
                         <Label layoutX="55.0" layoutY="78.0" text="Edad:" />
@@ -39,7 +39,7 @@
                         <ComboBox fx:id="comboTipoUsuario" layoutX="160.0" layoutY="119.0"
                                   prefHeight="26.0" prefWidth="204.0"/>
 
-                        <!-- BOTONES -->
+
                         <Button fx:id="btnNuevo" layoutX="80.0" layoutY="180.0"
                                 prefHeight="26.0" prefWidth="133.0" text="Nuevo"
                                 onAction="#onActionNuevo"/>
@@ -56,7 +56,7 @@
                                 prefHeight="26.0" prefWidth="133.0" text="Eliminar"
                                 onAction="#onActionEliminar" />
 
-                        <!-- Panel Estudiante -->
+                        
                         <AnchorPane fx:id="panelEstudiante" layoutX="55.0" layoutY="260.0"
                                     prefWidth="664.0" prefHeight="80.0" style="-fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 10;">
                             <children>

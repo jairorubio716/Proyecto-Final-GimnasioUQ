@@ -18,19 +18,19 @@ public class DataUtil {
         entrenador1.setDisponible(true);
         Entrenador entrenador2 = new Entrenador("3002", "Pedro", "3207654321", "pedro@email.com", 2200000);
         entrenador2.setDisponible(true);
-        Entrenador entrenador3 = new Entrenador("3003", "Luis (No disponible)", "3151112233", "luis@email.com", 2100000);
-        entrenador3.setDisponible(false);
+        Entrenador entrenador3 = new Entrenador("3003", "Luis", "3151112233", "luis@email.com", 2100000);
+        entrenador3.setDisponible(false); // Luis no disponible
         gimnasio.getListaEntrenadores().add(entrenador1);
         gimnasio.getListaEntrenadores().add(entrenador2);
         gimnasio.getListaEntrenadores().add(entrenador3);
 
         // ============================================================
-        //              CREAR CLASES (CON ENTRENADOR POR DEFECTO)
+        //              CREAR CLASES (CON HORA FIN Y ENTRENADOR POR DEFECTO)
         // ============================================================
-        Clase clase1 = new Clase("C01", "Yoga Matutino", DayOfWeek.MONDAY, LocalTime.of(8, 0), 15, entrenador1);
-        Clase clase2 = new Clase("C02", "Spinning Intenso", DayOfWeek.TUESDAY, LocalTime.of(18, 0), 20, entrenador2);
-        Clase clase3 = new Clase("C03", "Yoga Vespertino", DayOfWeek.WEDNESDAY, LocalTime.of(19, 0), 15, entrenador1);
-        Clase clase4 = new Clase("C04", "Full Body", DayOfWeek.FRIDAY, LocalTime.of(7, 0), 25, entrenador2);
+        Clase clase1 = new Clase("C01", "Yoga Matutino", DayOfWeek.MONDAY, LocalTime.of(8, 0), LocalTime.of(9, 0), 15, entrenador1);
+        Clase clase2 = new Clase("C02", "Spinning Intenso", DayOfWeek.TUESDAY, LocalTime.of(18, 0), LocalTime.of(19, 0), 20, entrenador2);
+        Clase clase3 = new Clase("C03", "Yoga Vespertino", DayOfWeek.WEDNESDAY, LocalTime.of(19, 0), LocalTime.of(20, 0), 15, entrenador1);
+        Clase clase4 = new Clase("C04", "Full Body", DayOfWeek.FRIDAY, LocalTime.of(7, 0), LocalTime.of(8, 0), 25, entrenador2);
         
         gimnasio.getListaClases().add(clase1);
         gimnasio.getListaClases().add(clase2);

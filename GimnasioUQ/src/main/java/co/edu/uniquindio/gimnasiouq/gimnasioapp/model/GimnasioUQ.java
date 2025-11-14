@@ -1,7 +1,9 @@
 package co.edu.uniquindio.gimnasiouq.gimnasioapp.model;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 public class GimnasioUQ {
 
@@ -11,241 +13,163 @@ public class GimnasioUQ {
     private ArrayList<Clase> listaClases = new ArrayList<>();
     private ArrayList<Entrenador> listaEntrenadores = new ArrayList<>();
     private ArrayList<Reserva> listaReservas = new ArrayList<>();
-    private ArrayList<Recepcionista> listaRecepcionistas = new ArrayList<>();
-    private ArrayList<Administrador> listaAdministradores = new ArrayList<>();
 
     public GimnasioUQ() {}
+    public GimnasioUQ(String nombre) { this.nombre = nombre; }
 
-    public GimnasioUQ(String nombre) {
-        this.nombre = nombre;
-    }
+    // GETTERS
+    public ArrayList<Usuario> getListaUsuarios() { return listaUsuarios; }
+    public ArrayList<Membresia> getListaMembresias() { return listaMembresias; }
+    public ArrayList<Clase> getListaClases() { return listaClases; }
+    public ArrayList<Entrenador> getListaEntrenadores() { return listaEntrenadores; }
+    public ArrayList<Reserva> getListaReservas() { return listaReservas; }
 
-    // Métodos CRUD para las demás entidades (Usuario, Membresia, Entrenador) se mantienen igual...
-    // ...
+    // --- LÓGICA DE NEGOCIO ---
 
-    // ============================================================
-    //                   CRUD CLASES
-    // ============================================================
-
-    public boolean crearClase(Clase clase) {
-        if (obtenerClase(clase.getCodigo()) != null) {
-            return false;
+    //<editor-fold desc="CRUDs">
+    public boolean crearUsuario(String nombre, String id, String edad, String tel, String tipo, String... args) {
+        if (obtenerUsuario(id) != null) return false;
+        Usuario nuevoUsuario = null;
+        switch (tipo) {
+            case "Estudiante": nuevoUsuario = new Estudiante(nombre, id, edad, tel, args[0], args[1]); break;
+            case "Trabajador": nuevoUsuario = new Trabajador(nombre, id, edad, tel, args[0]); break;
+            case "Externo": nuevoUsuario = new Externo(nombre, id, edad, tel, args[0]); break;
         }
-        return listaClases.add(clase);
+        if (nuevoUsuario != null) return listaUsuarios.add(nuevoUsuario);
+        return false;
     }
 
-    public boolean eliminarClase(String codigo) {
-        // Antes de eliminar una clase, se deberían cancelar todas las reservas futuras para ella.
-        listaReservas.removeIf(reserva -> reserva.getClase().getCodigo().equals(codigo));
-        return listaClases.removeIf(clase -> clase.getCodigo().equals(codigo));
-    }
-
-    public Clase obtenerClase(String codigo) {
-        return listaClases.stream()
-                .filter(clase -> clase.getCodigo().equals(codigo))
-                .findFirst()
-                .orElse(null);
-    }
-
-    // ============================================================
-    //              CRUD RESERVAS (REFACTORIZADO)
-    // ============================================================
-
-    public boolean crearReserva(Reserva reserva) {
-        if (obtenerReserva(reserva.getCodigo()) != null) {
-            return false;
+    public boolean actualizarUsuario(String identificacion, Usuario data) {
+        Usuario usuarioActual = obtenerUsuario(identificacion);
+        if (usuarioActual != null) {
+            if (!usuarioActual.getClass().equals(data.getClass())) {
+                eliminarUsuario(identificacion);
+                data.setIdentificacion(identificacion);
+                return listaUsuarios.add(data);
+            } else {
+                usuarioActual.setNombre(data.getNombre());
+                usuarioActual.setEdad(data.getEdad());
+                usuarioActual.setTelefono(data.getTelefono());
+                if (usuarioActual instanceof Estudiante) {
+                    ((Estudiante) usuarioActual).setSemestre(((Estudiante) data).getSemestre());
+                    ((Estudiante) usuarioActual).setPrograma(((Estudiante) data).getPrograma());
+                } else if (usuarioActual instanceof Trabajador) {
+                    ((Trabajador) usuarioActual).setCargo(((Trabajador) data).getCargo());
+                } else if (usuarioActual instanceof Externo) {
+                    ((Externo) usuarioActual).setInstitucion(((Externo) data).getInstitucion());
+                }
+                return true;
+            }
         }
-        return listaReservas.add(reserva);
+        return false;
     }
 
-    public boolean cancelarReserva(String codigoReserva) {
-        Reserva reserva = obtenerReserva(codigoReserva);
-        if (reserva != null && "ACTIVA".equals(reserva.getEstado())) {
-            reserva.setEstado("CANCELADA");
+    public boolean eliminarUsuario(String id) { return listaUsuarios.removeIf(u -> u.getIdentificacion().equals(id)); }
+    public Usuario obtenerUsuario(String id) { return listaUsuarios.stream().filter(u -> u.getIdentificacion().equals(id)).findFirst().orElse(null); }
+
+    // CLASE
+    public boolean crearClase(String codigo, String nombre, DayOfWeek dia, LocalTime horario, LocalTime horaFin, int cupo, Entrenador entrenador) {
+        if (obtenerClase(codigo) != null) return false;
+        if (!esEntrenadorDisponibleParaClase(entrenador, dia, horario, horaFin, null)) return false; // Validar disponibilidad
+        return listaClases.add(new Clase(codigo, nombre, dia, horario, horaFin, cupo, entrenador));
+    }
+    public boolean actualizarClase(String codigo, Clase data) {
+        Clase c = obtenerClase(codigo);
+        if (c != null) {
+            if (!esEntrenadorDisponibleParaClase(data.getEntrenadorPorDefecto(), data.getDia(), data.getHorario(), data.getHoraFin(), codigo)) return false; // Validar disponibilidad
+            c.setNombre(data.getNombre());
+            c.setDia(data.getDia());
+            c.setHorario(data.getHorario());
+            c.setHoraFin(data.getHoraFin());
+            c.setCupoMaximo(data.getCupoMaximo());
+            c.setEntrenadorPorDefecto(data.getEntrenadorPorDefecto());
             return true;
         }
         return false;
     }
-
-    public boolean registrarAsistencia(String codigoReserva) {
-        Reserva reserva = obtenerReserva(codigoReserva);
-        if (reserva != null && "ACTIVA".equals(reserva.getEstado())) {
-            reserva.setEstado("COMPLETADA");
+    public boolean eliminarClase(String codigo) { return listaClases.removeIf(c -> c.getCodigo().equals(codigo)); }
+    public Clase obtenerClase(String codigo) { return listaClases.stream().filter(c -> c.getCodigo().equals(codigo)).findFirst().orElse(null); }
+    
+    // ENTRENADOR
+    public boolean crearEntrenador(String id, String nombre, String tel, String correo, double sueldo, boolean disponible) {
+        if (obtenerEntrenador(id) != null) return false;
+        Entrenador e = new Entrenador(id, nombre, tel, correo, sueldo);
+        e.setDisponible(disponible);
+        return listaEntrenadores.add(e);
+    }
+    public boolean actualizarEntrenador(String id, Entrenador data) {
+        Entrenador e = obtenerEntrenador(id);
+        if (e != null) {
+            e.setNombre(data.getNombre());
+            e.setTelefono(data.getTelefono());
+            e.setCorreo(data.getCorreo());
+            e.setSueldo(data.getSueldo());
+            e.setDisponible(data.isDisponible());
             return true;
         }
         return false;
     }
+    public boolean eliminarEntrenador(String id) { return listaEntrenadores.removeIf(e -> e.getIdentificacion().equals(id)); }
+    public Entrenador obtenerEntrenador(String id) { return listaEntrenadores.stream().filter(e -> e.getIdentificacion().equals(id)).findFirst().orElse(null); }
 
-    public Reserva obtenerReserva(String codigoReserva) {
-        return listaReservas.stream()
-                .filter(reserva -> reserva.getCodigo().equals(codigoReserva))
-                .findFirst()
-                .orElse(null);
+    // MEMBRESIA
+    public boolean crearMembresia(String codigo, String idUsuario, TipoMembresia tipo, TipoMembresiaDuracion duracion, double costo, String fechaInicio, String fechaFin, EstadoMembresia estado) {
+        boolean tieneActiva = listaMembresias.stream().anyMatch(m -> m.getIdentificacionUsuario().equals(idUsuario) && m.estaActiva());
+        if (tieneActiva) return false;
+        if (obtenerMembresia(codigo) != null) return false;
+        return listaMembresias.add(new Membresia(codigo, idUsuario, tipo, duracion, costo, fechaInicio, fechaFin, estado));
     }
-    
-    // Getters y Setters (sin cambios)
-    // ...
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public ArrayList<Usuario> getListaUsuarios() {
-        return listaUsuarios;
-    }
-
-    public void setListaUsuarios(ArrayList<Usuario> listaUsuarios) {
-        this.listaUsuarios = listaUsuarios;
-    }
-
-    public ArrayList<Membresia> getListaMembresias() {
-        return listaMembresias;
-    }
-
-    public void setListaMembresias(ArrayList<Membresia> listaMembresias) {
-        this.listaMembresias = listaMembresias;
-    }
-
-    public ArrayList<Clase> getListaClases() {
-        return listaClases;
-    }
-
-    public void setListaClases(ArrayList<Clase> listaClases) {
-        this.listaClases = listaClases;
-    }
-
-    public ArrayList<Entrenador> getListaEntrenadores() {
-        return listaEntrenadores;
-    }
-
-    public void setListaEntrenadores(ArrayList<Entrenador> listaEntrenadores) {
-        this.listaEntrenadores = listaEntrenadores;
-    }
-
-    public ArrayList<Reserva> getListaReservas() {
-        return listaReservas;
-    }
-
-    public void setListaReservas(ArrayList<Reserva> listaReservas) {
-        this.listaReservas = listaReservas;
-    }
-
-    public ArrayList<Recepcionista> getListaRecepcionistas() {
-        return listaRecepcionistas;
-    }
-
-    public void setListaRecepcionistas(ArrayList<Recepcionista> listaRecepcionistas) {
-        this.listaRecepcionistas = listaRecepcionistas;
-    }
-
-    public ArrayList<Administrador> getListaAdministradores() {
-        return listaAdministradores;
-    }
-
-    public void setListaAdministradores(ArrayList<Administrador> listaAdministradores) {
-        this.listaAdministradores = listaAdministradores;
-    }
-    
-        public boolean crearUsuario(Usuario usuario) {
-        // Validar que no exista usuario con misma identificación
-        if (obtenerUsuario(usuario.getIdentificacion()) != null) {
-            return false;
-        }
-        return listaUsuarios.add(usuario);
-    }
-
-    public boolean actualizarUsuario(Usuario usuarioActualizado) {
-        Usuario existente = obtenerUsuario(usuarioActualizado.getIdentificacion());
-        if (existente != null) {
-            // Eliminar el viejo y agregar el nuevo (para cambio de tipo)
-            listaUsuarios.remove(existente);
-            return listaUsuarios.add(usuarioActualizado);
-        }
-        return false;
-    }
-
-    public boolean eliminarUsuario(String identificacion) {
-        Usuario u = obtenerUsuario(identificacion);
-        if (u != null) {
-            return listaUsuarios.remove(u);
-        }
-        return false;
-    }
-
-    public Usuario obtenerUsuario(String identificacion) {
-        return listaUsuarios.stream()
-                .filter(u -> u.getIdentificacion().equals(identificacion))
-                .findFirst()
-                .orElse(null);
-    }
-
-
-
-    //                   CRUD MEMBRESIAS
-
-    public boolean crearMembresia(Membresia membresia) {
-        if (obtenerMembresia(membresia.getCodigo()) != null) {
-            return false;
-        }
-        return listaMembresias.add(membresia);
-    }
-
-    public boolean actualizarMembresia(Membresia membresiaActualizada) {
-        Membresia existente = obtenerMembresia(membresiaActualizada.getCodigo());
-        if (existente != null) {
-            listaMembresias.remove(existente);
-            return listaMembresias.add(membresiaActualizada);
-        }
-        return false;
-    }
-
-    public boolean eliminarMembresia(String codigo) {
+    public boolean actualizarMembresia(String codigo, Membresia data) {
         Membresia m = obtenerMembresia(codigo);
         if (m != null) {
-            return listaMembresias.remove(m);
+            m.setTipo(data.getTipo());
+            m.setDuracion(data.getDuracion());
+            m.setCosto(data.getCosto());
+            m.setFechaInicio(data.getFechaInicio());
+            m.setFechaVencimiento(data.getFechaVencimiento());
+            m.setEstado(data.getEstado());
+            return true;
         }
         return false;
     }
-
-    public Membresia obtenerMembresia(String codigo) {
-        return listaMembresias.stream()
-                .filter(m -> m.getCodigo().equals(codigo))
-                .findFirst()
-                .orElse(null);
+    public boolean eliminarMembresia(String codigo) { return listaMembresias.removeIf(m -> m.getCodigo().equals(codigo)); }
+    public Membresia obtenerMembresia(String codigo) { return listaMembresias.stream().filter(m -> m.getCodigo().equals(codigo)).findFirst().orElse(null); }
+    
+    // RESERVA
+    public boolean crearReserva(String codigo, Usuario usuario, Clase clase, LocalDate fecha, Entrenador entrenador) {
+        if (obtenerReserva(codigo) != null) return false;
+        return listaReservas.add(new Reserva(codigo, usuario, clase, fecha, entrenador));
     }
-
-    // Métodos de entrenadores
-    public boolean crearEntrenador(Entrenador entrenador) {
-        if (obtenerEntrenador(entrenador.getIdentificacion()) != null) {
-            return false;
-        }
-        return listaEntrenadores.add(entrenador);
-    }
-
-    public boolean actualizarEntrenador(Entrenador entrenadorActualizado) {
-        Entrenador existente = obtenerEntrenador(entrenadorActualizado.getIdentificacion());
-        if (existente != null) {
-            listaEntrenadores.remove(existente);
-            return listaEntrenadores.add(entrenadorActualizado);
+    public boolean cancelarReserva(String codigo) {
+        Reserva r = obtenerReserva(codigo);
+        if (r != null && "ACTIVA".equals(r.getEstado())) {
+            r.setEstado("CANCELADA");
+            return true;
         }
         return false;
     }
+    public Reserva obtenerReserva(String codigo) { return listaReservas.stream().filter(r -> r.getCodigo().equals(codigo)).findFirst().orElse(null); }
+    //</editor-fold>
 
-    public boolean eliminarEntrenador(String identificacion) {
-        Entrenador e = obtenerEntrenador(identificacion);
-        if (e != null) {
-            return listaEntrenadores.remove(e);
+    // --- LÓGICA DE VALIDACIÓN ADICIONAL ---
+    public boolean esEntrenadorDisponibleParaClase(Entrenador entrenador, DayOfWeek dia, LocalTime horaInicio, LocalTime horaFin, String codigoClaseAExcluir) {
+        if (entrenador == null || dia == null || horaInicio == null || horaFin == null) return false;
+        if (!entrenador.isDisponible()) return false;
+
+        for (Clase claseExistente : listaClases) {
+            // Excluir la clase que estamos actualizando de la verificación de solapamiento
+            if (codigoClaseAExcluir != null && claseExistente.getCodigo().equals(codigoClaseAExcluir)) {
+                continue;
+            }
+
+            if (claseExistente.getEntrenadorPorDefecto() != null && claseExistente.getEntrenadorPorDefecto().equals(entrenador) && claseExistente.getDia().equals(dia)) {
+                // Verificar solapamiento de horarios
+                boolean solapa = (horaInicio.isBefore(claseExistente.getHoraFin()) && claseExistente.getHorario().isBefore(horaFin));
+                if (solapa) {
+                    return false; // El entrenador ya está ocupado en otra clase a esa hora
+                }
+            }
         }
-        return false;
-    }
-
-    public Entrenador obtenerEntrenador(String identificacion) {
-        return listaEntrenadores.stream()
-                .filter(e -> e.getIdentificacion().equals(identificacion))
-                .findFirst()
-                .orElse(null);
+        return true;
     }
 }

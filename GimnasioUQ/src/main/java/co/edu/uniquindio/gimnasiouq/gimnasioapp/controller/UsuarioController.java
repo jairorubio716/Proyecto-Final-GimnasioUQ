@@ -11,27 +11,19 @@ public class UsuarioController {
         this.modelFactory = ModelFactory.getInstancia();
     }
 
-    public boolean crearUsuario(Usuario usuario) {
-        return modelFactory.crearUsuario(usuario);
-    }
-
-    public boolean actualizarUsuario(Usuario usuario) {
-        return modelFactory.actualizarUsuario(usuario);
-    }
-
-    public boolean eliminarUsuario(String identificacion) {
-        return modelFactory.eliminarUsuario(identificacion);
-    }
-
-    public Usuario obtenerUsuario(String identificacion) {
-        return modelFactory.obtenerUsuario(identificacion);
-    }
-
     public ObservableList<Usuario> obtenerUsuarios() {
         return modelFactory.getUsuariosObservable();
     }
 
-    public boolean existeUsuario(String identificacion) {
-        return modelFactory.existeUsuario(identificacion);
+    public boolean crearUsuario(String nombre, String id, String edad, String tel, String tipo, String... args) {
+        return modelFactory.crearUsuario(nombre, id, edad, tel, tipo, args);
+    }
+
+    public boolean actualizarUsuario(String id, Usuario u) {
+        return modelFactory.actualizarUsuario(id, u);
+    }
+
+    public boolean eliminarUsuario(String id) {
+        return modelFactory.eliminarUsuario(id);
     }
 }

@@ -3,72 +3,113 @@ package co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.controller.UsuarioController;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.*;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
-
-import java.net.URL;
 import java.util.Optional;
-import java.util.ResourceBundle;
 
 public class CrudUsuarioViewController {
 
     UsuarioController usuarioController;
-    ObservableList<Usuario> listaUsuarios = FXCollections.observableArrayList();
+    ObservableList<Usuario> listaUsuarios;
     Usuario usuarioSeleccionado;
 
-    @FXML
-    private ResourceBundle resources;
-
-    @FXML
-    private URL location;
-
-    // FXML Components
-    @FXML private TextField txtNombre;
-    @FXML private TextField txtIdentificacion;
-    @FXML private TextField txtEdad;
-    @FXML private TextField txtTelefono;
+    @FXML private TextField txtNombre, txtIdentificacion, txtEdad, txtTelefono;
     @FXML private ComboBox<String> comboTipoUsuario;
-    @FXML private TextField txtSemestre;
-    @FXML private TextField txtPrograma;
-    @FXML private TextField txtCargo;
-    @FXML private TextField txtInstitucion;
-
-    @FXML private AnchorPane panelEstudiante;
-    @FXML private AnchorPane panelTrabajador;
-    @FXML private AnchorPane panelExterno;
-
+    @FXML private TextField txtSemestre, txtPrograma, txtCargo, txtInstitucion;
+    @FXML private AnchorPane panelEstudiante, panelTrabajador, panelExterno;
     @FXML private TableView<Usuario> tableUsuario;
-    @FXML private TableColumn<Usuario, String> tcNombre;
-    @FXML private TableColumn<Usuario, String> tcIdentificacion;
-    @FXML private TableColumn<Usuario, String> tcEdad;
-    @FXML private TableColumn<Usuario, String> tcTelefono;
-    @FXML private TableColumn<Usuario, String> tcTipoUsuario;
-    @FXML private TableColumn<Usuario, String> tcDetalleEspecifico;
-
-    @FXML private Button btnNuevo;
-    @FXML private Button btnAgregar;
-    @FXML private Button btnActualizar;
-    @FXML private Button btnEliminar;
+    @FXML private TableColumn<Usuario, String> tcNombre, tcIdentificacion, tcEdad, tcTelefono, tcTipoUsuario, tcDetalleEspecifico;
 
     @FXML
     void initialize() {
         usuarioController = new UsuarioController();
         initView();
-        configurarCombos();
     }
 
     private void initView() {
+        listaUsuarios = usuarioController.obtenerUsuarios();
         initDataBinding();
-        obtenerUsuarios();
-        tableUsuario.getItems().clear();
         tableUsuario.setItems(listaUsuarios);
         listenerSelection();
+        configurarCombos();
         ocultarTodosLosPaneles();
     }
+
+    @FXML void onActionAgregar(ActionEvent event) { crearUsuario(); }
+    @FXML void onActionActualizar(ActionEvent event) { actualizarUsuario(); }
+    @FXML void onActionEliminar(ActionEvent event) { eliminarUsuario(); }
+    @FXML void onActionNuevo(ActionEvent event) { limpiarFormulario(); }
+
+    private void crearUsuario() {
+        String nombre = txtNombre.getText();
+        String id = txtIdentificacion.getText();
+        String edad = txtEdad.getText();
+        String tel = txtTelefono.getText();
+        String tipo = comboTipoUsuario.getValue();
+        String arg1 = "", arg2 = "";
+
+        if (!validarCampos(nombre, id, edad, tel, tipo)) return;
+
+        switch (tipo) {
+            case "Estudiante": arg1 = txtSemestre.getText(); arg2 = txtPrograma.getText(); break;
+            case "Trabajador": arg1 = txtCargo.getText(); break;
+            case "Externo": arg1 = txtInstitucion.getText(); break;
+        }
+
+        if (usuarioController.crearUsuario(nombre, id, edad, tel, tipo, arg1, arg2)) {
+            mostrarMensaje("Creación Exitosa", "El usuario ha sido creado.");
+            limpiarFormulario();
+        } else {
+            mostrarMensaje("Error", "La identificación ya existe.");
+        }
+    }
+
+    private void actualizarUsuario() {
+        if (usuarioSeleccionado == null) {
+            mostrarMensaje("Advertencia", "Debe seleccionar un usuario.");
+            return;
+        }
+        String nombre = txtNombre.getText();
+        String edad = txtEdad.getText();
+        String tel = txtTelefono.getText();
+        String tipo = comboTipoUsuario.getValue();
+        
+        if (!validarCampos(nombre, "dummyId", edad, tel, tipo)) return;
+
+        Usuario usuarioActualizado = null;
+        switch (tipo) {
+            case "Estudiante":
+                usuarioActualizado = new Estudiante(nombre, "", edad, tel, txtSemestre.getText(), txtPrograma.getText());
+                break;
+            case "Trabajador":
+                usuarioActualizado = new Trabajador(nombre, "", edad, tel, txtCargo.getText());
+                break;
+            case "Externo":
+                usuarioActualizado = new Externo(nombre, "", edad, tel, txtInstitucion.getText());
+                break;
+        }
+
+        if (usuarioActualizado != null && usuarioController.actualizarUsuario(usuarioSeleccionado.getIdentificacion(), usuarioActualizado)) {
+            tableUsuario.refresh();
+            mostrarMensaje("Actualización Exitosa", "El usuario ha sido actualizado.");
+            limpiarFormulario();
+        } else {
+            mostrarMensaje("Error", "No se pudo actualizar el usuario.");
+        }
+    }
+
+    private void eliminarUsuario() {
+        if (usuarioSeleccionado != null && mostrarMensajeConfirmacion("¿Eliminar usuario?")) {
+            if (usuarioController.eliminarUsuario(usuarioSeleccionado.getIdentificacion())) {
+                mostrarMensaje("Eliminación Exitosa", "El usuario ha sido eliminado.");
+                limpiarFormulario();
+            }
+        }
+    }
+    
 
     private void initDataBinding() {
         tcNombre.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNombre()));
@@ -76,239 +117,98 @@ public class CrudUsuarioViewController {
         tcEdad.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEdad()));
         tcTelefono.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTelefono()));
         tcTipoUsuario.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getClass().getSimpleName()));
+        
         tcDetalleEspecifico.setCellValueFactory(cellData -> {
-            Usuario usuario = cellData.getValue();
-            if (usuario instanceof Estudiante) {
-                Estudiante est = (Estudiante) usuario;
-                return new SimpleStringProperty("Sem " + est.getSemestre() + " - " + est.getPrograma());
-            } else if (usuario instanceof Trabajador) {
-                Trabajador trab = (Trabajador) usuario;
-                return new SimpleStringProperty(trab.getCargo());
-            } else if (usuario instanceof Externo) {
-                Externo ext = (Externo) usuario;
-                return new SimpleStringProperty(ext.getInstitucion());
+            Usuario u = cellData.getValue();
+            if (u instanceof Estudiante) {
+                return new SimpleStringProperty("Sem " + ((Estudiante) u).getSemestre() + " - " + ((Estudiante) u).getPrograma());
+            }
+            if (u instanceof Trabajador) {
+                return new SimpleStringProperty(((Trabajador) u).getCargo());
+            }
+            if (u instanceof Externo) {
+                return new SimpleStringProperty(((Externo) u).getInstitucion());
             }
             return new SimpleStringProperty("");
         });
     }
 
-    private void obtenerUsuarios() {
-        listaUsuarios.addAll(usuarioController.obtenerUsuarios());
-    }
-
     private void listenerSelection() {
-        tableUsuario.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            usuarioSeleccionado = newSelection;
+        tableUsuario.getSelectionModel().selectedItemProperty().addListener((obs, old, newS) -> {
+            usuarioSeleccionado = newS;
             mostrarInformacion(usuarioSeleccionado);
         });
     }
 
-    private void mostrarInformacion(Usuario usuario) {
-        if (usuario != null) {
-            txtNombre.setText(usuario.getNombre());
-            txtIdentificacion.setText(usuario.getIdentificacion());
-            txtEdad.setText(usuario.getEdad());
-            txtTelefono.setText(usuario.getTelefono());
-
-            if (usuario instanceof Estudiante) {
+    private void mostrarInformacion(Usuario u) {
+        if (u != null) {
+            txtNombre.setText(u.getNombre());
+            txtIdentificacion.setText(u.getIdentificacion());
+            txtIdentificacion.setDisable(true);
+            txtEdad.setText(u.getEdad());
+            txtTelefono.setText(u.getTelefono());
+            if (u instanceof Estudiante) {
                 comboTipoUsuario.setValue("Estudiante");
-                Estudiante est = (Estudiante) usuario;
-                txtSemestre.setText(est.getSemestre());
-                txtPrograma.setText(est.getPrograma());
-            } else if (usuario instanceof Trabajador) {
+                txtSemestre.setText(((Estudiante) u).getSemestre());
+                txtPrograma.setText(((Estudiante) u).getPrograma());
+            } else if (u instanceof Trabajador) {
                 comboTipoUsuario.setValue("Trabajador");
-                Trabajador trab = (Trabajador) usuario;
-                txtCargo.setText(trab.getCargo());
-            } else if (usuario instanceof Externo) {
+                txtCargo.setText(((Trabajador) u).getCargo());
+            } else if (u instanceof Externo) {
                 comboTipoUsuario.setValue("Externo");
-                Externo ext = (Externo) usuario;
-                txtInstitucion.setText(ext.getInstitucion());
+                txtInstitucion.setText(((Externo) u).getInstitucion());
             }
         }
     }
-
-    @FXML
-    void onActionAgregar(ActionEvent event) {
-        crearUsuario();
+    
+    private void limpiarFormulario() {
+        txtNombre.clear();
+        txtIdentificacion.clear();
+        txtIdentificacion.setDisable(false);
+        txtEdad.clear();
+        txtTelefono.clear();
+        comboTipoUsuario.getSelectionModel().clearSelection();
+        // El listener de comboTipoUsuario se encargará de limpiar y ocultar los paneles
     }
 
-    @FXML
-    void onActionActualizar(ActionEvent event) {
-        actualizarUsuario();
-    }
-
-    @FXML
-    void onActionNuevo(ActionEvent event) {
-        limpiarFormulario();
-    }
-
-    @FXML
-    void onActionEliminar(ActionEvent event) {
-        eliminarUsuario();
-    }
-
-    private void crearUsuario() {
-        if (validarCampos()) {
-            Usuario usuario = crearUsuarioDesdeFormulario();
-            if (usuarioController.crearUsuario(usuario)) {
-                listaUsuarios.add(usuario);
-                mostrarMensaje("Notificación", "Creación de Usuario", "Usuario creado con éxito", Alert.AlertType.CONFIRMATION);
-                limpiarFormulario();
-            } else {
-                mostrarMensaje("Notificación", "Creación de Usuario", "El usuario no pudo ser creado (posiblemente identificación duplicada)", Alert.AlertType.WARNING);
-            }
-        }
-    }
-
-    private void actualizarUsuario() {
-        if (usuarioSeleccionado != null) {
-            if (validarCampos()) {
-                Usuario usuarioActualizado = crearUsuarioDesdeFormulario();
-
-                usuarioActualizado.setIdentificacion(usuarioSeleccionado.getIdentificacion());
-
-                if (usuarioController.actualizarUsuario(usuarioActualizado)) {
-
-                    int index = listaUsuarios.indexOf(usuarioSeleccionado);
-                    if (index != -1) {
-                        listaUsuarios.set(index, usuarioActualizado);
-                        tableUsuario.refresh();
-                    }
-                    mostrarMensaje("Notificación", "Actualización de Usuario", "Usuario actualizado con éxito", Alert.AlertType.INFORMATION);
-                    limpiarFormulario();
-                } else {
-                    mostrarMensaje("Notificación", "Actualización de Usuario", "El usuario no pudo ser actualizado", Alert.AlertType.ERROR);
-                }
-            }
-        } else {
-            mostrarMensaje("Notificación", "Selección de Usuario", "Debe seleccionar un usuario para actualizar", Alert.AlertType.WARNING);
-        }
-    }
-
-    private void eliminarUsuario() {
-        if (usuarioSeleccionado != null) {
-            if (mostrarMensajeConfirmacion("¿Está seguro de que desea eliminar al usuario " + usuarioSeleccionado.getNombre() + "?")) {
-                if (usuarioController.eliminarUsuario(usuarioSeleccionado.getIdentificacion())) {
-                    listaUsuarios.remove(usuarioSeleccionado);
-                    usuarioSeleccionado = null;
-                    limpiarFormulario();
-                    mostrarMensaje("Notificación", "Eliminación de Usuario", "Usuario eliminado con éxito", Alert.AlertType.INFORMATION);
-                } else {
-                    mostrarMensaje("Notificación", "Eliminación de Usuario", "El usuario no pudo ser eliminado", Alert.AlertType.ERROR);
-                }
-            }
-        } else {
-            mostrarMensaje("Notificación", "Selección de Usuario", "Debe seleccionar un usuario para eliminar", Alert.AlertType.WARNING);
-        }
-    }
-
-    private Usuario crearUsuarioDesdeFormulario() {
-        String tipoUsuario = comboTipoUsuario.getValue();
-        String nombre = txtNombre.getText();
-        String identificacion = txtIdentificacion.getText();
-        String edad = txtEdad.getText();
-        String telefono = txtTelefono.getText();
-
-        switch (tipoUsuario) {
-            case "Estudiante":
-                return new Estudiante(nombre, identificacion, edad, telefono, txtSemestre.getText(), txtPrograma.getText());
-            case "Trabajador":
-                return new Trabajador(nombre, identificacion, edad, telefono, txtCargo.getText());
-            case "Externo":
-                return new Externo(nombre, identificacion, edad, telefono, txtInstitucion.getText());
-            default:
-                return null;
-        }
-    }
-
-    private boolean validarCampos() {
-        String nombre = txtNombre.getText();
-        String identificacion = txtIdentificacion.getText();
-        String tipoUsuario = comboTipoUsuario.getValue();
-
-        if (nombre == null || nombre.isEmpty() || identificacion == null || identificacion.isEmpty() || tipoUsuario == null) {
-            mostrarMensaje("Notificación", "Validación de Campos", "Los campos Nombre, Identificación y Tipo de Usuario son obligatorios.", Alert.AlertType.WARNING);
+    private boolean validarCampos(String n, String id, String e, String t, String tipo) {
+        if (n.isEmpty() || id.isEmpty() || e.isEmpty() || t.isEmpty() || tipo == null) {
+            mostrarMensaje("Error de Validación", "Todos los campos son obligatorios.");
             return false;
-        }
-
-        switch (tipoUsuario) {
-            case "Estudiante":
-                if (txtSemestre.getText().isEmpty() || txtPrograma.getText().isEmpty()) {
-                    mostrarMensaje("Notificación", "Validación de Campos", "Para un estudiante, Semestre y Programa son obligatorios.", Alert.AlertType.WARNING);
-                    return false;
-                }
-                break;
-            case "Trabajador":
-                if (txtCargo.getText().isEmpty()) {
-                    mostrarMensaje("Notificación", "Validación de Campos", "Para un trabajador, el Cargo es obligatorio.", Alert.AlertType.WARNING);
-                    return false;
-                }
-                break;
-            case "Externo":
-                if (txtInstitucion.getText().isEmpty()) {
-                    mostrarMensaje("Notificación", "Validación de Campos", "Para un externo, la Institución es obligatoria.", Alert.AlertType.WARNING);
-                    return false;
-                }
-                break;
         }
         return true;
     }
 
-    private void limpiarFormulario() {
-        txtNombre.clear();
-        txtIdentificacion.clear();
-        txtEdad.clear();
-        txtTelefono.clear();
+    private void configurarCombos() {
+        comboTipoUsuario.getItems().setAll("Estudiante", "Trabajador", "Externo");
+        comboTipoUsuario.valueProperty().addListener((obs, o, n) -> mostrarCamposEspecificos(n));
+    }
+
+    private void ocultarTodosLosPaneles() {
+        panelEstudiante.setVisible(false); panelEstudiante.setManaged(false);
+        panelTrabajador.setVisible(false); panelTrabajador.setManaged(false);
+        panelExterno.setVisible(false); panelExterno.setManaged(false);
+    }
+
+    private void mostrarCamposEspecificos(String tipo) {
         txtSemestre.clear();
         txtPrograma.clear();
         txtCargo.clear();
         txtInstitucion.clear();
-        comboTipoUsuario.getSelectionModel().clearSelection();
+        
         ocultarTodosLosPaneles();
-        tableUsuario.getSelectionModel().clearSelection();
-        usuarioSeleccionado = null;
-    }
-
-
-    private void configurarCombos() {
-        comboTipoUsuario.getItems().setAll("Estudiante", "Trabajador", "Externo");
-        comboTipoUsuario.valueProperty().addListener((obs, oldVal, newVal) -> mostrarCamposEspecificos(newVal));
-    }
-
-    private void ocultarTodosLosPaneles() {
-        panelEstudiante.setVisible(false);
-        panelEstudiante.setManaged(false);
-        panelTrabajador.setVisible(false);
-        panelTrabajador.setManaged(false);
-        panelExterno.setVisible(false);
-        panelExterno.setManaged(false);
-    }
-
-    private void mostrarCamposEspecificos(String tipoUsuario) {
-        ocultarTodosLosPaneles();
-        if (tipoUsuario == null) return;
-
-        switch (tipoUsuario) {
-            case "Estudiante":
-                panelEstudiante.setVisible(true);
-                panelEstudiante.setManaged(true);
-                break;
-            case "Trabajador":
-                panelTrabajador.setVisible(true);
-                panelTrabajador.setManaged(true);
-                break;
-            case "Externo":
-                panelExterno.setVisible(true);
-                panelExterno.setManaged(true);
-                break;
+        if (tipo == null) return;
+        switch (tipo) {
+            case "Estudiante": panelEstudiante.setVisible(true); panelEstudiante.setManaged(true); break;
+            case "Trabajador": panelTrabajador.setVisible(true); panelTrabajador.setManaged(true); break;
+            case "Externo": panelExterno.setVisible(true); panelExterno.setManaged(true); break;
         }
     }
 
-
-    private void mostrarMensaje(String titulo, String header, String contenido, Alert.AlertType alertType) {
-        Alert alert = new Alert(alertType);
+    private void mostrarMensaje(String titulo, String contenido) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(titulo);
-        alert.setHeaderText(header);
+        alert.setHeaderText(null);
         alert.setContentText(contenido);
         alert.showAndWait();
     }
@@ -316,9 +216,7 @@ public class CrudUsuarioViewController {
     private boolean mostrarMensajeConfirmacion(String mensaje) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setHeaderText(null);
-        alert.setTitle("Confirmación");
         alert.setContentText(mensaje);
-        Optional<ButtonType> action = alert.showAndWait();
-        return action.isPresent() && action.get() == ButtonType.OK;
+        return alert.showAndWait().filter(r -> r == ButtonType.OK).isPresent();
     }
 }

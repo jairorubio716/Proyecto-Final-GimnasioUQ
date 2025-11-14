@@ -8,36 +8,25 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-
-import java.net.URL;
 import java.time.LocalDate;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.UUID;
 
 public class CrudMembresiaViewController {
 
     MembresiaController membresiaController;
     UsuarioController usuarioController;
-
     ObservableList<Membresia> listaMembresias;
     ObservableList<Usuario> listaUsuarios;
-
     Membresia membresiaSeleccionada;
 
-    @FXML private ResourceBundle resources;
-    @FXML private URL location;
-
-    @FXML private TextField txtCodigo;
+    @FXML private TextField txtCodigo, txtCosto;
     @FXML private ComboBox<TipoMembresia> comboTipoMembresia;
     @FXML private ComboBox<Usuario> comboUsuario;
     @FXML private ComboBox<TipoMembresiaDuracion> comboDuracion;
-    @FXML private TextField txtCosto;
     @FXML private ComboBox<EstadoMembresia> comboEstado;
     @FXML private TableView<Membresia> tableMembresia;
-    @FXML private TableColumn<Membresia, String> tcCodigo, tcUsuario, tcTipo, tcDuracion, tcCosto;
-    @FXML private TableColumn<Membresia, String> tcFechaInicio, tcFechaFin, tcEstado;
-    @FXML private Button btnNuevo, btnAgregar, btnActualizar, btnEliminar;
+    @FXML private TableColumn<Membresia, String> tcCodigo, tcUsuario, tcTipo, tcDuracion, tcCosto, tcFechaInicio, tcFechaFin, tcEstado;
 
     @FXML
     void initialize() {
@@ -47,31 +36,82 @@ public class CrudMembresiaViewController {
     }
 
     private void initView() {
-
-        listaUsuarios = usuarioController.obtenerUsuarios();
         listaMembresias = membresiaController.obtenerMembresias();
-
+        listaUsuarios = usuarioController.obtenerUsuarios();
         initDataBinding();
         configurarCombos();
-
-        comboUsuario.setItems(listaUsuarios);
         tableMembresia.setItems(listaMembresias);
-
         listenerSelection();
         limpiarFormulario();
     }
 
+    @FXML void onActionAgregar(ActionEvent event) { crearMembresia(); }
+    @FXML void onActionActualizar(ActionEvent event) { actualizarMembresia(); }
+    @FXML void onActionEliminar(ActionEvent event) { eliminarMembresia(); }
+    @FXML void onActionNuevo(ActionEvent event) { limpiarFormulario(); }
+
+    private void crearMembresia() {
+        if (!validarCampos(true)) return;
+        if (membresiaController.crearMembresia(
+                txtCodigo.getText(),
+                comboUsuario.getValue(),
+                comboTipoMembresia.getValue(),
+                comboDuracion.getValue(),
+                LocalDate.now().toString(),
+                LocalDate.now().plusMonths(comboDuracion.getValue().getMeses()).toString(),
+                EstadoMembresia.ACTIVA
+        )) {
+            mostrarMensaje("Creación Exitosa", "La membresía ha sido creada.");
+            limpiarFormulario();
+        } else {
+            mostrarMensaje("Error", "No se pudo crear la membresía (posiblemente el usuario ya tiene una activa).");
+        }
+    }
+
+    private void actualizarMembresia() {
+        if (membresiaSeleccionada == null) {
+            mostrarMensaje("Advertencia", "Debe seleccionar una membresía.");
+            return;
+        }
+        if (!validarCampos(false)) return;
+        
+        double costoCalculado = calcularCosto();
+
+        Membresia membresiaActualizada = new Membresia(
+            membresiaSeleccionada.getCodigo(),
+            membresiaSeleccionada.getIdentificacionUsuario(),
+            comboTipoMembresia.getValue(),
+            comboDuracion.getValue(),
+            costoCalculado,
+            membresiaSeleccionada.getFechaInicio(),
+            LocalDate.parse(membresiaSeleccionada.getFechaInicio()).plusMonths(comboDuracion.getValue().getMeses()).toString(),
+            comboEstado.getValue()
+        );
+
+        if (membresiaController.actualizarMembresia(membresiaSeleccionada.getCodigo(), membresiaActualizada)) {
+            tableMembresia.refresh();
+            mostrarMensaje("Actualización Exitosa", "La membresía ha sido actualizada.");
+            limpiarFormulario();
+        } else {
+            mostrarMensaje("Error", "No se pudo actualizar la membresía.");
+        }
+    }
+
+    private void eliminarMembresia() {
+        if (membresiaSeleccionada != null && mostrarMensajeConfirmacion("¿Eliminar membresía?")) {
+            if (membresiaController.eliminarMembresia(membresiaSeleccionada.getCodigo())) {
+                mostrarMensaje("Eliminación Exitosa", "La membresía ha sido eliminada.");
+                limpiarFormulario();
+            }
+        }
+    }
+    
+    //<editor-fold desc="Métodos Auxiliares">
     private void initDataBinding() {
         tcCodigo.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCodigo()));
         tcUsuario.setCellValueFactory(cellData -> {
-            String idUsuario = cellData.getValue().getIdentificacionUsuario();
-            return new SimpleStringProperty(
-                listaUsuarios.stream()
-                    .filter(u -> u.getIdentificacion().equals(idUsuario))
-                    .map(Usuario::getNombre)
-                    .findFirst()
-                    .orElse(idUsuario)
-            );
+            String id = cellData.getValue().getIdentificacionUsuario();
+            return new SimpleStringProperty(listaUsuarios.stream().filter(u -> u.getIdentificacion().equals(id)).map(Usuario::getNombre).findFirst().orElse(id));
         });
         tcTipo.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTipo().getNombre()));
         tcDuracion.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getDuracion().toString()));
@@ -85,135 +125,48 @@ public class CrudMembresiaViewController {
         comboTipoMembresia.getItems().setAll(TipoMembresia.values());
         comboDuracion.getItems().setAll(TipoMembresiaDuracion.values());
         comboEstado.getItems().setAll(EstadoMembresia.values());
+        comboUsuario.setItems(listaUsuarios);
 
         comboUsuario.setCellFactory(param -> new ListCell<>() {
             @Override
             protected void updateItem(Usuario item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? null : item.getNombre() + " (" + item.getIdentificacion() + ")");
+                setText(empty ? null : item.getNombre());
             }
         });
         comboUsuario.setButtonCell(new ListCell<>() {
-             @Override
+            @Override
             protected void updateItem(Usuario item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? "Seleccione un usuario" : item.getNombre());
+                setText(empty ? null : item.getNombre());
             }
         });
 
-        comboTipoMembresia.valueProperty().addListener((obs, oldV, newV) -> actualizarCostoEnUI());
-        comboDuracion.valueProperty().addListener((obs, oldV, newV) -> actualizarCostoEnUI());
-        comboUsuario.valueProperty().addListener((obs, oldV, newV) -> actualizarCostoEnUI());
+        comboTipoMembresia.valueProperty().addListener((obs, o, n) -> actualizarCostoEnUI());
+        comboDuracion.valueProperty().addListener((obs, o, n) -> actualizarCostoEnUI());
+        comboUsuario.valueProperty().addListener((obs, o, n) -> actualizarCostoEnUI());
     }
 
     private void listenerSelection() {
-        tableMembresia.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            membresiaSeleccionada = newSelection;
+        tableMembresia.getSelectionModel().selectedItemProperty().addListener((obs, o, newS) -> {
+            membresiaSeleccionada = newS;
             mostrarInformacion(membresiaSeleccionada);
         });
     }
 
-    private void mostrarInformacion(Membresia membresia) {
-        if (membresia != null) {
-            txtCodigo.setText(membresia.getCodigo());
-            comboUsuario.setValue(
-                listaUsuarios.stream()
-                    .filter(u -> u.getIdentificacion().equals(membresia.getIdentificacionUsuario()))
-                    .findFirst().orElse(null)
-            );
-            comboTipoMembresia.setValue(membresia.getTipo());
-            comboDuracion.setValue(membresia.getDuracion());
-            comboEstado.setValue(membresia.getEstado());
+    private void mostrarInformacion(Membresia m) {
+        if (m != null) {
+            txtCodigo.setText(m.getCodigo());
+            comboUsuario.setValue(listaUsuarios.stream().filter(u -> u.getIdentificacion().equals(m.getIdentificacionUsuario())).findFirst().orElse(null));
+            comboTipoMembresia.setValue(m.getTipo());
+            comboDuracion.setValue(m.getDuracion());
+            comboEstado.setValue(m.getEstado());
             actualizarCostoEnUI();
-            
             txtCodigo.setDisable(true);
             comboUsuario.setDisable(true);
-        }
-    }
-
-    @FXML void onActionNuevo(ActionEvent event) { limpiarFormulario(); }
-    @FXML void onActionAgregar(ActionEvent event) { crearMembresia(); }
-    @FXML void onActionActualizar(ActionEvent event) { actualizarMembresia(); }
-    @FXML void onActionEliminar(ActionEvent event) { eliminarMembresia(); }
-
-    private void crearMembresia() {
-        if (validarCampos()) {
-            Usuario usuarioSeleccionado = comboUsuario.getValue();
-            if (membresiaController.usuarioTieneMembresiaActiva(usuarioSeleccionado.getIdentificacion())) {
-                mostrarMensaje("Validación", "Membresía Existente", "El usuario seleccionado ya tiene una membresía activa.", Alert.AlertType.WARNING);
-                return;
-            }
-
-            Membresia nuevaMembresia = crearMembresiaDesdeFormulario();
-            if (membresiaController.crearMembresia(nuevaMembresia, usuarioSeleccionado)) {
-                mostrarMensaje("Notificación", "Creación Exitosa", "La membresía ha sido creada.", Alert.AlertType.INFORMATION);
-                limpiarFormulario();
-            } else {
-                mostrarMensaje("Error", "Error de Creación", "No se pudo crear la membresía.", Alert.AlertType.ERROR);
-            }
-        }
-    }
-
-    private void actualizarMembresia() {
-        if (membresiaSeleccionada != null && validarCampos()) {
-            Membresia membresiaActualizada = crearMembresiaDesdeFormulario();
-            membresiaActualizada.setCodigo(membresiaSeleccionada.getCodigo());
-            membresiaActualizada.setIdentificacionUsuario(membresiaSeleccionada.getIdentificacionUsuario());
-
-            if (membresiaController.actualizarMembresia(membresiaActualizada)) {
-                mostrarMensaje("Notificación", "Actualización Exitosa", "La membresía ha sido actualizada.", Alert.AlertType.INFORMATION);
-                limpiarFormulario();
-            } else {
-                mostrarMensaje("Error", "Error de Actualización", "No se pudo actualizar la membresía.", Alert.AlertType.ERROR);
-            }
-        } else if (membresiaSeleccionada == null) {
-            mostrarMensaje("Advertencia", "Sin Selección", "Debe seleccionar una membresía para actualizar.", Alert.AlertType.WARNING);
-        }
-    }
-
-    private void eliminarMembresia() {
-        if (membresiaSeleccionada != null) {
-            if (mostrarMensajeConfirmacion("¿Está seguro de que desea eliminar la membresía " + membresiaSeleccionada.getCodigo() + "?")) {
-                if (membresiaController.eliminarMembresia(membresiaSeleccionada.getCodigo())) {
-                    limpiarFormulario();
-                    mostrarMensaje("Notificación", "Eliminación Exitosa", "La membresía ha sido eliminada.", Alert.AlertType.INFORMATION);
-                } else {
-                    mostrarMensaje("Error", "Error de Eliminación", "No se pudo eliminar la membresía.", Alert.AlertType.ERROR);
-                }
-            }
         } else {
-            mostrarMensaje("Advertencia", "Sin Selección", "Debe seleccionar una membresía para eliminar.", Alert.AlertType.WARNING);
+            limpiarFormulario();
         }
-    }
-
-    private Membresia crearMembresiaDesdeFormulario() {
-        String codigo = txtCodigo.getText();
-        String idUsuario = comboUsuario.getValue().getIdentificacion();
-        TipoMembresia tipo = comboTipoMembresia.getValue();
-        TipoMembresiaDuracion duracion = comboDuracion.getValue();
-
-        double costo = calcularCosto();
-
-        LocalDate fechaInicio = LocalDate.now();
-        LocalDate fechaFin = fechaInicio.plusMonths(duracion.getMeses());
-
-        return new Membresia(codigo, idUsuario, tipo, duracion, costo, fechaInicio.toString(), fechaFin.toString(), comboEstado.getValue());
-    }
-
-    private boolean validarCampos() {
-        if (comboUsuario.getValue() == null) {
-            mostrarMensaje("Validación", "Campo Requerido", "Debe seleccionar un usuario.", Alert.AlertType.WARNING);
-            return false;
-        }
-        if (comboTipoMembresia.getValue() == null) {
-            mostrarMensaje("Validación", "Campo Requerido", "Debe seleccionar un tipo de membresía.", Alert.AlertType.WARNING);
-            return false;
-        }
-        if (comboDuracion.getValue() == null) {
-            mostrarMensaje("Validación", "Campo Requerido", "Debe seleccionar una duración.", Alert.AlertType.WARNING);
-            return false;
-        }
-        return true;
     }
 
     private void limpiarFormulario() {
@@ -222,29 +175,39 @@ public class CrudMembresiaViewController {
         comboUsuario.getSelectionModel().clearSelection();
         comboTipoMembresia.getSelectionModel().clearSelection();
         comboDuracion.getSelectionModel().clearSelection();
-        comboEstado.setValue(EstadoMembresia.ACTIVA);
+        comboEstado.getSelectionModel().clearSelection();
         tableMembresia.getSelectionModel().clearSelection();
-        
-        txtCodigo.setDisable(true);
+        txtCodigo.setDisable(false);
         comboUsuario.setDisable(false);
-        membresiaSeleccionada = null;
     }
 
+    private boolean validarCampos(boolean validarUsuario) {
+        if (validarUsuario && comboUsuario.getValue() == null) {
+            mostrarMensaje("Error de Validación", "Debe seleccionar un usuario.");
+            return false;
+        }
+        if (comboTipoMembresia.getValue() == null || comboDuracion.getValue() == null) {
+            mostrarMensaje("Error de Validación", "Debe seleccionar un tipo y duración.");
+            return false;
+        }
+        return true;
+    }
+    
+    private boolean validarCampos() {
+        return validarCampos(true);
+    }
+    
     private double calcularCosto() {
-        TipoMembresia tipo = comboTipoMembresia.getValue();
-        TipoMembresiaDuracion duracion = comboDuracion.getValue();
-        Usuario usuario = comboUsuario.getValue();
-
-        if (tipo != null && duracion != null && usuario != null) {
-            double costoBase = tipo.getCostoMensual() * duracion.getMeses();
+        if (comboUsuario.getValue() != null && comboTipoMembresia.getValue() != null && comboDuracion.getValue() != null) {
+            double costoBase = comboTipoMembresia.getValue().getCostoMensual() * comboDuracion.getValue().getMeses();
             double descuento = 1.0;
-            if (usuario instanceof Estudiante) descuento = 0.8; // 20%
-            else if (usuario instanceof Trabajador) descuento = 0.9; // 10%
+            if (comboUsuario.getValue() instanceof Estudiante) descuento = 0.8;
+            if (comboUsuario.getValue() instanceof Trabajador) descuento = 0.9;
             return costoBase * descuento;
         }
         return 0.0;
     }
-
+    
     private void actualizarCostoEnUI() {
         double costo = calcularCosto();
         if (costo > 0) {
@@ -254,10 +217,10 @@ public class CrudMembresiaViewController {
         }
     }
 
-    private void mostrarMensaje(String titulo, String header, String contenido, Alert.AlertType alertType) {
-        Alert alert = new Alert(alertType);
+    private void mostrarMensaje(String titulo, String contenido) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(titulo);
-        alert.setHeaderText(header);
+        alert.setHeaderText(null);
         alert.setContentText(contenido);
         alert.showAndWait();
     }
@@ -267,7 +230,7 @@ public class CrudMembresiaViewController {
         alert.setHeaderText(null);
         alert.setTitle("Confirmación");
         alert.setContentText(mensaje);
-        Optional<ButtonType> action = alert.showAndWait();
-        return action.isPresent() && action.get() == ButtonType.OK;
+        return alert.showAndWait().filter(r -> r == ButtonType.OK).isPresent();
     }
+    //</editor-fold>
 }

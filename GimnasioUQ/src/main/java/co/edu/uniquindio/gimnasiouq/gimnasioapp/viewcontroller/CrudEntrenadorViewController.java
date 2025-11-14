@@ -3,48 +3,21 @@ package co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.controller.EntrenadorController;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.Entrenador;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
-import java.net.URL;
-import java.util.Optional;
-import java.util.ResourceBundle;
-
 public class CrudEntrenadorViewController {
 
     EntrenadorController entrenadorController;
-    ObservableList<Entrenador> listaEntrenadores = FXCollections.observableArrayList();
+    ObservableList<Entrenador> listaEntrenadores;
     Entrenador entrenadorSeleccionado;
 
-    @FXML
-    private ResourceBundle resources;
-
-    @FXML
-    private URL location;
-
-    // FXML Components
-    @FXML private TextField txtIdentificacion;
-    @FXML private TextField txtNombre;
-    @FXML private TextField txtTelefono;
-    @FXML private TextField txtCorreo;
-    @FXML private TextField txtSueldo;
+    @FXML private TextField txtIdentificacion, txtNombre, txtTelefono, txtCorreo, txtSueldo;
     @FXML private CheckBox checkDisponible;
-
     @FXML private TableView<Entrenador> tableEntrenador;
-    @FXML private TableColumn<Entrenador, String> tcIdentificacion;
-    @FXML private TableColumn<Entrenador, String> tcNombre;
-    @FXML private TableColumn<Entrenador, String> tcTelefono;
-    @FXML private TableColumn<Entrenador, String> tcCorreo;
-    @FXML private TableColumn<Entrenador, String> tcSueldo;
-    @FXML private TableColumn<Entrenador, String> tcDisponible;
-
-    @FXML private Button btnNuevo;
-    @FXML private Button btnAgregar;
-    @FXML private Button btnActualizar;
-    @FXML private Button btnEliminar;
+    @FXML private TableColumn<Entrenador, String> tcIdentificacion, tcNombre, tcTelefono, tcCorreo, tcSueldo, tcDisponible;
 
     @FXML
     void initialize() {
@@ -53,13 +26,68 @@ public class CrudEntrenadorViewController {
     }
 
     private void initView() {
+        listaEntrenadores = entrenadorController.obtenerEntrenadores();
         initDataBinding();
-        obtenerEntrenadores();
-        tableEntrenador.getItems().clear();
         tableEntrenador.setItems(listaEntrenadores);
         listenerSelection();
     }
 
+    @FXML void onActionAgregar(ActionEvent event) { crearEntrenador(); }
+    @FXML void onActionActualizar(ActionEvent event) { actualizarEntrenador(); }
+    @FXML void onActionEliminar(ActionEvent event) { eliminarEntrenador(); }
+    @FXML void onActionNuevo(ActionEvent event) { limpiarFormulario(); }
+
+    private void crearEntrenador() {
+        if (!validarCampos()) return;
+        if (entrenadorController.crearEntrenador(
+                txtIdentificacion.getText(),
+                txtNombre.getText(),
+                txtTelefono.getText(),
+                txtCorreo.getText(),
+                Double.parseDouble(txtSueldo.getText()),
+                checkDisponible.isSelected()
+        )) {
+            mostrarMensaje("Creación Exitosa", "El entrenador ha sido creado.");
+            limpiarFormulario();
+        } else {
+            mostrarMensaje("Error", "La identificación ya existe.");
+        }
+    }
+
+    private void actualizarEntrenador() {
+        if (entrenadorSeleccionado == null) {
+            mostrarMensaje("Advertencia", "Debe seleccionar un entrenador.");
+            return;
+        }
+        if (!validarCampos()) return;
+        Entrenador entrenadorActualizado = new Entrenador(
+                entrenadorSeleccionado.getIdentificacion(),
+                txtNombre.getText(),
+                txtTelefono.getText(),
+                txtCorreo.getText(),
+                Double.parseDouble(txtSueldo.getText())
+        );
+        entrenadorActualizado.setDisponible(checkDisponible.isSelected());
+        
+        if (entrenadorController.actualizarEntrenador(entrenadorSeleccionado.getIdentificacion(), entrenadorActualizado)) {
+            tableEntrenador.refresh();
+            mostrarMensaje("Actualización Exitosa", "El entrenador ha sido actualizado.");
+            limpiarFormulario();
+        } else {
+            mostrarMensaje("Error", "No se pudo actualizar el entrenador.");
+        }
+    }
+
+    private void eliminarEntrenador() {
+        if (entrenadorSeleccionado != null && mostrarMensajeConfirmacion("¿Eliminar entrenador?")) {
+            if (entrenadorController.eliminarEntrenador(entrenadorSeleccionado.getIdentificacion())) {
+                mostrarMensaje("Eliminación Exitosa", "El entrenador ha sido eliminado.");
+                limpiarFormulario();
+            }
+        }
+    }
+    
+    //<editor-fold desc="Métodos Auxiliares">
     private void initDataBinding() {
         tcIdentificacion.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getIdentificacion()));
         tcNombre.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNombre()));
@@ -69,153 +97,54 @@ public class CrudEntrenadorViewController {
         tcDisponible.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().isDisponible() ? "SÍ" : "NO"));
     }
 
-    private void obtenerEntrenadores() {
-        listaEntrenadores.addAll(entrenadorController.obtenerEntrenadores());
-    }
-
     private void listenerSelection() {
-        tableEntrenador.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            entrenadorSeleccionado = newSelection;
+        tableEntrenador.getSelectionModel().selectedItemProperty().addListener((obs, o, newS) -> {
+            entrenadorSeleccionado = newS;
             mostrarInformacion(entrenadorSeleccionado);
         });
     }
 
-    private void mostrarInformacion(Entrenador entrenador) {
-        if (entrenador != null) {
-            txtIdentificacion.setText(entrenador.getIdentificacion());
-            txtNombre.setText(entrenador.getNombre());
-            txtTelefono.setText(entrenador.getTelefono());
-            txtCorreo.setText(entrenador.getCorreo());
-            txtSueldo.setText(String.valueOf(entrenador.getSueldo()));
-            checkDisponible.setSelected(entrenador.isDisponible());
+    private void mostrarInformacion(Entrenador e) {
+        if (e != null) {
+            txtIdentificacion.setText(e.getIdentificacion());
             txtIdentificacion.setDisable(true);
-        } else {
-            limpiarFormulario();
+            txtNombre.setText(e.getNombre());
+            txtTelefono.setText(e.getTelefono());
+            txtCorreo.setText(e.getCorreo());
+            txtSueldo.setText(String.valueOf(e.getSueldo()));
+            checkDisponible.setSelected(e.isDisponible());
         }
-    }
-
-    @FXML
-    void onActionAgregar(ActionEvent event) {
-        crearEntrenador();
-    }
-
-    @FXML
-    void onActionActualizar(ActionEvent event) {
-        actualizarEntrenador();
-    }
-
-    @FXML
-    void onActionNuevo(ActionEvent event) {
-        limpiarFormulario();
-    }
-
-    @FXML
-    void onActionEliminar(ActionEvent event) {
-        eliminarEntrenador();
-    }
-
-    private void crearEntrenador() {
-        if (validarCampos(true)) {
-            Entrenador entrenador = crearEntrenadorDesdeFormulario();
-            if (entrenadorController.crearEntrenador(entrenador)) {
-                listaEntrenadores.add(entrenador);
-                mostrarMensaje("Notificación", "Creación de Entrenador", "Entrenador creado con éxito", Alert.AlertType.CONFIRMATION);
-                limpiarFormulario();
-            } else {
-                mostrarMensaje("Notificación", "Creación de Entrenador", "El entrenador no pudo ser creado (posiblemente identificación duplicada)", Alert.AlertType.WARNING);
-            }
-        }
-    }
-
-    private void actualizarEntrenador() {
-        if (entrenadorSeleccionado != null) {
-            if (validarCampos(false)) {
-                Entrenador entrenadorActualizado = crearEntrenadorDesdeFormulario();
-                entrenadorActualizado.setIdentificacion(entrenadorSeleccionado.getIdentificacion()); // Mantener la ID original
-
-                if (entrenadorController.actualizarEntrenador(entrenadorActualizado)) {
-                    int index = listaEntrenadores.indexOf(entrenadorSeleccionado);
-                    if (index != -1) {
-                        listaEntrenadores.set(index, entrenadorActualizado);
-                        tableEntrenador.refresh();
-                    }
-                    mostrarMensaje("Notificación", "Actualización de Entrenador", "Entrenador actualizado con éxito", Alert.AlertType.INFORMATION);
-                    limpiarFormulario();
-                } else {
-                    mostrarMensaje("Notificación", "Actualización de Entrenador", "El entrenador no pudo ser actualizado", Alert.AlertType.ERROR);
-                }
-            }
-        } else {
-            mostrarMensaje("Notificación", "Selección de Entrenador", "Debe seleccionar un entrenador para actualizar", Alert.AlertType.WARNING);
-        }
-    }
-
-    private void eliminarEntrenador() {
-        if (entrenadorSeleccionado != null) {
-            if (mostrarMensajeConfirmacion("¿Está seguro de que desea eliminar al entrenador " + entrenadorSeleccionado.getNombre() + "?")) {
-                if (entrenadorController.eliminarEntrenador(entrenadorSeleccionado.getIdentificacion())) {
-                    listaEntrenadores.remove(entrenadorSeleccionado);
-                    limpiarFormulario();
-                    mostrarMensaje("Notificación", "Eliminación de Entrenador", "Entrenador eliminado con éxito", Alert.AlertType.INFORMATION);
-                } else {
-                    mostrarMensaje("Notificación", "Eliminación de Entrenador", "El entrenador no pudo ser eliminado", Alert.AlertType.ERROR);
-                }
-            }
-        } else {
-            mostrarMensaje("Notificación", "Selección de Entrenador", "Debe seleccionar un entrenador para eliminar", Alert.AlertType.WARNING);
-        }
-    }
-
-    private Entrenador crearEntrenadorDesdeFormulario() {
-        Entrenador entrenador = new Entrenador(
-                txtIdentificacion.getText(),
-                txtNombre.getText(),
-                txtTelefono.getText(),
-                txtCorreo.getText(),
-                Double.parseDouble(txtSueldo.getText())
-        );
-        entrenador.setDisponible(checkDisponible.isSelected());
-        return entrenador;
-    }
-
-    private boolean validarCampos(boolean validarId) {
-        if (validarId && txtIdentificacion.getText().isEmpty()) {
-            mostrarMensaje("Validación", "Campo Vacío", "La identificación es obligatoria.", Alert.AlertType.WARNING);
-            return false;
-        }
-        if (txtNombre.getText().isEmpty()) {
-            mostrarMensaje("Validación", "Campo Vacío", "El nombre es obligatorio.", Alert.AlertType.WARNING);
-            return false;
-        }
-        if (txtSueldo.getText().isEmpty()) {
-            mostrarMensaje("Validación", "Campo Vacío", "El sueldo es obligatorio.", Alert.AlertType.WARNING);
-            return false;
-        }
-        try {
-            Double.parseDouble(txtSueldo.getText());
-        } catch (NumberFormatException e) {
-            mostrarMensaje("Validación", "Formato Incorrecto", "El sueldo debe ser un número válido.", Alert.AlertType.WARNING);
-            return false;
-        }
-        return true;
     }
 
     private void limpiarFormulario() {
         txtIdentificacion.clear();
+        txtIdentificacion.setDisable(false);
         txtNombre.clear();
         txtTelefono.clear();
         txtCorreo.clear();
         txtSueldo.clear();
         checkDisponible.setSelected(true);
         tableEntrenador.getSelectionModel().clearSelection();
-        txtIdentificacion.setDisable(false);
-        entrenadorSeleccionado = null;
     }
 
-    private void mostrarMensaje(String titulo, String header, String contenido, Alert.AlertType alertType) {
-        Alert alert = new Alert(alertType);
+    private boolean validarCampos() {
+        if (txtIdentificacion.getText().isEmpty() || txtNombre.getText().isEmpty() || txtSueldo.getText().isEmpty()) {
+            mostrarMensaje("Error de Validación", "Identificación, Nombre y Sueldo son obligatorios.");
+            return false;
+        }
+        try {
+            Double.parseDouble(txtSueldo.getText());
+        } catch (NumberFormatException e) {
+            mostrarMensaje("Error de Formato", "El sueldo debe ser un número.");
+            return false;
+        }
+        return true;
+    }
+
+    private void mostrarMensaje(String titulo, String contenido) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(titulo);
-        alert.setHeaderText(header);
+        alert.setHeaderText(null);
         alert.setContentText(contenido);
         alert.showAndWait();
     }
@@ -223,9 +152,8 @@ public class CrudEntrenadorViewController {
     private boolean mostrarMensajeConfirmacion(String mensaje) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setHeaderText(null);
-        alert.setTitle("Confirmación");
         alert.setContentText(mensaje);
-        Optional<ButtonType> action = alert.showAndWait();
-        return action.isPresent() && action.get() == ButtonType.OK;
+        return alert.showAndWait().filter(r -> r == ButtonType.OK).isPresent();
     }
+    //</editor-fold>
 }

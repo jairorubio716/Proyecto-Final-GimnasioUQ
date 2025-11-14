@@ -84,6 +84,12 @@
                     </content>
                 </Tab>
 
+                <Tab text="Gestionar Clases">
+                    <content>
+                        <fx:include source="CrudClasesView.fxml" />
+                    </content>
+                </Tab>
+
 
 
 

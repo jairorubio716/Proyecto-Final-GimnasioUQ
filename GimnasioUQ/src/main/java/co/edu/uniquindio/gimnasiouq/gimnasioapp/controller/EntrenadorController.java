@@ -1,17 +1,16 @@
 package co.edu.uniquindio.gimnasiouq.gimnasioapp.controller;
 
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.factory.ModelFactory;
+import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.Clase;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.Entrenador;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class EntrenadorController {
-    private ModelFactory modelFactory;
+    ModelFactory modelFactory;
 
     public EntrenadorController() {
         this.modelFactory = ModelFactory.getInstancia();
@@ -20,30 +19,21 @@ public class EntrenadorController {
     public ObservableList<Entrenador> obtenerEntrenadores() {
         return modelFactory.getEntrenadoresObservable();
     }
-
-    public ObservableList<Entrenador> obtenerEntrenadoresDisponibles() {
-        return FXCollections.observableArrayList(
-            modelFactory.getEntrenadoresObservable().stream()
-                .filter(Entrenador::isDisponible)
-                .collect(Collectors.toList())
-        );
+    
+    public boolean crearEntrenador(String id, String nombre, String tel, String correo, double sueldo, boolean disponible) {
+        return modelFactory.crearEntrenador(id, nombre, tel, correo, sueldo, disponible);
     }
 
-    public ObservableList<Entrenador> obtenerEntrenadoresDisponiblesParaHorario(DayOfWeek dia, LocalTime hora) {
-        return FXCollections.observableArrayList(
-            modelFactory.obtenerEntrenadoresDisponiblesParaHorario(dia, hora)
-        );
+    public boolean actualizarEntrenador(String id, Entrenador e) {
+        return modelFactory.actualizarEntrenador(id, e);
     }
 
-    public boolean crearEntrenador(Entrenador entrenador) {
-        return modelFactory.crearEntrenador(entrenador);
+    public boolean eliminarEntrenador(String id) {
+        return modelFactory.eliminarEntrenador(id);
     }
-
-    public boolean actualizarEntrenador(Entrenador entrenador) {
-        return modelFactory.actualizarEntrenador(entrenador);
-    }
-
-    public boolean eliminarEntrenador(String identificacion) {
-        return modelFactory.eliminarEntrenador(identificacion);
+    
+    // SOLUCIÓN: Añadir el parámetro Clase claseSeleccionada
+    public List<Entrenador> obtenerEntrenadoresDisponiblesParaHorario(DayOfWeek dia, LocalTime hora, LocalDate fecha, Clase claseSeleccionada) {
+        return modelFactory.obtenerEntrenadoresDisponiblesParaHorario(dia, hora, fecha, claseSeleccionada);
     }
 }
