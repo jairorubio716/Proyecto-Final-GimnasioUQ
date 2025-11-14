@@ -78,7 +78,7 @@ public class CrudClaseViewController {
 
     private void actualizarClase() {
         if (claseSeleccionada == null) {
-            mostrarMensaje("Sin Selección", "Debe seleccionar una clase para actualizar.", Alert.AlertType.WARNING); // Corregido
+            mostrarMensaje("Sin Selección", "Debe seleccionar una clase para actualizar.", Alert.AlertType.WARNING);
             return;
         }
         if (!validarCampos()) return;
@@ -132,14 +132,7 @@ public class CrudClaseViewController {
         comboDia.setCellFactory(p -> new ListCell<>() {
             @Override protected void updateItem(DayOfWeek item, boolean empty) { super.updateItem(item, empty); setText(empty ? null : item.getDisplayName(TextStyle.FULL, new Locale("es", "ES"))); }
         });
-        comboDia.setButtonCell(new ListCell<>() { // Añadido para mostrar el día seleccionado
-            @Override protected void updateItem(DayOfWeek item, boolean empty) { super.updateItem(item, empty); setText(empty ? null : item.getDisplayName(TextStyle.FULL, new Locale("es", "ES"))); }
-        });
-
         comboEntrenadorDefecto.setCellFactory(p -> new ListCell<>() {
-            @Override protected void updateItem(Entrenador item, boolean empty) { super.updateItem(item, empty); setText(empty ? null : item.getNombre()); }
-        });
-        comboEntrenadorDefecto.setButtonCell(new ListCell<>() { // Añadido para mostrar el entrenador seleccionado
             @Override protected void updateItem(Entrenador item, boolean empty) { super.updateItem(item, empty); setText(empty ? null : item.getNombre()); }
         });
     }
@@ -183,7 +176,7 @@ public class CrudClaseViewController {
         Entrenador entrenador = comboEntrenadorDefecto.getValue();
 
         if (nombre.isEmpty() || horarioStr.isEmpty() || horaFinStr.isEmpty() || cupoMaximoStr.isEmpty() || dia == null || entrenador == null) {
-            mostrarMensaje("Campos Obligatorios", "Todos los campos son obligatorios.", Alert.AlertType.WARNING); // Corregido
+            mostrarMensaje("Error de Validación", "Todos los campos son obligatorios.", Alert.AlertType.WARNING);
             return false;
         }
 
@@ -191,22 +184,22 @@ public class CrudClaseViewController {
             LocalTime horaInicio = LocalTime.parse(horarioStr);
             LocalTime horaFin = LocalTime.parse(horaFinStr);
             if (horaFin.isBefore(horaInicio) || horaFin.equals(horaInicio)) {
-                mostrarMensaje("Hora Inválida", "La hora de fin debe ser posterior a la hora de inicio.", Alert.AlertType.WARNING); // Corregido
+                mostrarMensaje("Error de Validación", "La hora de fin debe ser posterior a la hora de inicio.", Alert.AlertType.WARNING);
                 return false;
             }
         } catch (DateTimeParseException e) {
-            mostrarMensaje("Formato de Hora", "El formato de la hora debe ser HH:mm (Ej: 08:00).", Alert.AlertType.WARNING); // Corregido
+            mostrarMensaje("Error de Formato", "El formato de la hora debe ser HH:mm (Ej: 08:00).", Alert.AlertType.WARNING);
             return false;
         }
 
         try {
             int cupo = Integer.parseInt(cupoMaximoStr);
             if (cupo <= 0) {
-                mostrarMensaje("Cupo Inválido", "El cupo máximo debe ser un número positivo.", Alert.AlertType.WARNING); // Corregido
+                mostrarMensaje("Error de Validación", "El cupo máximo debe ser un número positivo.", Alert.AlertType.WARNING);
                 return false;
             }
         } catch (NumberFormatException e) {
-            mostrarMensaje("Cupo Inválido", "El cupo máximo debe ser un número entero.", Alert.AlertType.WARNING); // Corregido
+            mostrarMensaje("Error de Formato", "El cupo máximo debe ser un número entero.", Alert.AlertType.WARNING);
             return false;
         }
 
