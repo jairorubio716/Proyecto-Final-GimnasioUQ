@@ -28,7 +28,6 @@ public class ReservaController {
         return modelFactory.cuposDisponibles(clase, fecha);
     }
 
-    // SOLUCIÓN: Añadir el método usuarioTieneReservaMismoHorario para que actúe como puente
     public boolean usuarioTieneReservaMismoHorario(String identificacionUsuario, Clase clase, LocalDate fecha) {
         return modelFactory.usuarioTieneReservaMismoHorario(identificacionUsuario, clase, fecha);
     }

@@ -1,6 +1,7 @@
 package co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller;
 
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.controller.ControlAccesoController;
+import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.Membresia;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.Usuario;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
@@ -14,7 +15,7 @@ public class UsuariosDentroViewController {
     ObservableList<Usuario> listaUsuariosDentro;
     
     @FXML private TableView<Usuario> tableUsuariosDentro;
-    @FXML private TableColumn<Usuario, String> tcNombre, tcIdentificacion, tcTipoUsuario;
+    @FXML private TableColumn<Usuario, String> tcNombre, tcIdentificacion, tcTipoUsuario, tcTipoMembresia;
     @FXML private Button btnRegistrarSalida;
 
     @FXML
@@ -36,7 +37,6 @@ public class UsuariosDentroViewController {
     }
 
     private void registrarSalida() {
-        // SOLUCIÓN: Obtener la selección directamente de la tabla
         Usuario usuarioSeleccionado = tableUsuariosDentro.getSelectionModel().getSelectedItem();
         
         if (usuarioSeleccionado != null) {
@@ -54,6 +54,14 @@ public class UsuariosDentroViewController {
         tcNombre.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNombre()));
         tcIdentificacion.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getIdentificacion()));
         tcTipoUsuario.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getClass().getSimpleName()));
+        
+        tcTipoMembresia.setCellValueFactory(cellData -> {
+            Membresia membresia = controlAccesoController.obtenerMembresiaActivaUsuario(cellData.getValue().getIdentificacion());
+            if (membresia != null) {
+                return new SimpleStringProperty(membresia.getTipo().getNombre());
+            }
+            return new SimpleStringProperty("N/A");
+        });
     }
 
     private void listenerSelection() {

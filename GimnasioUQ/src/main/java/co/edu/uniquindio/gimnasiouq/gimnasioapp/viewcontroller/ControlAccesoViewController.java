@@ -49,13 +49,11 @@ public class ControlAccesoViewController {
         listenerSelection();
         limpiarVista();
         
-        // SOLUCIÓN: Listener para mostrar/ocultar el panel de búsqueda y para limpiar la vista si el usuario sale.
         controlAccesoController.obtenerUsuariosDentro().addListener((ListChangeListener<Usuario>) c -> {
             boolean hayAlguienDentro = !c.getList().isEmpty();
             panelBusquedaInterna.setVisible(hayAlguienDentro);
             panelBusquedaInterna.setManaged(hayAlguienDentro);
 
-            // Si el usuario que se estaba mostrando ya no está en la lista, limpiar la vista.
             if (usuarioValidado != null && !c.getList().contains(usuarioValidado)) {
                 limpiarVista();
             }

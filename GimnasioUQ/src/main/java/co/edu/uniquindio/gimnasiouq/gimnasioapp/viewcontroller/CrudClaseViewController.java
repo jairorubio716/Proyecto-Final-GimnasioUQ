@@ -78,7 +78,6 @@ public class CrudClaseViewController {
 
     private void actualizarClase() {
         if (claseSeleccionada == null) {
-            // SOLUCIÓN: Corregir la llamada a mostrarMensaje
             mostrarMensaje("Sin Selección", "Debe seleccionar una clase para actualizar.", Alert.AlertType.WARNING);
             return;
         }
@@ -117,7 +116,6 @@ public class CrudClaseViewController {
         }
     }
     
-    //<editor-fold desc="Métodos Auxiliares">
     private void initDataBinding() {
         tcNombre.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNombre()));
         tcDia.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getDia().getDisplayName(TextStyle.FULL, new Locale("es", "ES"))));
@@ -133,14 +131,14 @@ public class CrudClaseViewController {
         comboDia.setCellFactory(p -> new ListCell<>() {
             @Override protected void updateItem(DayOfWeek item, boolean empty) { super.updateItem(item, empty); setText(empty ? null : item.getDisplayName(TextStyle.FULL, new Locale("es", "ES"))); }
         });
-        comboDia.setButtonCell(new ListCell<>() { // Añadido para mostrar el día seleccionado
+        comboDia.setButtonCell(new ListCell<>() {
             @Override protected void updateItem(DayOfWeek item, boolean empty) { super.updateItem(item, empty); setText(empty ? null : item.getDisplayName(TextStyle.FULL, new Locale("es", "ES"))); }
         });
 
         comboEntrenadorDefecto.setCellFactory(p -> new ListCell<>() {
             @Override protected void updateItem(Entrenador item, boolean empty) { super.updateItem(item, empty); setText(empty ? null : item.getNombre()); }
         });
-        comboEntrenadorDefecto.setButtonCell(new ListCell<>() { // Añadido para mostrar el entrenador seleccionado
+        comboEntrenadorDefecto.setButtonCell(new ListCell<>() {
             @Override protected void updateItem(Entrenador item, boolean empty) { super.updateItem(item, empty); setText(empty ? null : item.getNombre()); }
         });
     }
@@ -217,7 +215,7 @@ public class CrudClaseViewController {
     private void mostrarMensaje(String titulo, String contenido, Alert.AlertType alertType) {
         Alert alert = new Alert(alertType);
         alert.setTitle(titulo);
-        alert.setHeaderText(null); // Siempre null para este método
+        alert.setHeaderText(null);
         alert.setContentText(contenido);
         alert.showAndWait();
     }
@@ -229,5 +227,4 @@ public class CrudClaseViewController {
         alert.setContentText(mensaje);
         return alert.showAndWait().filter(r -> r == ButtonType.OK).isPresent();
     }
-    //</editor-fold>
 }

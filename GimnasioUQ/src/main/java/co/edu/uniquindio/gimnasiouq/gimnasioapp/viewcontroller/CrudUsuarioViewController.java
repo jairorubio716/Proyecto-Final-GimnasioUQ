@@ -8,7 +8,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
-import java.util.Optional;
 
 public class CrudUsuarioViewController {
 
@@ -102,7 +101,7 @@ public class CrudUsuarioViewController {
     }
 
     private void eliminarUsuario() {
-        if (usuarioSeleccionado != null && mostrarMensajeConfirmacion("¿Eliminar usuario?")) {
+        if (usuarioSeleccionado != null && mostrarMensajeConfirmacion("¿Está seguro de que desea eliminar el usuario?")) {
             if (usuarioController.eliminarUsuario(usuarioSeleccionado.getIdentificacion())) {
                 mostrarMensaje("Eliminación Exitosa", "El usuario ha sido eliminado.");
                 limpiarFormulario();
@@ -168,7 +167,6 @@ public class CrudUsuarioViewController {
         txtEdad.clear();
         txtTelefono.clear();
         comboTipoUsuario.getSelectionModel().clearSelection();
-        // El listener de comboTipoUsuario se encargará de limpiar y ocultar los paneles
     }
 
     private boolean validarCampos(String n, String id, String e, String t, String tipo) {

@@ -32,7 +32,6 @@ public class EntrenadorController {
         return modelFactory.eliminarEntrenador(id);
     }
     
-    // SOLUCIÓN: Añadir el parámetro Clase claseSeleccionada
     public List<Entrenador> obtenerEntrenadoresDisponiblesParaHorario(DayOfWeek dia, LocalTime hora, LocalDate fecha, Clase claseSeleccionada) {
         return modelFactory.obtenerEntrenadoresDisponiblesParaHorario(dia, hora, fecha, claseSeleccionada);
     }

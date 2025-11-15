@@ -29,8 +29,8 @@ public class CrudReservaViewController {
     ObservableList<Reserva> listaReservas;
     ObservableList<Usuario> listaUsuarios;
     ObservableList<Clase> listaClases;
-    ObservableList<Entrenador> listaEntrenadoresBase; // Lista base de todos los entrenadores
-    FilteredList<Entrenador> entrenadoresFiltradosParaHorario; // Lista filtrada en tiempo real
+    ObservableList<Entrenador> listaEntrenadoresBase;
+    FilteredList<Entrenador> entrenadoresFiltradosParaHorario;
 
     Reserva reservaSeleccionada;
     Usuario usuarioSeleccionado;
@@ -60,13 +60,13 @@ public class CrudReservaViewController {
         listaUsuarios = usuarioController.obtenerUsuarios();
         listaReservas = reservaController.obtenerReservas();
         listaClases = claseController.obtenerClases();
-        listaEntrenadoresBase = entrenadorController.obtenerEntrenadores(); // Obtener la lista base de entrenadores
+        listaEntrenadoresBase = entrenadorController.obtenerEntrenadores();
 
-        entrenadoresFiltradosParaHorario = new FilteredList<>(listaEntrenadoresBase); // Envolver la lista base
+        entrenadoresFiltradosParaHorario = new FilteredList<>(listaEntrenadoresBase);
         
         initDataBinding();
         configurarCombos();
-        tableReserva.setItems(listaReservas); // Mostrar todas las reservas al inicio
+        tableReserva.setItems(listaReservas);
         listenerSelection();
         limpiarTodaLaVista();
     }
@@ -95,14 +95,13 @@ public class CrudReservaViewController {
     }
 
     private void cancelarReserva() {
-        if (reservaSeleccionada != null && mostrarMensajeConfirmacion("¿Cancelar reserva?")) {
+        if (reservaSeleccionada != null && mostrarMensajeConfirmacion("¿Está seguro de que desea cancelar la reserva?")) {
             if (reservaController.cancelarReserva(reservaSeleccionada.getCodigo())) {
                 tableReserva.refresh();
             }
         }
     }
     
-    //<editor-fold desc="Métodos Auxiliares">
     private void initDataBinding() {
         tcCodigo.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCodigo()));
         tcClase.setCellValueFactory(cellData -> {
@@ -120,7 +119,7 @@ public class CrudReservaViewController {
     private void configurarCombos() {
         comboUsuario.setItems(listaUsuarios);
         comboClase.setItems(listaClases);
-        comboEntrenador.setItems(entrenadoresFiltradosParaHorario); // Usar la FilteredList
+        comboEntrenador.setItems(entrenadoresFiltradosParaHorario);
 
         comboUsuario.setCellFactory(p -> new ListCell<>() {
             @Override protected void updateItem(Usuario item, boolean empty) { super.updateItem(item, empty); setText(empty ? null : item.getNombre()); }
@@ -172,7 +171,7 @@ public class CrudReservaViewController {
             boolean esVip = m.getTipo() == TipoMembresia.VIP;
             panelEntrenadorVip.setVisible(esVip); panelEntrenadorVip.setManaged(esVip);
         }
-        actualizarDisponibilidad(); // Asegurarse de que se actualice al cambiar de usuario
+        actualizarDisponibilidad();
     }
 
     private void actualizarInfoMembresia(Membresia m) {
@@ -215,7 +214,6 @@ public class CrudReservaViewController {
         Clase c = comboClase.getValue();
         LocalDate f = dateFechaClase.getValue();
         
-        // Actualizar Cupos
         if (c != null && f != null) {
             int cupos = reservaController.cuposDisponibles(c, f);
             lblCuposDisponibles.setText(String.valueOf(cupos));
@@ -223,15 +221,13 @@ public class CrudReservaViewController {
             lblCuposDisponibles.setText("-");
         }
 
-        // Actualizar Entrenadores
         if (c != null && f != null) {
-            // SOLUCIÓN: Actualizar el predicado de la FilteredList
             entrenadoresFiltradosParaHorario.setPredicate(entrenador -> 
                 entrenadorController.obtenerEntrenadoresDisponiblesParaHorario(c.getDia(), c.getHorario(), f, c)
                                     .contains(entrenador)
             );
         } else {
-            entrenadoresFiltradosParaHorario.setPredicate(entrenador -> false); // Si no hay clase/fecha, no hay entrenadores
+            entrenadoresFiltradosParaHorario.setPredicate(entrenador -> false);
         }
     }
 
@@ -244,7 +240,7 @@ public class CrudReservaViewController {
 
     private void limpiarTodaLaVista() {
         comboUsuario.getSelectionModel().clearSelection();
-        tableReserva.setItems(listaReservas); // Mostrar todas las reservas por defecto
+        tableReserva.setItems(listaReservas);
         limpiarFormularioReserva();
     }
 
@@ -263,5 +259,4 @@ public class CrudReservaViewController {
         alert.setContentText(mensaje);
         return alert.showAndWait().filter(r -> r == ButtonType.OK).isPresent();
     }
-    //</editor-fold>
 }

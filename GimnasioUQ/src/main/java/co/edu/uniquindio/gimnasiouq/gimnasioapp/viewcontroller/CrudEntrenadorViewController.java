@@ -79,7 +79,7 @@ public class CrudEntrenadorViewController {
     }
 
     private void eliminarEntrenador() {
-        if (entrenadorSeleccionado != null && mostrarMensajeConfirmacion("¿Eliminar entrenador?")) {
+        if (entrenadorSeleccionado != null && mostrarMensajeConfirmacion("¿Está seguro de que desea eliminar el entrenador?")) {
             if (entrenadorController.eliminarEntrenador(entrenadorSeleccionado.getIdentificacion())) {
                 mostrarMensaje("Eliminación Exitosa", "El entrenador ha sido eliminado.");
                 limpiarFormulario();
@@ -87,7 +87,6 @@ public class CrudEntrenadorViewController {
         }
     }
     
-    //<editor-fold desc="Métodos Auxiliares">
     private void initDataBinding() {
         tcIdentificacion.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getIdentificacion()));
         tcNombre.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNombre()));
@@ -155,5 +154,4 @@ public class CrudEntrenadorViewController {
         alert.setContentText(mensaje);
         return alert.showAndWait().filter(r -> r == ButtonType.OK).isPresent();
     }
-    //</editor-fold>
 }

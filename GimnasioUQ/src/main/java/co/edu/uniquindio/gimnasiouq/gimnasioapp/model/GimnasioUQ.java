@@ -4,6 +4,9 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.List; // Importar List
+import java.util.Map; // Importar Map
+import java.util.stream.Collectors;
 
 public class GimnasioUQ {
 
@@ -14,22 +17,23 @@ public class GimnasioUQ {
     private ArrayList<Entrenador> listaEntrenadores = new ArrayList<>();
     private ArrayList<Reserva> listaReservas = new ArrayList<>();
     private ArrayList<Usuario> usuariosDentroDelGimnasio = new ArrayList<>();
+    private ArrayList<Administrador> listaAdministradores = new ArrayList<>();
+    private ArrayList<Recepcionista> listaRecepcionistas = new ArrayList<>();
 
     private static final int GRACE_PERIOD_MINUTES = 15;
 
     public GimnasioUQ() {}
     public GimnasioUQ(String nombre) { this.nombre = nombre; }
 
-    //<editor-fold desc="Getters">
     public ArrayList<Usuario> getListaUsuarios() { return listaUsuarios; }
     public ArrayList<Membresia> getListaMembresias() { return listaMembresias; }
     public ArrayList<Clase> getListaClases() { return listaClases; }
     public ArrayList<Entrenador> getListaEntrenadores() { return listaEntrenadores; }
     public ArrayList<Reserva> getListaReservas() { return listaReservas; }
     public ArrayList<Usuario> getUsuariosDentroDelGimnasio() { return usuariosDentroDelGimnasio; }
-    //</editor-fold>
+    public ArrayList<Administrador> getListaAdministradores() { return listaAdministradores; }
+    public ArrayList<Recepcionista> getListaRecepcionistas() { return listaRecepcionistas; }
 
-    //<editor-fold desc="CRUDs y Lógica">
     public boolean crearUsuario(String nombre, String id, String edad, String tel, String tipo, String... args) {
         if (obtenerUsuario(id) != null) return false;
         Usuario nuevoUsuario = null;
@@ -150,18 +154,12 @@ public class GimnasioUQ {
     public boolean registrarAsistencia(String codigoReserva) {
         Reserva reserva = obtenerReserva(codigoReserva);
         if (reserva == null || !"ACTIVA".equals(reserva.getEstado())) return false;
-
-        // SOLUCIÓN: Añadir la validación de que el usuario esté dentro del gimnasio.
-        if (!estaDentro(reserva.getUsuario().getIdentificacion())) {
-            return false;
-        }
-
+        if (!estaDentro(reserva.getUsuario().getIdentificacion())) return false;
         LocalTime ahora = LocalTime.now();
         LocalTime horaInicioClase = reserva.getClase().getHorario();
         LocalTime horaFinClase = reserva.getClase().getHoraFin();
         LocalTime inicioCheckin = horaInicioClase.minusMinutes(GRACE_PERIOD_MINUTES);
         boolean enVentana = !ahora.isBefore(inicioCheckin) && ahora.isBefore(horaFinClase);
-
         if (enVentana) {
             reserva.setEstado("COMPLETADA");
             return true;
@@ -198,5 +196,64 @@ public class GimnasioUQ {
         }
         return true;
     }
-    //</editor-fold>
+
+    public boolean crearAdministrador(Administrador admin) {
+        if (obtenerAdministrador(admin.getIdentificacion()) != null) return false;
+        return listaAdministradores.add(admin);
+    }
+    public boolean actualizarAdministrador(String id, Administrador data) {
+        Administrador admin = obtenerAdministrador(id);
+        if (admin != null) {
+            admin.setNombre(data.getNombre());
+            admin.setCorreo(data.getCorreo());
+            admin.setContrasena(data.getContrasena());
+            return true;
+        }
+        return false;
+    }
+    public boolean eliminarAdministrador(String id) {
+        return listaAdministradores.removeIf(a -> a.getIdentificacion().equals(id));
+    }
+    public Administrador obtenerAdministrador(String id) {
+        return listaAdministradores.stream().filter(a -> a.getIdentificacion().equals(id)).findFirst().orElse(null);
+    }
+    public Administrador obtenerAdministradorPorUsername(String username) {
+        return listaAdministradores.stream().filter(a -> a.getCorreo().equals(username)).findFirst().orElse(null);
+    }
+
+    public boolean crearRecepcionista(Recepcionista recep) {
+        if (obtenerRecepcionista(recep.getIdentificacion()) != null) return false;
+        return listaRecepcionistas.add(recep);
+    }
+    public boolean actualizarRecepcionista(String id, Recepcionista data) {
+        Recepcionista recep = obtenerRecepcionista(id);
+        if (recep != null) {
+            recep.setNombre(data.getNombre());
+            recep.setCorreo(data.getCorreo());
+            recep.setContrasena(data.getContrasena());
+            return true;
+        }
+        return false;
+    }
+    public boolean eliminarRecepcionista(String id) {
+        return listaRecepcionistas.removeIf(r -> r.getIdentificacion().equals(id));
+    }
+    public Recepcionista obtenerRecepcionista(String id) {
+        return listaRecepcionistas.stream().filter(r -> r.getIdentificacion().equals(id)).findFirst().orElse(null);
+    }
+    public Recepcionista obtenerRecepcionistaPorUsername(String username) {
+        return listaRecepcionistas.stream().filter(r -> r.getCorreo().equals(username)).findFirst().orElse(null);
+    }
+
+    public Rol validarCredenciales(String username, String password) {
+        Administrador admin = obtenerAdministradorPorUsername(username);
+        if (admin != null && admin.getContrasena().equals(password)) {
+            return Rol.ADMIN;
+        }
+        Recepcionista recep = obtenerRecepcionistaPorUsername(username);
+        if (recep != null && recep.getContrasena().equals(password)) {
+            return Rol.RECEPCIONISTA;
+        }
+        return null;
+    }
 }

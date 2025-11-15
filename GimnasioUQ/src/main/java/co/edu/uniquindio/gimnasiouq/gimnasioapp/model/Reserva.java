@@ -6,7 +6,7 @@ public class Reserva {
     private String codigo;
     private Usuario usuario;
     private Clase clase;
-    private Entrenador entrenador; // NUEVO: El entrenador específico para esta reserva
+    private Entrenador entrenador;
     private LocalDate fechaReserva;
     private LocalDate fechaClase;
     private String estado;
@@ -18,12 +18,11 @@ public class Reserva {
         this.usuario = usuario;
         this.clase = clase;
         this.fechaClase = fechaClase;
-        this.entrenador = entrenador; // Puede ser null si es una clase sin entrenador asignado
+        this.entrenador = entrenador;
         this.fechaReserva = LocalDate.now();
         this.estado = "ACTIVA";
     }
 
-    // Getters y Setters
     public String getCodigo() { return codigo; }
     public void setCodigo(String codigo) { this.codigo = codigo; }
 

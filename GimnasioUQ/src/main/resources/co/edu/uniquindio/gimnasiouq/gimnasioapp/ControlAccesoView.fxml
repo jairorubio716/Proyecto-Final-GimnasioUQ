@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="650.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller.ControlAccesoViewController">
+<AnchorPane prefHeight="650.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/21.0.6" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller.ControlAccesoViewController">
     <children>
         <VBox spacing="15.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <padding>
@@ -29,7 +29,6 @@
                 <Button fx:id="btnLimpiar" onAction="#onActionLimpiar" text="Limpiar" />
             </HBox>
 
-            <!-- SOLUCIÓN: Nuevo panel de búsqueda para usuarios que ya están dentro -->
             <VBox fx:id="panelBusquedaInterna" spacing="10.0" managed="false" visible="false">
                 <children>
                     <Separator />

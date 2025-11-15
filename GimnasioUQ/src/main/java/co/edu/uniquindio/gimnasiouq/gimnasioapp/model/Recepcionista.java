@@ -5,14 +5,16 @@ public class Recepcionista {
     private String nombre;
     private String identificacion;
     private String correo;
+    private String contrasena;
 
     public Recepcionista() {
     }
 
-    public Recepcionista(String nombre, String identificacion, String correo) {
+    public Recepcionista(String nombre, String identificacion, String correo, String contrasena) {
         this.nombre = nombre;
         this.identificacion = identificacion;
         this.correo = correo;
+        this.contrasena = contrasena;
     }
 
     public String getNombre() {
@@ -37,5 +39,25 @@ public class Recepcionista {
 
     public void setCorreo(String correo) {
         this.correo = correo;
+    }
+
+    public String getContrasena() {
+        return contrasena;
+    }
+
+    public void setContrasena(String contrasena) {
+        this.contrasena = contrasena;
+    }
+
+    public String getUsername() {
+        return this.correo;
+    }
+
+    public String getPassword() {
+        return this.contrasena;
+    }
+
+    public Rol getRol() {
+        return Rol.RECEPCIONISTA;
     }
 }

@@ -11,7 +11,7 @@ public class Entrenador {
     private boolean disponible;
 
     public Entrenador() {
-        this.disponible = true; // Disponible por defecto
+        this.disponible = true;
     }
 
     public Entrenador(String identificacion, String nombre, String telefono,
@@ -24,7 +24,6 @@ public class Entrenador {
         this.sueldo = sueldo;
     }
 
-    // Getters y Setters
     public String getIdentificacion() { return identificacion; }
     public void setIdentificacion(String identificacion) { this.identificacion = identificacion; }
 
@@ -43,7 +42,6 @@ public class Entrenador {
     public boolean isDisponible() { return disponible; }
     public void setDisponible(boolean disponible) { this.disponible = disponible; }
 
-    // SOLUCIÓN: Implementar equals y hashCode basados en la identificación
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

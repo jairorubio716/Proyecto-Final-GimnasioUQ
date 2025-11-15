@@ -1,15 +1,34 @@
 package co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller;
 
+import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.Rol;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import java.net.URL;
-import java.util.ResourceBundle;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 
-public class GimnasioViewController implements Initializable {
+public class GimnasioViewController {
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        System.out.println("GimnasioViewController inicializado");
-        System.out.println("✅ Listas observables compartidas listas para usar");
+    @FXML private TabPane tabPanePrincipal;
+    @FXML private Tab tabControlAcceso;
+    @FXML private Tab tabGestionPersonal;
+    @FXML private Tab tabGestionUsuarios;
+    @FXML private Tab tabGestionMembresias;
+    @FXML private Tab tabGestionEntrenadores;
+    @FXML private Tab tabGestionClases;
+    @FXML private Tab tabReservas;
+    @FXML private Tab tabReportes;
+    @FXML private Tab tabReportesAdmin;
+
+    public void inicializarConRol(Rol rol) {
+        if (rol == Rol.RECEPCIONISTA) {
+            tabControlAcceso.setDisable(true);
+            tabGestionPersonal.setDisable(true);
+            tabGestionEntrenadores.setDisable(true);
+            tabGestionClases.setDisable(true);
+            tabReportesAdmin.setDisable(true);
+
+            tabPanePrincipal.getSelectionModel().select(tabGestionUsuarios);
+
+        } else if (rol == Rol.ADMIN) {
+        }
     }
 }

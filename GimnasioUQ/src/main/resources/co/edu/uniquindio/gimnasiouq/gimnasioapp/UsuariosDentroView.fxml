@@ -21,6 +21,7 @@
                     <TableColumn fx:id="tcNombre" prefWidth="250.0" text="Nombre" />
                     <TableColumn fx:id="tcIdentificacion" prefWidth="150.0" text="Identificación" />
                     <TableColumn fx:id="tcTipoUsuario" prefWidth="150.0" text="Tipo de Usuario" />
+                    <TableColumn fx:id="tcTipoMembresia" prefWidth="150.0" text="Membresía" /> <!-- NUEVA COLUMNA -->
                 </columns>
             </TableView>
             <HBox alignment="CENTER_RIGHT" spacing="10.0">

@@ -7,7 +7,9 @@ import javafx.collections.ObservableList;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ModelFactory {
@@ -19,7 +21,9 @@ public class ModelFactory {
     private final ObservableList<Entrenador> entrenadoresObservable = FXCollections.observableArrayList();
     private final ObservableList<Membresia> membresiasObservable = FXCollections.observableArrayList();
     private final ObservableList<Reserva> reservasObservable = FXCollections.observableArrayList();
-    private final ObservableList<Usuario> usuariosDentroObservable = FXCollections.observableArrayList(); // NUEVA LISTA VIVA
+    private final ObservableList<Usuario> usuariosDentroObservable = FXCollections.observableArrayList();
+    private final ObservableList<Administrador> administradoresObservable = FXCollections.observableArrayList();
+    private final ObservableList<Recepcionista> recepcionistasObservable = FXCollections.observableArrayList();
 
     public static ModelFactory getInstancia() {
         if(modelFactory == null) {
@@ -36,17 +40,19 @@ public class ModelFactory {
         membresiasObservable.setAll(gimnasio.getListaMembresias());
         reservasObservable.setAll(gimnasio.getListaReservas());
         usuariosDentroObservable.setAll(gimnasio.getUsuariosDentroDelGimnasio());
+        administradoresObservable.setAll(gimnasio.getListaAdministradores());
+        recepcionistasObservable.setAll(gimnasio.getListaRecepcionistas());
     }
 
-    // --- GETTERS DE LISTAS VIVAS ---
     public ObservableList<Usuario> getUsuariosObservable() { return usuariosObservable; }
     public ObservableList<Clase> getClasesObservable() { return clasesObservable; }
     public ObservableList<Entrenador> getEntrenadoresObservable() { return entrenadoresObservable; }
     public ObservableList<Membresia> getMembresiasObservable() { return membresiasObservable; }
     public ObservableList<Reserva> getReservasObservable() { return reservasObservable; }
-    public ObservableList<Usuario> getUsuariosDentroObservable() { return usuariosDentroObservable; } // NUEVO GETTER
+    public ObservableList<Usuario> getUsuariosDentroObservable() { return usuariosDentroObservable; }
+    public ObservableList<Administrador> getAdministradoresObservable() { return administradoresObservable; }
+    public ObservableList<Recepcionista> getRecepcionistasObservable() { return recepcionistasObservable; }
 
-    //<editor-fold desc="CRUDs y Lógica">
     public boolean crearUsuario(String nombre, String id, String edad, String tel, String tipo, String... args) {
         if (gimnasio.crearUsuario(nombre, id, edad, tel, tipo, args)) {
             usuariosObservable.setAll(gimnasio.getListaUsuarios());
@@ -161,7 +167,6 @@ public class ModelFactory {
         return false;
     }
     
-    // NUEVOS MÉTODOS
     public boolean registrarIngreso(Usuario usuario) {
         if (gimnasio.registrarIngreso(usuario)) {
             usuariosDentroObservable.setAll(gimnasio.getUsuariosDentroDelGimnasio());
@@ -176,15 +181,71 @@ public class ModelFactory {
         }
         return false;
     }
-    public boolean estaDentro(String id) {
-        return gimnasio.estaDentro(id);
+    public boolean estaDentro(String id) { return gimnasio.estaDentro(id); }
+
+    public boolean crearAdministrador(Administrador admin) {
+        if (gimnasio.crearAdministrador(admin)) {
+            administradoresObservable.setAll(gimnasio.getListaAdministradores());
+            return true;
+        }
+        return false;
     }
-    //</editor-fold>
+    public boolean actualizarAdministrador(String id, Administrador data) {
+        if (gimnasio.actualizarAdministrador(id, data)) {
+            administradoresObservable.setAll(gimnasio.getListaAdministradores());
+            return true;
+        }
+        return false;
+    }
+    public boolean eliminarAdministrador(String id) {
+        if (gimnasio.eliminarAdministrador(id)) {
+            administradoresObservable.removeIf(a -> a.getIdentificacion().equals(id));
+            return true;
+        }
+        return false;
+    }
+    public Administrador obtenerAdministrador(String id) { return gimnasio.obtenerAdministrador(id); }
+    public Administrador obtenerAdministradorPorUsername(String username) { return gimnasio.obtenerAdministradorPorUsername(username); }
+
+    public boolean crearRecepcionista(Recepcionista recep) {
+        if (gimnasio.crearRecepcionista(recep)) {
+            recepcionistasObservable.setAll(gimnasio.getListaRecepcionistas());
+            return true;
+        }
+        return false;
+    }
+    public boolean actualizarRecepcionista(String id, Recepcionista data) {
+        if (gimnasio.actualizarRecepcionista(id, data)) {
+            recepcionistasObservable.setAll(gimnasio.getListaRecepcionistas());
+            return true;
+        }
+        return false;
+    }
+    public boolean eliminarRecepcionista(String id) {
+        if (gimnasio.eliminarRecepcionista(id)) {
+            recepcionistasObservable.removeIf(r -> r.getIdentificacion().equals(id));
+            return true;
+        }
+        return false;
+    }
+    public Recepcionista obtenerRecepcionista(String id) { return gimnasio.obtenerRecepcionista(id); }
+    public Recepcionista obtenerRecepcionistaPorUsername(String username) { return gimnasio.obtenerRecepcionistaPorUsername(username); }
+
+    public Rol validarCredenciales(String username, String password) {
+        Administrador admin = obtenerAdministradorPorUsername(username);
+        if (admin != null && admin.getContrasena().equals(password)) {
+            return Rol.ADMIN;
+        }
+        Recepcionista recep = obtenerRecepcionistaPorUsername(username);
+        if (recep != null && recep.getContrasena().equals(password)) {
+            return Rol.RECEPCIONISTA;
+        }
+        return null;
+    }
     
-    //<editor-fold desc="Lógica Adicional">
     public Usuario obtenerUsuario(String id) { return gimnasio.obtenerUsuario(id); }
     public Membresia obtenerMembresiaActivaUsuario(String id) { return membresiasObservable.stream().filter(m -> m.getIdentificacionUsuario().equals(id) && m.estaActiva()).findFirst().orElse(null); }
-    public List<Reserva> obtenerReservasActivasUsuarioParaFecha(String idUsuario, LocalDate fecha) { return reservasObservable.stream().filter(r -> r.getUsuario().getIdentificacion().equals(idUsuario) && r.getFechaClase().equals(fecha) && r.getEstado().equals("ACTIVA")).collect(Collectors.toList()); }
+    public List<Reserva> obtenerReservasActivasUsuarioParaFecha(String idUsuario, LocalDate fecha) { return reservasObservable.stream().filter(r -> r.getUsuario().getIdentificacion().equals(idUsuario) && r.getFechaClase().equals(fecha) && "ACTIVA".equals(r.getEstado())).collect(Collectors.toList()); }
     public List<Entrenador> obtenerEntrenadoresDisponiblesParaHorario(DayOfWeek dia, LocalTime horario, LocalDate fechaClase, Clase claseSeleccionada) {
         List<Entrenador> entrenadoresDisponiblesGeneral = entrenadoresObservable.stream().filter(Entrenador::isDisponible).collect(Collectors.toList());
         List<Entrenador> entrenadoresOcupadosClasesGrupales = clasesObservable.stream().filter(clase -> clase.getDia() == dia && clase.getHorario().isBefore(horario.plusMinutes(1)) && clase.getHoraFin().isAfter(horario.plusMinutes(1)) && clase.getEntrenadorPorDefecto() != null).map(Clase::getEntrenadorPorDefecto).collect(Collectors.toList());
@@ -208,5 +269,41 @@ public class ModelFactory {
         if (usuario instanceof Trabajador) return precioBase * 0.9;
         return precioBase;
     }
-    //</editor-fold>
+    
+    public List<Usuario> obtenerUsuariosConMembresiaActiva() {
+        return usuariosObservable.stream()
+                .filter(u -> obtenerMembresiaActivaUsuario(u.getIdentificacion()) != null)
+                .collect(Collectors.toList());
+    }
+
+    public List<Membresia> obtenerMembresiasProximasAVencer(int dias) {
+        LocalDate fechaLimite = LocalDate.now().plusDays(dias);
+        return membresiasObservable.stream()
+                .filter(m -> m.estaActiva() && LocalDate.parse(m.getFechaVencimiento()).isBefore(fechaLimite))
+                .sorted(Comparator.comparing(Membresia::getFechaVencimiento))
+                .collect(Collectors.toList());
+    }
+    
+    public Map<String, Double> obtenerIngresosPorTipoMembresia() {
+        return membresiasObservable.stream()
+                .collect(Collectors.groupingBy(m -> m.getTipo().getNombre(), Collectors.summingDouble(Membresia::getCosto)));
+    }
+
+    public List<Reserva> obtenerHistorialAsistencias() {
+        return reservasObservable.stream()
+                .filter(r -> "COMPLETADA".equals(r.getEstado()))
+                .sorted(Comparator.comparing(Reserva::getFechaClase).reversed())
+                .collect(Collectors.toList());
+    }
+
+    public Map<String, Long> obtenerRankingClasesReservadas() {
+        return reservasObservable.stream()
+                .collect(Collectors.groupingBy(r -> r.getClase().getNombre(), Collectors.counting()));
+    }
+
+    public Map<String, Long> obtenerRankingClasesAsistidas() {
+        return reservasObservable.stream()
+                .filter(r -> "COMPLETADA".equals(r.getEstado()))
+                .collect(Collectors.groupingBy(r -> r.getClase().getNombre(), Collectors.counting()));
+    }
 }

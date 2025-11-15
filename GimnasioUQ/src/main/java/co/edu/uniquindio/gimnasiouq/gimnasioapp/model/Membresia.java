@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public class Membresia {
     private String codigo;
-    private String identificacionUsuario; // Relación con usuario
+    private String identificacionUsuario;
     private TipoMembresia tipo;
     private TipoMembresiaDuracion duracion;
     private double costo;
@@ -29,7 +29,6 @@ public class Membresia {
         this.fechaCompra = LocalDate.now().toString();
     }
 
-    // Getters y Setters
     public String getCodigo() { return codigo; }
     public void setCodigo(String codigo) { this.codigo = codigo; }
 

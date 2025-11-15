@@ -9,8 +9,8 @@ public class Clase {
     private String codigo;
     private String nombre;
     private DayOfWeek dia;
-    private LocalTime horario; // Hora de inicio
-    private LocalTime horaFin;   // NUEVO: Hora de fin
+    private LocalTime horario;
+    private LocalTime horaFin;
     private int cupoMaximo;
     private Entrenador entrenadorPorDefecto;
 
@@ -26,7 +26,6 @@ public class Clase {
         this.entrenadorPorDefecto = entrenadorPorDefecto;
     }
 
-    // Getters y Setters
     public String getCodigo() { return codigo; }
     public void setCodigo(String codigo) { this.codigo = codigo; }
 
@@ -36,10 +35,10 @@ public class Clase {
     public DayOfWeek getDia() { return dia; }
     public void setDia(DayOfWeek dia) { this.dia = dia; }
 
-    public LocalTime getHorario() { return horario; } // Hora de inicio
+    public LocalTime getHorario() { return horario; }
     public void setHorario(LocalTime horario) { this.horario = horario; }
 
-    public LocalTime getHoraFin() { return horaFin; } // NUEVO: Hora de fin
+    public LocalTime getHoraFin() { return horaFin; }
     public void setHoraFin(LocalTime horaFin) { this.horaFin = horaFin; }
 
     public int getCupoMaximo() { return cupoMaximo; }

@@ -98,7 +98,7 @@ public class CrudMembresiaViewController {
     }
 
     private void eliminarMembresia() {
-        if (membresiaSeleccionada != null && mostrarMensajeConfirmacion("¿Eliminar membresía?")) {
+        if (membresiaSeleccionada != null && mostrarMensajeConfirmacion("¿Está seguro de que desea eliminar la membresía?")) {
             if (membresiaController.eliminarMembresia(membresiaSeleccionada.getCodigo())) {
                 mostrarMensaje("Eliminación Exitosa", "La membresía ha sido eliminada.");
                 limpiarFormulario();
@@ -106,7 +106,6 @@ public class CrudMembresiaViewController {
         }
     }
     
-    //<editor-fold desc="Métodos Auxiliares">
     private void initDataBinding() {
         tcCodigo.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCodigo()));
         tcUsuario.setCellValueFactory(cellData -> {
@@ -232,5 +231,4 @@ public class CrudMembresiaViewController {
         alert.setContentText(mensaje);
         return alert.showAndWait().filter(r -> r == ButtonType.OK).isPresent();
     }
-    //</editor-fold>
 }

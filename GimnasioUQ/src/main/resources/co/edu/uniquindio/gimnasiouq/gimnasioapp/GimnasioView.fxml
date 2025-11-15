@@ -1,40 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="700.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.uniquindio.gimnasiouq.gimnasioapp.GimnasioApp">
+<AnchorPane prefHeight="700.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller.GimnasioViewController">
     <children>
-        <TabPane prefHeight="700.0" prefWidth="1200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <TabPane fx:id="tabPanePrincipal" prefHeight="700.0" prefWidth="1200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <tabs>
-                <Tab text="Control de Acceso">
+                <Tab fx:id="tabControlAcceso" text="Control de Acceso">
                     <content>
                         <fx:include source="ControlAccesoView.fxml" />
                     </content>
                 </Tab>
-                <Tab text="Gestionar Usuarios">
+                <Tab fx:id="tabGestionPersonal" text="Gestionar Personal">
+                    <content>
+                        <fx:include source="GestionPersonalView.fxml" />
+                    </content>
+                </Tab>
+                <Tab fx:id="tabGestionUsuarios" text="Gestionar Usuarios">
                     <content>
                         <fx:include source="CrudUsuarioView.fxml" />
                     </content>
                 </Tab>
-                <Tab text="Gestionar Membresías">
+                <Tab fx:id="tabGestionMembresias" text="Gestionar Membresías">
                     <content>
                         <fx:include source="MembresiaView.fxml" />
                     </content>
                 </Tab>
-                <Tab text="Gestionar Entrenadores">
+                <Tab fx:id="tabGestionEntrenadores" text="Gestionar Entrenadores">
                     <content>
                         <fx:include source="CrudEntrenadoresView.fxml" />
                     </content>
                 </Tab>
-                <Tab text="Gestionar Clases">
+                <Tab fx:id="tabGestionClases" text="Gestionar Clases">
                     <content>
                         <fx:include source="CrudClasesView.fxml" />
                     </content>
                 </Tab>
-                <Tab text="Reservas de Clases">
+                <Tab fx:id="tabReservas" text="Reservas de Clases">
                     <content>
                         <fx:include source="CrudReservaView.fxml" />
+                    </content>
+                </Tab>
+                <Tab fx:id="tabReportes" text="Reportes">
+                    <content>
+                        <fx:include source="ReportesView.fxml" />
+                    </content>
+                </Tab>
+                <Tab fx:id="tabReportesAdmin" text="Reportes Admin">
+                    <content>
+                        <fx:include source="ReportesAdminView.fxml" />
                     </content>
                 </Tab>
             </tabs>
