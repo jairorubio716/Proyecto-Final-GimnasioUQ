@@ -5,6 +5,7 @@ import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.*;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.UUID;
 
 public class DataUtil {
 
@@ -18,8 +19,8 @@ public class DataUtil {
         entrenador1.setDisponible(true);
         Entrenador entrenador2 = new Entrenador("3002", "Pedro", "3207654321", "pedro@email.com", 2200000);
         entrenador2.setDisponible(true);
-        Entrenador entrenador3 = new Entrenador("3003", "Luis", "3151112233", "luis@email.com", 2100000);
-        entrenador3.setDisponible(false); // Luis no disponible
+        Entrenador entrenador3 = new Entrenador("3003", "Luis (No disponible)", "3151112233", "luis@email.com", 2100000);
+        entrenador3.setDisponible(false);
         gimnasio.getListaEntrenadores().add(entrenador1);
         gimnasio.getListaEntrenadores().add(entrenador2);
         gimnasio.getListaEntrenadores().add(entrenador3);
@@ -32,10 +33,16 @@ public class DataUtil {
         Clase clase3 = new Clase("C03", "Yoga Vespertino", DayOfWeek.WEDNESDAY, LocalTime.of(19, 0), LocalTime.of(20, 0), 15, entrenador1);
         Clase clase4 = new Clase("C04", "Full Body", DayOfWeek.FRIDAY, LocalTime.of(7, 0), LocalTime.of(8, 0), 25, entrenador2);
         
+        // SOLUCIÓN: Clase de prueba para el día y hora actual
+        DayOfWeek hoy = LocalDate.now().getDayOfWeek();
+        LocalTime ahora = LocalTime.now();
+        Clase clasePruebaHoy = new Clase("C99", "Clase de Prueba Hoy", hoy, ahora.minusMinutes(10), ahora.plusHours(1), 5, entrenador2);
+
         gimnasio.getListaClases().add(clase1);
         gimnasio.getListaClases().add(clase2);
         gimnasio.getListaClases().add(clase3);
         gimnasio.getListaClases().add(clase4);
+        gimnasio.getListaClases().add(clasePruebaHoy);
 
         // ============================================================
         //                   CREAR USUARIOS
@@ -50,16 +57,20 @@ public class DataUtil {
         // ============================================================
         //                   CREAR MEMBRESÍAS
         // ============================================================
-        String fechaHoy = LocalDate.now().toString();
-        String fechaMensual = LocalDate.now().plusMonths(1).toString();
-        String fechaAnual = LocalDate.now().plusYears(1).toString();
-
-        Membresia mem1 = new Membresia("MEM001", "2001", TipoMembresia.PREMIUM, TipoMembresiaDuracion.MENSUAL, 80000, fechaHoy, fechaMensual, EstadoMembresia.ACTIVA);
-        Membresia mem2 = new Membresia("MEM002", "2002", TipoMembresia.BASICA, TipoMembresiaDuracion.ANUAL, 500000, fechaHoy, fechaAnual, EstadoMembresia.ACTIVA);
-        Membresia mem3 = new Membresia("MEM003", "2003", TipoMembresia.VIP, TipoMembresiaDuracion.TRIMESTRAL, 450000, fechaHoy, LocalDate.now().plusMonths(3).toString(), EstadoMembresia.ACTIVA);
+        String fechaHoyStr = LocalDate.now().toString();
+        Membresia mem1 = new Membresia("MEM001", "2001", TipoMembresia.PREMIUM, TipoMembresiaDuracion.MENSUAL, 80000, fechaHoyStr, LocalDate.now().plusMonths(1).toString(), EstadoMembresia.ACTIVA);
+        Membresia mem2 = new Membresia("MEM002", "2002", TipoMembresia.BASICA, TipoMembresiaDuracion.ANUAL, 500000, fechaHoyStr, LocalDate.now().plusYears(1).toString(), EstadoMembresia.ACTIVA);
+        Membresia mem3 = new Membresia("MEM003", "2003", TipoMembresia.VIP, TipoMembresiaDuracion.TRIMESTRAL, 450000, fechaHoyStr, LocalDate.now().plusMonths(3).toString(), EstadoMembresia.ACTIVA);
         gimnasio.getListaMembresias().add(mem1);
         gimnasio.getListaMembresias().add(mem2);
         gimnasio.getListaMembresias().add(mem3);
+
+        // ============================================================
+        //                   CREAR RESERVAS DE PRUEBA
+        // ============================================================
+        // SOLUCIÓN: Reserva para la clase de prueba de hoy
+        Reserva reservaPruebaHoy = new Reserva("RES-999", externo1, clasePruebaHoy, LocalDate.now(), entrenador2);
+        gimnasio.getListaReservas().add(reservaPruebaHoy);
 
         return gimnasio;
     }

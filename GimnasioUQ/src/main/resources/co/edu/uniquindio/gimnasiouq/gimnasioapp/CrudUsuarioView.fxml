@@ -10,8 +10,9 @@
             fx:controller="co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller.CrudUsuarioViewController">
 
     <children>
-        <SplitPane dividerPositions="0.5" layoutX="14.0" layoutY="14.0"
-                   orientation="VERTICAL" prefHeight="572.0" prefWidth="772.0">
+        <SplitPane dividerPositions="0.5" orientation="VERTICAL"
+                   AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
+                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
 
             <items>
 
@@ -94,8 +95,8 @@
                 <!-- TABLA INFERIOR -->
                 <AnchorPane prefHeight="300.0" prefWidth="770.0">
                     <children>
-                        <TableView fx:id="tableUsuario" layoutX="14.0" layoutY="14.0"
-                                   prefHeight="272.0" prefWidth="742.0">
+                        <TableView fx:id="tableUsuario" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
+                                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                             <columns>
                                 <TableColumn fx:id="tcNombre" prefWidth="150.0" text="Nombre"/>
                                 <TableColumn fx:id="tcIdentificacion" prefWidth="120.0" text="Identificación"/>

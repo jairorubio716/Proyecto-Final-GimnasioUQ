@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="650.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller.ControlAccesoViewController">
+    <children>
+        <VBox spacing="15.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <padding>
+                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+            </padding>
+
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                <Label text="Control de Acceso">
+                    <font>
+                        <Font name="System Bold" size="18.0" />
+                    </font>
+                </Label>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnVerUsuariosDentro" onAction="#onActionVerUsuariosDentro" text="Ver Usuarios Dentro" />
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                <Label text="Identificación del Usuario:" />
+                <TextField fx:id="txtIdentificacion" prefWidth="200.0" promptText="Ingrese identificación" />
+                <Button fx:id="btnValidarAcceso" onAction="#onActionValidarAcceso" text="Permitir Ingreso" />
+                <Button fx:id="btnLimpiar" onAction="#onActionLimpiar" text="Limpiar" />
+            </HBox>
+
+            <!-- SOLUCIÓN: Nuevo panel de búsqueda para usuarios que ya están dentro -->
+            <VBox fx:id="panelBusquedaInterna" spacing="10.0" managed="false" visible="false">
+                <children>
+                    <Separator />
+                    <Label text="Consultar Usuario Dentro del Gimnasio" style="-fx-font-weight: bold;" />
+                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                        <Label text="Identificación:" />
+                        <TextField fx:id="txtBuscarDentro" prefWidth="200.0" promptText="Ingrese identificación" />
+                        <Button fx:id="btnBuscarDentro" onAction="#onActionBuscarDentro" text="Buscar" />
+                    </HBox>
+                </children>
+            </VBox>
+
+            <VBox fx:id="panelInfoUsuario" spacing="8.0" style="-fx-border-color: #bdc3c7; -fx-border-radius: 5; -fx-padding: 10;" managed="false" visible="false">
+                <Label text="Información del Usuario" style="-fx-font-weight: bold;" />
+                <HBox spacing="10.0">
+                    <Label text="Nombre:" style="-fx-font-weight: bold;" />
+                    <Label fx:id="lblNombreUsuario" />
+                </HBox>
+                <HBox spacing="10.0">
+                    <Label text="Membresía:" style="-fx-font-weight: bold;" />
+                    <Label fx:id="lblTipoMembresia" />
+                </HBox>
+                <HBox spacing="10.0">
+                    <Label text="Estado Membresía:" style="-fx-font-weight: bold;" />
+                    <Label fx:id="lblEstadoMembresia" />
+                </HBox>
+            </VBox>
+
+            <VBox fx:id="panelReservasHoy" spacing="8.0" style="-fx-border-color: #3498db; -fx-border-radius: 5; -fx-padding: 10;" managed="false" visible="false" VBox.vgrow="ALWAYS">
+                <Label text="Historial de Reservas" style="-fx-font-weight: bold;" />
+                <TableView fx:id="tableReservasHoy" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="tcClase" prefWidth="250.0" text="Clase" />
+                        <TableColumn fx:id="tcHorario" prefWidth="120.0" text="Horario" />
+                        <TableColumn fx:id="tcEntrenador" prefWidth="200.0" text="Entrenador" />
+                        <TableColumn fx:id="tcEstadoReserva" prefWidth="120.0" text="Estado" />
+                    </columns>
+                </TableView>
+                <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                    <Button fx:id="btnRegistrarAsistencia" onAction="#onActionRegistrarAsistencia" text="Registrar Asistencia" disable="true" />
+                </HBox>
+            </VBox>
+        </VBox>
+    </children>
+</AnchorPane>
