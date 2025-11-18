@@ -51,8 +51,7 @@
                           </children>
                        </HBox>
                        
-                       <!-- SOLUCIÓN: Volver a poner el BarChart para Clases Más Reservadas -->
-                       <VBox spacing="10.0" style="-fx-background-color: #FFFFFF;">
+                        <VBox spacing="10.0" style="-fx-background-color: #FFFFFF;">
                           <children>
                               <Label style="-fx-font-weight: bold;" text="Clases Más Reservadas" />
                               <BarChart fx:id="chartClasesPopulares" animated="false" style="-fx-background-color: #FFFFFF;" VBox.vgrow="ALWAYS">

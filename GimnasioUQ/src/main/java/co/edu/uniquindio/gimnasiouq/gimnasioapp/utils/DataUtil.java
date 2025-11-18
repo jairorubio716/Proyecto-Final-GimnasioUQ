@@ -32,7 +32,7 @@ public class DataUtil {
         GimnasioUQ gimnasio = new GimnasioUQ("Gimnasio UQ Fit");
 
         Entrenador e1 = new Entrenador("3001", "Ana", "3101234567", "ana@email.com", 2000000);
-        Entrenador e2 = new Entrenador("3002", "Pedro", "3207654321", "pedro@email.com", 2200000);
+        Entrenador e2 = new Entrenador( "3002", "Pedro", "3207654321", "pedro@email.com", 2200000);
         Entrenador e3 = new Entrenador("3003", "Luis", "3151112233", "luis@email.com", 2100000);
         e3.setDisponible(false);
         Entrenador e4 = new Entrenador("3004", "Sofia", "3118889900", "sofia@email.com", 2300000);
@@ -57,8 +57,11 @@ public class DataUtil {
         Clase c10 = new Clase("C10", "Entrenamiento Funcional", DayOfWeek.TUESDAY, LocalTime.of(10, 0), LocalTime.of(11, 0), 20, e4);
         
         DayOfWeek hoyDiaSemana = LocalDate.now().getDayOfWeek();
-        LocalTime ahora = LocalTime.now();
-        Clase clasePruebaHoy = new Clase("C99", "Clase de Prueba INMEDIATA", hoyDiaSemana, ahora.minusMinutes(10), ahora.plusHours(1), 5, e2);
+
+        LocalTime horaInicioPrueba = LocalTime.now().plusMinutes(5);
+        LocalTime horaFinPrueba = horaInicioPrueba.plusHours(1);
+
+        Clase clasePruebaHoy = new Clase("C99", "Clase de Prueba INMEDIATA", hoyDiaSemana, horaInicioPrueba, horaFinPrueba, 5, e2);
 
         gimnasio.getListaClases().add(c1);
         gimnasio.getListaClases().add(c2);
@@ -94,6 +97,7 @@ public class DataUtil {
         gimnasio.getListaUsuarios().add(u10);
 
         String fechaHoyStr = LocalDate.now().toString();
+
         gimnasio.crearMembresia("MEM001", "2001", TipoMembresia.PREMIUM, TipoMembresiaDuracion.MENSUAL, 80000, fechaHoyStr, LocalDate.now().plusMonths(1).toString(), EstadoMembresia.ACTIVA);
         gimnasio.crearMembresia("MEM002", "2002", TipoMembresia.BASICA, TipoMembresiaDuracion.ANUAL, 500000, fechaHoyStr, LocalDate.now().plusYears(1).toString(), EstadoMembresia.ACTIVA);
         gimnasio.crearMembresia("MEM003", "2003", TipoMembresia.VIP, TipoMembresiaDuracion.TRIMESTRAL, 450000, fechaHoyStr, LocalDate.now().plusMonths(3).toString(), EstadoMembresia.ACTIVA);
@@ -107,16 +111,16 @@ public class DataUtil {
 
         Reserva reservaPruebaHoy = new Reserva("RES-999", u3, clasePruebaHoy, LocalDate.now(), e2);
         gimnasio.getListaReservas().add(reservaPruebaHoy);
-        gimnasio.getListaReservas().add(new Reserva("RES-001", u1, c1, LocalDate.now().plusDays(1), e1)); // Activa
-        gimnasio.getListaReservas().add(new Reserva("RES-002", u2, c2, LocalDate.now().minusDays(5), e2)); // Pasada, para completar
-        gimnasio.getListaReservas().add(new Reserva("RES-003", u4, c7, LocalDate.now().plusDays(2), e5)); // Activa
-        gimnasio.getListaReservas().add(new Reserva("RES-004", u7, c8, LocalDate.now().plusDays(3), e6)); // Activa
-        gimnasio.getListaReservas().add(new Reserva("RES-005", u8, c10, LocalDate.now().plusDays(1), e4)); // Activa
-        gimnasio.getListaReservas().add(new Reserva("RES-006", u1, c3, LocalDate.now().minusDays(10), e1)); // Pasada, para completar
-        gimnasio.getListaReservas().add(new Reserva("RES-007", u5, c5, LocalDate.now().minusDays(2), e2)); // Pasada, para completar
-        gimnasio.getListaReservas().add(new Reserva("RES-008", u9, c9, LocalDate.now().plusDays(4), e1)); // Activa
-        gimnasio.getListaReservas().add(new Reserva("RES-009", u10, c4, LocalDate.now().plusDays(5), e4)); // Activa
-        gimnasio.getListaReservas().add(new Reserva("RES-010", u3, c6, LocalDate.now().minusDays(1), e1)); // Pasada, para completar
+        gimnasio.getListaReservas().add(new Reserva("RES-001", u1, c1, LocalDate.now().plusDays(1), e1));
+        gimnasio.getListaReservas().add(new Reserva("RES-002", u2, c2, LocalDate.now().minusDays(5), e2));
+        gimnasio.getListaReservas().add(new Reserva("RES-003", u4, c7, LocalDate.now().plusDays(2), e5));
+        gimnasio.getListaReservas().add(new Reserva("RES-004", u7, c8, LocalDate.now().plusDays(3), e6));
+        gimnasio.getListaReservas().add(new Reserva("RES-005", u8, c10, LocalDate.now().plusDays(1), e4));
+        gimnasio.getListaReservas().add(new Reserva("RES-006", u1, c3, LocalDate.now().minusDays(10), e1));
+        gimnasio.getListaReservas().add(new Reserva("RES-007", u5, c5, LocalDate.now().minusDays(2), e2));
+        gimnasio.getListaReservas().add(new Reserva("RES-008", u9, c9, LocalDate.now().plusDays(4), e1));
+        gimnasio.getListaReservas().add(new Reserva("RES-009", u10, c4, LocalDate.now().plusDays(5), e4));
+        gimnasio.getListaReservas().add(new Reserva("RES-010", u3, c6, LocalDate.now().minusDays(1), e1));
 
         gimnasio.getListaReservas().stream()
                 .filter(r -> r.getCodigo().equals("RES-002") || r.getCodigo().equals("RES-006") || r.getCodigo().equals("RES-007") || r.getCodigo().equals("RES-010"))

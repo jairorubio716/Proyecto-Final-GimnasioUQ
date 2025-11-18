@@ -7,6 +7,8 @@
     <list default="true" id="4323a86f-dde1-4793-ac13-d649f4ba60dd" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/utils/DataUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/utils/DataUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/viewcontroller/ControlAccesoViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/viewcontroller/ControlAccesoViewController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/ReportesView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/ReportesView.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -93,7 +95,7 @@
       <workItem from="1763258885928" duration="1491000" />
       <workItem from="1763260494796" duration="12000" />
       <workItem from="1763260812841" duration="2273000" />
-      <workItem from="1763424816574" duration="15742000" />
+      <workItem from="1763424816574" duration="18576000" />
     </task>
     <servers />
   </component>

@@ -186,11 +186,11 @@ public class ControlAccesoViewController {
 
     private void listenerSelection() {
         tableReservasHoy.getSelectionModel().selectedItemProperty().addListener((obs, old, newS) -> {
+
             if (newS == null) {
                 btnRegistrarAsistencia.setDisable(true);
                 return;
             }
-            
             boolean esParaHoy = newS.getFechaClase().equals(LocalDate.now());
             boolean estaActiva = newS.getEstado().equals("ACTIVA");
             
