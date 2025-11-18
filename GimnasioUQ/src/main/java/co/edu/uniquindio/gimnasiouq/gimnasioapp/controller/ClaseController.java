@@ -6,7 +6,6 @@ import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.Entrenador;
 import javafx.collections.ObservableList;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
-import java.util.List;
 
 public class ClaseController {
     ModelFactory modelFactory;

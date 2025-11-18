@@ -2,21 +2,15 @@ package co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller;
 
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.controller.*;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.*;
+import co.edu.uniquindio.gimnasiouq.gimnasioapp.utils.AlertasUtil;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 public class CrudReservaViewController {
 
@@ -66,38 +60,51 @@ public class CrudReservaViewController {
         
         initDataBinding();
         configurarCombos();
-        tableReserva.setItems(listaReservas);
         listenerSelection();
         limpiarTodaLaVista();
     }
 
-    @FXML void onActionCrearReserva(ActionEvent event) { crearReserva(); }
-    @FXML void onActionCancelarReserva(ActionEvent event) { cancelarReserva(); }
+    @FXML void onActionCrearReserva() { crearReserva(); }
+    @FXML void onActionCancelarReserva() { cancelarReserva(); }
 
     private void crearReserva() {
-        if (!validarCampos()) return;
-        Entrenador entrenadorFinal = comboClase.getValue().getEntrenadorPorDefecto();
-        if (panelEntrenadorVip.isVisible() && comboEntrenador.getValue() != null) {
-            entrenadorFinal = comboEntrenador.getValue();
-        }
-        if (reservaController.crearReserva(
-                "RES-" + UUID.randomUUID().toString().substring(0, 4),
-                usuarioSeleccionado,
-                comboClase.getValue(),
-                dateFechaClase.getValue(),
-                entrenadorFinal
-        )) {
-            mostrarMensaje("Creación Exitosa", "La reserva ha sido creada.");
-            limpiarFormularioReserva();
-        } else {
-            mostrarMensaje("Error", "No se pudo crear la reserva.");
+        try {
+            if (!validarCampos()) return;
+            
+            Entrenador entrenadorFinal = comboClase.getValue().getEntrenadorPorDefecto();
+            if (panelEntrenadorVip.isVisible() && comboEntrenador.getValue() != null) {
+                entrenadorFinal = comboEntrenador.getValue();
+            }
+            
+            if (reservaController.crearReserva(
+                    "RES-" + UUID.randomUUID().toString().substring(0, 4),
+                    usuarioSeleccionado,
+                    comboClase.getValue(),
+                    dateFechaClase.getValue(),
+                    entrenadorFinal
+            )) {
+                actualizarTablaReservasUsuario();
+                AlertasUtil.mostrarInformacion("Creación Exitosa", "La reserva ha sido creada.");
+                limpiarFormularioReserva();
+            } else {
+                AlertasUtil.mostrarError("No se pudo crear la reserva. Verifique los datos o la disponibilidad.");
+            }
+        } catch (Exception e) {
+            AlertasUtil.mostrarError("Ocurrió un error inesperado al crear la reserva: " + e.getMessage());
         }
     }
 
     private void cancelarReserva() {
-        if (reservaSeleccionada != null && mostrarMensajeConfirmacion("¿Está seguro de que desea cancelar la reserva?")) {
-            if (reservaController.cancelarReserva(reservaSeleccionada.getCodigo())) {
-                tableReserva.refresh();
+        if (reservaSeleccionada != null && AlertasUtil.mostrarConfirmacion("¿Está seguro de que desea cancelar la reserva?")) {
+            try {
+                if (reservaController.cancelarReserva(reservaSeleccionada.getCodigo())) {
+                    actualizarTablaReservasUsuario();
+                    AlertasUtil.mostrarInformacion("Cancelación Exitosa", "La reserva ha sido cancelada.");
+                } else {
+                    AlertasUtil.mostrarError("No se pudo cancelar la reserva.");
+                }
+            } catch (Exception e) {
+                AlertasUtil.mostrarError("Ocurrió un error inesperado al cancelar la reserva: " + e.getMessage());
             }
         }
     }
@@ -106,7 +113,7 @@ public class CrudReservaViewController {
         tcCodigo.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCodigo()));
         tcClase.setCellValueFactory(cellData -> {
             String desc = cellData.getValue().getClase().getNombre();
-            if (cellData.getValue().getEntrenador() != null) {
+            if (cellData.getValue().getEntrenador() != null && !cellData.getValue().getEntrenador().equals(cellData.getValue().getClase().getEntrenadorPorDefecto())) {
                 desc += " con " + cellData.getValue().getEntrenador().getNombre();
             }
             return new SimpleStringProperty(desc);
@@ -162,9 +169,12 @@ public class CrudReservaViewController {
             limpiarTodaLaVista();
             return;
         }
-        tableReserva.setItems(listaReservas.filtered(r -> r.getUsuario().equals(usuarioSeleccionado)));
+        
+        actualizarTablaReservasUsuario();
+        
         Membresia m = membresiaController.obtenerMembresiaActivaUsuario(usuarioSeleccionado.getIdentificacion());
         actualizarInfoMembresia(m);
+        
         if (m != null && m.estaActiva()) {
             boolean puedeReservar = m.getTipo() == TipoMembresia.PREMIUM || m.getTipo() == TipoMembresia.VIP;
             panelReservaClases.setVisible(puedeReservar); panelReservaClases.setManaged(puedeReservar);
@@ -187,24 +197,29 @@ public class CrudReservaViewController {
     private boolean validarCampos() {
         Clase claseSeleccionada = comboClase.getValue();
         LocalDate fechaSeleccionada = dateFechaClase.getValue();
+        
+        if (usuarioSeleccionado == null) {
+            AlertasUtil.mostrarError("Debe seleccionar un usuario primero.");
+            return false;
+        }
         if (claseSeleccionada == null || fechaSeleccionada == null) {
-            mostrarMensaje("Error de Validación", "Debe seleccionar una clase y una fecha.");
+            AlertasUtil.mostrarError("Debe seleccionar una clase y una fecha.");
             return false;
         }
         if (fechaSeleccionada.isBefore(LocalDate.now())) {
-            mostrarMensaje("Error de Validación", "La fecha no puede ser en el pasado.");
+            AlertasUtil.mostrarError("La fecha de la clase no puede ser en el pasado.");
             return false;
         }
         if (claseSeleccionada.getDia() != null && fechaSeleccionada.getDayOfWeek() != claseSeleccionada.getDia()) {
-            mostrarMensaje("Error de Validación", "La clase no se dicta ese día de la semana.");
+            AlertasUtil.mostrarError("La clase seleccionada no se dicta el día de la semana elegido.");
             return false;
         }
         if (reservaController.cuposDisponibles(claseSeleccionada, fechaSeleccionada) <= 0) {
-            mostrarMensaje("Error de Validación", "No hay cupos disponibles para esta clase.");
+            AlertasUtil.mostrarError("No hay cupos disponibles para esta clase en la fecha seleccionada.");
             return false;
         }
         if (reservaController.usuarioTieneReservaMismoHorario(usuarioSeleccionado.getIdentificacion(), claseSeleccionada, fechaSeleccionada)) {
-            mostrarMensaje("Error de Validación", "Ya tiene una reserva para esta clase en la misma fecha.");
+            AlertasUtil.mostrarError("El usuario ya tiene una reserva para esta clase en la misma fecha y hora.");
             return false;
         }
         return true;
@@ -230,6 +245,15 @@ public class CrudReservaViewController {
             entrenadoresFiltradosParaHorario.setPredicate(entrenador -> false);
         }
     }
+    
+    private void actualizarTablaReservasUsuario() {
+        if (usuarioSeleccionado != null) {
+            tableReserva.setItems(listaReservas.filtered(r -> r.getUsuario().equals(usuarioSeleccionado)));
+        } else {
+            tableReserva.setItems(listaReservas);
+        }
+        tableReserva.refresh();
+    }
 
     private void limpiarFormularioReserva() {
         comboClase.getSelectionModel().clearSelection();
@@ -242,21 +266,7 @@ public class CrudReservaViewController {
         comboUsuario.getSelectionModel().clearSelection();
         tableReserva.setItems(listaReservas);
         limpiarFormularioReserva();
-    }
-
-    private void mostrarMensaje(String titulo, String contenido) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(contenido);
-        alert.showAndWait();
-    }
-
-    private boolean mostrarMensajeConfirmacion(String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setHeaderText(null);
-        alert.setTitle("Confirmación");
-        alert.setContentText(mensaje);
-        return alert.showAndWait().filter(r -> r == ButtonType.OK).isPresent();
+        lblTipoMembresia.setText("N/A");
+        lblEstadoMembresia.setText("N/A");
     }
 }

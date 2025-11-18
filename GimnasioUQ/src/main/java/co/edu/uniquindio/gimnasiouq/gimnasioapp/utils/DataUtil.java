@@ -5,16 +5,35 @@ import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.*;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DataUtil {
+
+    // Listas quemadas para Administradores y Recepcionistas
+    private static final List<Administrador> administradoresQuemados = new ArrayList<>();
+    private static final List<Recepcionista> recepcionistasQuemados = new ArrayList<>();
+
+    static {
+        // Inicializar administradores y recepcionistas quemados
+        administradoresQuemados.add(new Administrador("Admin General", "ADM001", "admin", "admin"));
+        recepcionistasQuemados.add(new Recepcionista("Recepcionista Principal", "REC001", "recep", "1234"));
+    }
+
+    public static List<Administrador> getAdministradoresQuemados() {
+        return administradoresQuemados;
+    }
+
+    public static List<Recepcionista> getRecepcionistasQuemados() {
+        return recepcionistasQuemados;
+    }
 
     public static GimnasioUQ inicializarDatos() {
         GimnasioUQ gimnasio = new GimnasioUQ("Gimnasio UQ Fit");
 
         Entrenador e1 = new Entrenador("3001", "Ana", "3101234567", "ana@email.com", 2000000);
         Entrenador e2 = new Entrenador("3002", "Pedro", "3207654321", "pedro@email.com", 2200000);
-        Entrenador e3 = new Entrenador("3003", "Luis (No disponible)", "3151112233", "luis@email.com", 2100000);
+        Entrenador e3 = new Entrenador("3003", "Luis", "3151112233", "luis@email.com", 2100000);
         e3.setDisponible(false);
         Entrenador e4 = new Entrenador("3004", "Sofia", "3118889900", "sofia@email.com", 2300000);
         gimnasio.getListaEntrenadores().add(e1);
@@ -41,12 +60,12 @@ public class DataUtil {
         gimnasio.getListaClases().add(c6);
         gimnasio.getListaClases().add(clasePruebaHoy);
 
-        Usuario u1 = new Estudiante("Juan Pérez (Premium)", "2001", "20", "3001234567", "5", "Ingeniería");
-        Usuario u2 = new Trabajador("María García (Básico)", "2002", "35", "3007654321", "Profesor");
-        Usuario u3 = new Externo("Carlos López (VIP)", "2003", "28", "3001112233", "Empresa ABC");
-        Usuario u4 = new Estudiante("Laura G. (Premium)", "2004", "22", "3145556677", "8", "Medicina");
-        Usuario u5 = new Trabajador("Andrés M. (VIP)", "2005", "45", "3214443322", "Administrativo");
-        Usuario u6 = new Externo("Sofía R. (Básico)", "2006", "31", "3189990011", "Independiente");
+        Usuario u1 = new Estudiante("Juan Pérez ", "2001", "20", "3001234567", "5", "Ingeniería");
+        Usuario u2 = new Trabajador("María García", "2002", "35", "3007654321", "Profesor");
+        Usuario u3 = new Externo("Carlos López", "2003", "28", "3001112233", "Empresa ABC");
+        Usuario u4 = new Estudiante("Laura G", "2004", "22", "3145556677", "8", "Medicina");
+        Usuario u5 = new Trabajador("Andrés M", "2005", "45", "3214443322", "Administrativo");
+        Usuario u6 = new Externo("Sofía R", "2006", "31", "3189990011", "Independiente");
         gimnasio.getListaUsuarios().add(u1);
         gimnasio.getListaUsuarios().add(u2);
         gimnasio.getListaUsuarios().add(u3);
@@ -62,48 +81,8 @@ public class DataUtil {
         gimnasio.crearMembresia("MEM005", "2005", TipoMembresia.VIP, TipoMembresiaDuracion.MENSUAL, 150000, LocalDate.now().minusDays(25).toString(), LocalDate.now().plusDays(5).toString(), EstadoMembresia.ACTIVA);
         gimnasio.crearMembresia("MEM006", "2006", TipoMembresia.BASICA, TipoMembresiaDuracion.MENSUAL, 50000, LocalDate.now().minusMonths(2).toString(), LocalDate.now().minusMonths(1).toString(), EstadoMembresia.INACTIVA);
 
-        Reserva r1 = new Reserva(UUID.randomUUID().toString(), u1, c1, LocalDate.now().minusWeeks(3), e1);
-        r1.setEstado("COMPLETADA");
-        gimnasio.getListaReservas().add(r1);
-        
-        Reserva r2 = new Reserva(UUID.randomUUID().toString(), u3, c1, LocalDate.now().minusWeeks(3), e1);
-        r2.setEstado("COMPLETADA");
-        gimnasio.getListaReservas().add(r2);
-
-        Reserva r3 = new Reserva(UUID.randomUUID().toString(), u4, c4, LocalDate.now().minusWeeks(2), e4);
-        r3.setEstado("COMPLETADA");
-        gimnasio.getListaReservas().add(r3);
-
-        Reserva r4 = new Reserva(UUID.randomUUID().toString(), u5, c4, LocalDate.now().minusWeeks(2), e4);
-        r4.setEstado("COMPLETADA");
-        gimnasio.getListaReservas().add(r4);
-
-        Reserva r5 = new Reserva(UUID.randomUUID().toString(), u1, c4, LocalDate.now().minusWeeks(2), e4);
-        r5.setEstado("COMPLETADA");
-        gimnasio.getListaReservas().add(r5);
-
-        Reserva r6 = new Reserva(UUID.randomUUID().toString(), u3, c5, LocalDate.now().minusWeeks(1), e2);
-        r6.setEstado("COMPLETADA");
-        gimnasio.getListaReservas().add(r6);
-
-        Reserva r7 = new Reserva(UUID.randomUUID().toString(), u4, c5, LocalDate.now().minusWeeks(1), e2);
-        r7.setEstado("COMPLETADA");
-        gimnasio.getListaReservas().add(r7);
-
-        Reserva r8 = new Reserva(UUID.randomUUID().toString(), u5, c6, LocalDate.now().minusWeeks(1), e1);
-        r8.setEstado("COMPLETADA");
-        gimnasio.getListaReservas().add(r8);
-
-        if (c1.getDia() == hoyDiaSemana) gimnasio.crearReserva(UUID.randomUUID().toString(), u3, c1, LocalDate.now().plusDays(1), e1);
-        if (c2.getDia() == hoyDiaSemana) gimnasio.crearReserva(UUID.randomUUID().toString(), u1, c2, LocalDate.now().plusDays(2), e2);
-        if (c3.getDia() == hoyDiaSemana) gimnasio.crearReserva(UUID.randomUUID().toString(), u4, c3, LocalDate.now().plusDays(3), e1);
-        if (c5.getDia() == hoyDiaSemana) gimnasio.crearReserva(UUID.randomUUID().toString(), u5, c5, LocalDate.now().plusDays(4), e2);
-
         Reserva reservaPruebaHoy = new Reserva("RES-999", u3, clasePruebaHoy, LocalDate.now(), e2);
         gimnasio.getListaReservas().add(reservaPruebaHoy);
-
-        gimnasio.crearAdministrador(new Administrador("Admin General", "ADM001", "admin", "admin"));
-        gimnasio.crearRecepcionista(new Recepcionista("Recepcionista Principal", "REC001", "recep", "1234"));
 
         return gimnasio;
     }

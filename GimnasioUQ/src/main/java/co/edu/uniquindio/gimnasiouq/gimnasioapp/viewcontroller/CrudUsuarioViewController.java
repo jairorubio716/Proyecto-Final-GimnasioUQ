@@ -2,9 +2,9 @@ package co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller;
 
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.controller.UsuarioController;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.*;
+import co.edu.uniquindio.gimnasiouq.gimnasioapp.utils.AlertasUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
@@ -37,79 +37,109 @@ public class CrudUsuarioViewController {
         ocultarTodosLosPaneles();
     }
 
-    @FXML void onActionAgregar(ActionEvent event) { crearUsuario(); }
-    @FXML void onActionActualizar(ActionEvent event) { actualizarUsuario(); }
-    @FXML void onActionEliminar(ActionEvent event) { eliminarUsuario(); }
-    @FXML void onActionNuevo(ActionEvent event) { limpiarFormulario(); }
+    @FXML void onActionAgregar() { crearUsuario(); }
+    @FXML void onActionActualizar() { actualizarUsuario(); }
+    @FXML void onActionEliminar() { eliminarUsuario(); }
+    @FXML void onActionNuevo() { limpiarFormulario(); }
 
     private void crearUsuario() {
-        String nombre = txtNombre.getText();
-        String id = txtIdentificacion.getText();
-        String edad = txtEdad.getText();
-        String tel = txtTelefono.getText();
-        String tipo = comboTipoUsuario.getValue();
-        String arg1 = "", arg2 = "";
+        try {
+            String nombre = txtNombre.getText();
+            String id = txtIdentificacion.getText();
+            String edad = txtEdad.getText();
+            String tel = txtTelefono.getText();
+            String tipo = comboTipoUsuario.getValue();
+            String arg1 = "", arg2 = "";
 
-        if (!validarCampos(nombre, id, edad, tel, tipo)) return;
+            if (!validarCampos(nombre, id, edad, tel, tipo)) return;
 
-        switch (tipo) {
-            case "Estudiante": arg1 = txtSemestre.getText(); arg2 = txtPrograma.getText(); break;
-            case "Trabajador": arg1 = txtCargo.getText(); break;
-            case "Externo": arg1 = txtInstitucion.getText(); break;
-        }
+            Integer.parseInt(edad);
+            if (tipo.equals("Estudiante")) {
+                Integer.parseInt(txtSemestre.getText());
+            }
 
-        if (usuarioController.crearUsuario(nombre, id, edad, tel, tipo, arg1, arg2)) {
-            mostrarMensaje("Creación Exitosa", "El usuario ha sido creado.");
-            limpiarFormulario();
-        } else {
-            mostrarMensaje("Error", "La identificación ya existe.");
+            switch (tipo) {
+                case "Estudiante": arg1 = txtSemestre.getText(); arg2 = txtPrograma.getText(); break;
+                case "Trabajador": arg1 = txtCargo.getText(); break;
+                case "Externo": arg1 = txtInstitucion.getText(); break;
+            }
+
+            if (usuarioController.crearUsuario(nombre, id, edad, tel, tipo, arg1, arg2)) {
+                AlertasUtil.mostrarInformacion("Creación Exitosa", "El usuario ha sido creado.");
+                limpiarFormulario();
+                tableUsuario.setItems(usuarioController.obtenerUsuarios());
+                tableUsuario.refresh();
+            } else {
+                AlertasUtil.mostrarError("La identificación ya existe.");
+            }
+        } catch (NumberFormatException e) {
+            AlertasUtil.mostrarError("El campo 'Edad' y/o 'Semestre' deben ser valores numéricos válidos.");
+        } catch (Exception e) {
+            AlertasUtil.mostrarError("Ocurrió un error inesperado al crear el usuario: " + e.getMessage());
         }
     }
 
     private void actualizarUsuario() {
         if (usuarioSeleccionado == null) {
-            mostrarMensaje("Advertencia", "Debe seleccionar un usuario.");
+            AlertasUtil.mostrarAdvertencia("Debe seleccionar un usuario.");
             return;
         }
-        String nombre = txtNombre.getText();
-        String edad = txtEdad.getText();
-        String tel = txtTelefono.getText();
-        String tipo = comboTipoUsuario.getValue();
-        
-        if (!validarCampos(nombre, "dummyId", edad, tel, tipo)) return;
+        try {
+            String nombre = txtNombre.getText();
+            String edad = txtEdad.getText();
+            String tel = txtTelefono.getText();
+            String tipo = comboTipoUsuario.getValue();
 
-        Usuario usuarioActualizado = null;
-        switch (tipo) {
-            case "Estudiante":
-                usuarioActualizado = new Estudiante(nombre, "", edad, tel, txtSemestre.getText(), txtPrograma.getText());
-                break;
-            case "Trabajador":
-                usuarioActualizado = new Trabajador(nombre, "", edad, tel, txtCargo.getText());
-                break;
-            case "Externo":
-                usuarioActualizado = new Externo(nombre, "", edad, tel, txtInstitucion.getText());
-                break;
-        }
+            if (!validarCampos(nombre, usuarioSeleccionado.getIdentificacion(), edad, tel, tipo)) return;
 
-        if (usuarioActualizado != null && usuarioController.actualizarUsuario(usuarioSeleccionado.getIdentificacion(), usuarioActualizado)) {
-            tableUsuario.refresh();
-            mostrarMensaje("Actualización Exitosa", "El usuario ha sido actualizado.");
-            limpiarFormulario();
-        } else {
-            mostrarMensaje("Error", "No se pudo actualizar el usuario.");
+            Integer.parseInt(edad);
+            if (tipo.equals("Estudiante")) {
+                Integer.parseInt(txtSemestre.getText());
+            }
+
+            Usuario usuarioActualizado = null;
+            switch (tipo) {
+                case "Estudiante":
+                    usuarioActualizado = new Estudiante(nombre, "", edad, tel, txtSemestre.getText(), txtPrograma.getText());
+                    break;
+                case "Trabajador":
+                    usuarioActualizado = new Trabajador(nombre, "", edad, tel, txtCargo.getText());
+                    break;
+                case "Externo":
+                    usuarioActualizado = new Externo(nombre, "", edad, tel, txtInstitucion.getText());
+                    break;
+            }
+
+            if (usuarioActualizado != null && usuarioController.actualizarUsuario(usuarioSeleccionado.getIdentificacion(), usuarioActualizado)) {
+                tableUsuario.refresh();
+                AlertasUtil.mostrarInformacion("Actualización Exitosa", "El usuario ha sido actualizado.");
+                limpiarFormulario();
+            } else {
+                AlertasUtil.mostrarError("No se pudo actualizar el usuario.");
+            }
+        } catch (NumberFormatException e) {
+            AlertasUtil.mostrarError("El campo 'Edad' y/o 'Semestre' deben ser valores numéricos válidos.");
+        } catch (Exception e) {
+            AlertasUtil.mostrarError("Ocurrió un error inesperado al actualizar el usuario: " + e.getMessage());
         }
     }
 
     private void eliminarUsuario() {
-        if (usuarioSeleccionado != null && mostrarMensajeConfirmacion("¿Está seguro de que desea eliminar el usuario?")) {
-            if (usuarioController.eliminarUsuario(usuarioSeleccionado.getIdentificacion())) {
-                mostrarMensaje("Eliminación Exitosa", "El usuario ha sido eliminado.");
-                limpiarFormulario();
+        if (usuarioSeleccionado != null && AlertasUtil.mostrarConfirmacion("¿Está seguro de que desea eliminar el usuario?")) {
+            try {
+                if (usuarioController.eliminarUsuario(usuarioSeleccionado.getIdentificacion())) {
+                    listaUsuarios.remove(usuarioSeleccionado);
+                    AlertasUtil.mostrarInformacion("Eliminación Exitosa", "El usuario ha sido eliminado.");
+                    limpiarFormulario();
+                } else {
+                    AlertasUtil.mostrarError("No se pudo eliminar el usuario.");
+                }
+            } catch (Exception e) {
+                AlertasUtil.mostrarError("Ocurrió un error inesperado al eliminar el usuario: " + e.getMessage());
             }
         }
     }
     
-
     private void initDataBinding() {
         tcNombre.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNombre()));
         tcIdentificacion.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getIdentificacion()));
@@ -167,11 +197,13 @@ public class CrudUsuarioViewController {
         txtEdad.clear();
         txtTelefono.clear();
         comboTipoUsuario.getSelectionModel().clearSelection();
+        usuarioSeleccionado = null;
+        tableUsuario.getSelectionModel().clearSelection();
     }
 
     private boolean validarCampos(String n, String id, String e, String t, String tipo) {
         if (n.isEmpty() || id.isEmpty() || e.isEmpty() || t.isEmpty() || tipo == null) {
-            mostrarMensaje("Error de Validación", "Todos los campos son obligatorios.");
+            AlertasUtil.mostrarError("Todos los campos son obligatorios.");
             return false;
         }
         return true;
@@ -201,20 +233,5 @@ public class CrudUsuarioViewController {
             case "Trabajador": panelTrabajador.setVisible(true); panelTrabajador.setManaged(true); break;
             case "Externo": panelExterno.setVisible(true); panelExterno.setManaged(true); break;
         }
-    }
-
-    private void mostrarMensaje(String titulo, String contenido) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(contenido);
-        alert.showAndWait();
-    }
-
-    private boolean mostrarMensajeConfirmacion(String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
-        return alert.showAndWait().filter(r -> r == ButtonType.OK).isPresent();
     }
 }

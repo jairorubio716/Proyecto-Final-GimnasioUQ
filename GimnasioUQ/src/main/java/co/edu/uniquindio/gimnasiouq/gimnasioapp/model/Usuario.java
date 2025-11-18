@@ -1,5 +1,7 @@
 package co.edu.uniquindio.gimnasiouq.gimnasioapp.model;
 
+import java.util.Objects;
+
 public abstract class Usuario {
     private String nombre;
     private String identificacion;
@@ -31,4 +33,17 @@ public abstract class Usuario {
 
     public Entrenador getEntrenadorAsignado() { return entrenadorAsignado; }
     public void setEntrenadorAsignado(Entrenador entrenadorAsignado) { this.entrenadorAsignado = entrenadorAsignado; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Usuario usuario = (Usuario) o;
+        return Objects.equals(identificacion, usuario.identificacion);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(identificacion);
+    }
 }

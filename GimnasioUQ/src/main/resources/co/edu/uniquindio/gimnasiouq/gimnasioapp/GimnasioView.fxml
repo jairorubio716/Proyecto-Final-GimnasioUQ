@@ -13,11 +13,6 @@
                         <fx:include source="ControlAccesoView.fxml" />
                     </content>
                 </Tab>
-                <Tab fx:id="tabGestionPersonal" text="Gestionar Personal">
-                    <content>
-                        <fx:include source="GestionPersonalView.fxml" />
-                    </content>
-                </Tab>
                 <Tab fx:id="tabGestionUsuarios" text="Gestionar Usuarios">
                     <content>
                         <fx:include source="CrudUsuarioView.fxml" />

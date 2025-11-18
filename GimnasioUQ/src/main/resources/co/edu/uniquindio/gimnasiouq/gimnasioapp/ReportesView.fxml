@@ -1,63 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.chart.BarChart?>
-<?import javafx.scene.chart.CategoryAxis?>
-<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="650.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller.ReportesViewController">
+<AnchorPane prefHeight="650.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller.ReportesViewController">
     <children>
         <VBox spacing="15.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <padding>
                 <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
             </padding>
-
-            <HBox alignment="CENTER_LEFT" spacing="10.0">
-                <Label text="Reportes del Gimnasio">
-                    <font>
-                        <Font name="System Bold" size="18.0" />
-                    </font>
-                </Label>
-                <Region HBox.hgrow="ALWAYS" />
-                <Button fx:id="btnRefrescar" onAction="#onActionRefrescar" text="Refrescar Reportes" />
-            </HBox>
-
-            <SplitPane dividerPositions="0.5" orientation="VERTICAL" VBox.vgrow="ALWAYS">
-                <items>
-                    <HBox spacing="15.0">
-                        <VBox spacing="10.0" HBox.hgrow="ALWAYS">
-                            <Label text="Usuarios Activos" style="-fx-font-weight: bold;" />
-                            <ListView fx:id="listUsuariosActivos" />
-                        </VBox>
-                        <VBox spacing="10.0" HBox.hgrow="ALWAYS">
-                            <Label text="Membresías Próximas a Vencer (30 días)" style="-fx-font-weight: bold;" />
-                            <TableView fx:id="tableMembresiasPorVencer">
-                                <columns>
-                                    <TableColumn fx:id="tcUsuarioMembresiaVence" prefWidth="150.0" text="Usuario" />
-                                    <TableColumn fx:id="tcFechaVencimiento" prefWidth="120.0" text="Fecha Venc." />
-                                    <TableColumn fx:id="tcDiasRestantes" prefWidth="120.0" text="Días Restantes" />
-                                </columns>
-                            </TableView>
-                        </VBox>
-                    </HBox>
-                    
-                    <!-- SOLUCIÓN: Volver a poner el BarChart para Clases Más Reservadas -->
-                    <VBox spacing="10.0">
-                        <Label text="Clases Más Reservadas" style="-fx-font-weight: bold;" />
-                        <BarChart fx:id="chartClasesPopulares" animated="false" VBox.vgrow="ALWAYS">
-                            <xAxis>
-                                <CategoryAxis side="BOTTOM" />
-                            </xAxis>
-                            <yAxis>
-                                <NumberAxis side="LEFT" />
-                            </yAxis>
-                        </BarChart>
-                    </VBox>
-                </items>
-            </SplitPane>
+           <children>
+   
+               <HBox alignment="CENTER_LEFT" spacing="10.0">
+      <children>
+                      <Label text="Reportes del Gimnasio">
+                          <font>
+                              <Font name="System Bold" size="18.0" />
+                          </font>
+                      </Label>
+                      <Region HBox.hgrow="ALWAYS" />
+                      <Button fx:id="btnRefrescar" onAction="#onActionRefrescar" style="-fx-background-color: #14b549;" text="Refrescar Reportes" />
+      </children>
+               </HBox>
+   
+               <SplitPane dividerPositions="0.5" orientation="VERTICAL" VBox.vgrow="ALWAYS">
+                   <items>
+                       <HBox spacing="15.0" style="-fx-background-color: #FFFFFF;">
+                          <children>
+                              <VBox spacing="10.0" style="-fx-background-color: #FFFFFF;" HBox.hgrow="ALWAYS">
+                                 <children>
+                                     <Label style="-fx-font-weight: bold;" text="Usuarios Activos" />
+                                     <ListView fx:id="listUsuariosActivos" style="-fx-border-color: #14b549;" />
+                                 </children>
+                              </VBox>
+                              <VBox spacing="10.0" style="-fx-background-color: #FFFFFF;" HBox.hgrow="ALWAYS">
+                                 <children>
+                                     <Label style="-fx-font-weight: bold;" text="Membresías Próximas a Vencer (30 días)" />
+                                     <TableView fx:id="tableMembresiasPorVencer" style="-fx-border-color: #14b549;">
+                                         <columns>
+                                             <TableColumn fx:id="tcUsuarioMembresiaVence" prefWidth="150.0" text="Usuario" />
+                                             <TableColumn fx:id="tcFechaVencimiento" prefWidth="120.0" text="Fecha Venc." />
+                                             <TableColumn fx:id="tcDiasRestantes" prefWidth="120.0" text="Días Restantes" />
+                                         </columns>
+                                     </TableView>
+                                 </children>
+                              </VBox>
+                          </children>
+                       </HBox>
+                       
+                       <!-- SOLUCIÓN: Volver a poner el BarChart para Clases Más Reservadas -->
+                       <VBox spacing="10.0" style="-fx-background-color: #FFFFFF;">
+                          <children>
+                              <Label style="-fx-font-weight: bold;" text="Clases Más Reservadas" />
+                              <BarChart fx:id="chartClasesPopulares" animated="false" style="-fx-background-color: #FFFFFF;" VBox.vgrow="ALWAYS">
+                                  <xAxis>
+                                      <CategoryAxis side="BOTTOM" />
+                                  </xAxis>
+                                  <yAxis>
+                                      <NumberAxis side="LEFT" />
+                                  </yAxis>
+                              </BarChart>
+                          </children>
+                       </VBox>
+                   </items>
+               </SplitPane>
+           </children>
         </VBox>
     </children>
 </AnchorPane>

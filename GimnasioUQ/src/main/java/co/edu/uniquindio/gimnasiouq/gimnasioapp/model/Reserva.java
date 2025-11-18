@@ -1,6 +1,7 @@
 package co.edu.uniquindio.gimnasiouq.gimnasioapp.model;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class Reserva {
     private String codigo;
@@ -43,4 +44,17 @@ public class Reserva {
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Reserva reserva = (Reserva) o;
+        return Objects.equals(codigo, reserva.codigo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(codigo);
+    }
 }

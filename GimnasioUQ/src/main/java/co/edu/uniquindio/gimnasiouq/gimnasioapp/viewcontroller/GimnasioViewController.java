@@ -9,19 +9,15 @@ public class GimnasioViewController {
 
     @FXML private TabPane tabPanePrincipal;
     @FXML private Tab tabControlAcceso;
-    @FXML private Tab tabGestionPersonal;
+
     @FXML private Tab tabGestionUsuarios;
-    @FXML private Tab tabGestionMembresias;
     @FXML private Tab tabGestionEntrenadores;
     @FXML private Tab tabGestionClases;
-    @FXML private Tab tabReservas;
-    @FXML private Tab tabReportes;
     @FXML private Tab tabReportesAdmin;
 
     public void inicializarConRol(Rol rol) {
         if (rol == Rol.RECEPCIONISTA) {
             tabControlAcceso.setDisable(true);
-            tabGestionPersonal.setDisable(true);
             tabGestionEntrenadores.setDisable(true);
             tabGestionClases.setDisable(true);
             tabReportesAdmin.setDisable(true);

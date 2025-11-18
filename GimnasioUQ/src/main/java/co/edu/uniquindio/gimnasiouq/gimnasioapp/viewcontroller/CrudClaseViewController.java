@@ -4,9 +4,9 @@ import co.edu.uniquindio.gimnasiouq.gimnasioapp.controller.ClaseController;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.controller.EntrenadorController;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.Clase;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.Entrenador;
+import co.edu.uniquindio.gimnasiouq.gimnasioapp.utils.AlertasUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import java.time.DayOfWeek;
@@ -14,7 +14,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.time.format.TextStyle;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.UUID;
 
 public class CrudClaseViewController {
@@ -47,71 +46,87 @@ public class CrudClaseViewController {
         listenerSelection();
     }
 
-    @FXML void onActionAgregar(ActionEvent event) { crearClase(); }
-    @FXML void onActionActualizar(ActionEvent event) { actualizarClase(); }
-    @FXML void onActionEliminar(ActionEvent event) { eliminarClase(); }
-    @FXML void onActionNuevo(ActionEvent event) { limpiarFormulario(); }
+    @FXML void onActionAgregar() { crearClase(); }
+    @FXML void onActionActualizar() { actualizarClase(); }
+    @FXML void onActionEliminar() { eliminarClase(); }
+    @FXML void onActionNuevo() { limpiarFormulario(); }
 
     private void crearClase() {
-        if (!validarCampos()) return;
-        
-        LocalTime horaInicio = LocalTime.parse(txtHorario.getText());
-        LocalTime horaFin = LocalTime.parse(txtHoraFin.getText());
+        try {
+            if (!validarCampos()) return;
 
-        Clase nuevaClase = new Clase(
-                "CL-" + UUID.randomUUID().toString().substring(0, 4),
-                txtNombreClase.getText(),
-                comboDia.getValue(),
-                horaInicio,
-                horaFin,
-                Integer.parseInt(txtCupoMaximo.getText()),
-                comboEntrenadorDefecto.getValue()
-        );
+            LocalTime horaInicio = LocalTime.parse(txtHorario.getText());
+            LocalTime horaFin = LocalTime.parse(txtHoraFin.getText());
+            int cupoMaximo = Integer.parseInt(txtCupoMaximo.getText());
+            String codigo = "CL-" + UUID.randomUUID().toString().substring(0, 4);
 
-        if (claseController.crearClase(nuevaClase.getCodigo(), nuevaClase.getNombre(), nuevaClase.getDia(), nuevaClase.getHorario(), nuevaClase.getHoraFin(), nuevaClase.getCupoMaximo(), nuevaClase.getEntrenadorPorDefecto())) {
-            mostrarMensaje("Creación Exitosa", "La clase ha sido creada.", Alert.AlertType.INFORMATION);
-            limpiarFormulario();
-        } else {
-            mostrarMensaje("Error de Creación", "No se pudo crear la clase. Verifique el código o la disponibilidad del entrenador.", Alert.AlertType.ERROR);
+            if (claseController.crearClase(codigo, txtNombreClase.getText(), comboDia.getValue(), horaInicio, horaFin, cupoMaximo, comboEntrenadorDefecto.getValue())) {
+                listaClases = claseController.obtenerClases();
+                tableClases.setItems(listaClases);
+                AlertasUtil.mostrarInformacion("Creación Exitosa", "La clase ha sido creada.");
+                limpiarFormulario();
+            } else {
+                AlertasUtil.mostrarError("No se pudo crear la clase. Verifique que el código no esté duplicado o la disponibilidad del entrenador.");
+            }
+        } catch (DateTimeParseException e) {
+            AlertasUtil.mostrarError("El formato de la hora debe ser HH:mm (Ej: 08:00).");
+        } catch (NumberFormatException e) {
+            AlertasUtil.mostrarError("El cupo máximo debe ser un número entero válido.");
+        } catch (Exception e) {
+            AlertasUtil.mostrarError("Ocurrió un error inesperado al crear la clase: " + e.getMessage());
         }
     }
 
     private void actualizarClase() {
         if (claseSeleccionada == null) {
-            mostrarMensaje("Sin Selección", "Debe seleccionar una clase para actualizar.", Alert.AlertType.WARNING);
+            AlertasUtil.mostrarAdvertencia("Debe seleccionar una clase para actualizar.");
             return;
         }
-        if (!validarCampos()) return;
+        try {
+            if (!validarCampos()) return;
 
-        LocalTime horaInicio = LocalTime.parse(txtHorario.getText());
-        LocalTime horaFin = LocalTime.parse(txtHoraFin.getText());
+            LocalTime horaInicio = LocalTime.parse(txtHorario.getText());
+            LocalTime horaFin = LocalTime.parse(txtHoraFin.getText());
+            int cupoMaximo = Integer.parseInt(txtCupoMaximo.getText());
 
-        Clase claseActualizada = new Clase(
-                claseSeleccionada.getCodigo(),
-                txtNombreClase.getText(),
-                comboDia.getValue(),
-                horaInicio,
-                horaFin,
-                Integer.parseInt(txtCupoMaximo.getText()),
-                comboEntrenadorDefecto.getValue()
-        );
+            Clase claseActualizada = new Clase(
+                    claseSeleccionada.getCodigo(),
+                    txtNombreClase.getText(),
+                    comboDia.getValue(),
+                    horaInicio,
+                    horaFin,
+                    cupoMaximo,
+                    comboEntrenadorDefecto.getValue()
+            );
 
-        if (claseController.actualizarClase(claseSeleccionada.getCodigo(), claseActualizada)) {
-            tableClases.refresh();
-            mostrarMensaje("Actualización Exitosa", "La clase ha sido actualizada.", Alert.AlertType.INFORMATION);
-            limpiarFormulario();
-        } else {
-            mostrarMensaje("Error de Actualización", "No se pudo actualizar la clase. Verifique la disponibilidad del entrenador.", Alert.AlertType.ERROR);
+            if (claseController.actualizarClase(claseSeleccionada.getCodigo(), claseActualizada)) {
+                tableClases.refresh();
+                AlertasUtil.mostrarInformacion("Actualización Exitosa", "La clase ha sido actualizada.");
+                limpiarFormulario();
+            } else {
+                AlertasUtil.mostrarError("No se pudo actualizar la clase. Verifique la disponibilidad del entrenador.");
+            }
+        } catch (DateTimeParseException e) {
+            AlertasUtil.mostrarError("El formato de la hora debe ser HH:mm (Ej: 08:00).");
+        } catch (NumberFormatException e) {
+            AlertasUtil.mostrarError("El cupo máximo debe ser un número entero válido.");
+        } catch (Exception e) {
+            AlertasUtil.mostrarError("Ocurrió un error inesperado al actualizar la clase: " + e.getMessage());
         }
     }
 
     private void eliminarClase() {
-        if (claseSeleccionada != null && mostrarMensajeConfirmacion("¿Está seguro de que desea eliminar la clase '" + claseSeleccionada.getNombre() + "'?")) {
-            if (claseController.eliminarClase(claseSeleccionada.getCodigo())) {
-                mostrarMensaje("Eliminación Exitosa", "La clase ha sido eliminada.", Alert.AlertType.INFORMATION);
-                limpiarFormulario();
-            } else {
-                mostrarMensaje("Error de Eliminación", "No se pudo eliminar la clase.", Alert.AlertType.ERROR);
+        if (claseSeleccionada != null && AlertasUtil.mostrarConfirmacion("¿Está seguro de que desea eliminar la clase '" + claseSeleccionada.getNombre() + "'?")) {
+            try {
+                if (claseController.eliminarClase(claseSeleccionada.getCodigo())) {
+                    listaClases.remove(claseSeleccionada);
+                    AlertasUtil.mostrarInformacion("Eliminación Exitosa", "La clase ha sido eliminada.");
+                    limpiarFormulario();
+                } else {
+                    AlertasUtil.mostrarError("No se pudo eliminar la clase.");
+                }
+            } catch (Exception e) {
+                AlertasUtil.mostrarError("Ocurrió un error inesperado al eliminar la clase: " + e.getMessage());
             }
         }
     }
@@ -171,6 +186,7 @@ public class CrudClaseViewController {
         txtCupoMaximo.clear();
         comboEntrenadorDefecto.getSelectionModel().clearSelection();
         tableClases.getSelectionModel().clearSelection();
+        claseSeleccionada = null;
     }
 
     private boolean validarCampos() {
@@ -182,7 +198,7 @@ public class CrudClaseViewController {
         Entrenador entrenador = comboEntrenadorDefecto.getValue();
 
         if (nombre.isEmpty() || horarioStr.isEmpty() || horaFinStr.isEmpty() || cupoMaximoStr.isEmpty() || dia == null || entrenador == null) {
-            mostrarMensaje("Error de Validación", "Todos los campos son obligatorios.", Alert.AlertType.WARNING);
+            AlertasUtil.mostrarError("Todos los campos son obligatorios.");
             return false;
         }
 
@@ -190,41 +206,25 @@ public class CrudClaseViewController {
             LocalTime horaInicio = LocalTime.parse(horarioStr);
             LocalTime horaFin = LocalTime.parse(horaFinStr);
             if (horaFin.isBefore(horaInicio) || horaFin.equals(horaInicio)) {
-                mostrarMensaje("Error de Validación", "La hora de fin debe ser posterior a la hora de inicio.", Alert.AlertType.WARNING);
+                AlertasUtil.mostrarError("La hora de fin debe ser posterior a la hora de inicio.");
                 return false;
             }
         } catch (DateTimeParseException e) {
-            mostrarMensaje("Error de Formato", "El formato de la hora debe ser HH:mm (Ej: 08:00).", Alert.AlertType.WARNING);
+            AlertasUtil.mostrarError("El formato de la hora debe ser HH:mm (Ej: 08:00).");
             return false;
         }
 
         try {
             int cupo = Integer.parseInt(cupoMaximoStr);
             if (cupo <= 0) {
-                mostrarMensaje("Error de Validación", "El cupo máximo debe ser un número positivo.", Alert.AlertType.WARNING);
+                AlertasUtil.mostrarError("El cupo máximo debe ser un número positivo.");
                 return false;
             }
         } catch (NumberFormatException e) {
-            mostrarMensaje("Error de Formato", "El cupo máximo debe ser un número entero.", Alert.AlertType.WARNING);
+            AlertasUtil.mostrarError("El cupo máximo debe ser un número entero.");
             return false;
         }
 
         return true;
-    }
-
-    private void mostrarMensaje(String titulo, String contenido, Alert.AlertType alertType) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(contenido);
-        alert.showAndWait();
-    }
-
-    private boolean mostrarMensajeConfirmacion(String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setHeaderText(null);
-        alert.setTitle("Confirmación");
-        alert.setContentText(mensaje);
-        return alert.showAndWait().filter(r -> r == ButtonType.OK).isPresent();
     }
 }

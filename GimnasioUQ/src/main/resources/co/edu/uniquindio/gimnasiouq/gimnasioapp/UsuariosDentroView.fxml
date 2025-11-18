@@ -1,32 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="650.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller.UsuariosDentroViewController">
+<AnchorPane prefHeight="650.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller.UsuariosDentroViewController">
     <children>
         <VBox spacing="15.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <padding>
                 <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
             </padding>
-            <Label text="Usuarios Dentro del Gimnasio">
-                <font>
-                    <Font name="System Bold" size="18.0" />
-                </font>
-            </Label>
-            <TableView fx:id="tableUsuariosDentro" VBox.vgrow="ALWAYS">
-                <columns>
-                    <TableColumn fx:id="tcNombre" prefWidth="250.0" text="Nombre" />
-                    <TableColumn fx:id="tcIdentificacion" prefWidth="150.0" text="Identificación" />
-                    <TableColumn fx:id="tcTipoUsuario" prefWidth="150.0" text="Tipo de Usuario" />
-                    <TableColumn fx:id="tcTipoMembresia" prefWidth="150.0" text="Membresía" /> <!-- NUEVA COLUMNA -->
-                </columns>
-            </TableView>
-            <HBox alignment="CENTER_RIGHT" spacing="10.0">
-                <Button fx:id="btnRegistrarSalida" onAction="#onActionRegistrarSalida" text="Registrar Salida" disable="true" />
-            </HBox>
+           <children>
+               <Label text="Usuarios Dentro del Gimnasio">
+                   <font>
+                       <Font name="System Bold" size="18.0" />
+                   </font>
+               </Label>
+               <TableView fx:id="tableUsuariosDentro" style="-fx-border-color: #14b549;" VBox.vgrow="ALWAYS">
+                   <columns>
+                       <TableColumn fx:id="tcNombre" prefWidth="250.0" text="Nombre" />
+                       <TableColumn fx:id="tcIdentificacion" prefWidth="150.0" text="Identificación" />
+                       <TableColumn fx:id="tcTipoUsuario" prefWidth="150.0" text="Tipo de Usuario" />
+                       <TableColumn fx:id="tcTipoMembresia" prefWidth="150.0" text="Membresía" />
+                   </columns>
+               </TableView>
+               <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                  <children>
+                      <Button fx:id="btnRegistrarSalida" disable="true" onAction="#onActionRegistrarSalida" text="Registrar Salida" />
+                  </children>
+               </HBox>
+           </children>
         </VBox>
     </children>
 </AnchorPane>

@@ -3,13 +3,12 @@ package co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.controller.MembresiaController;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.controller.UsuarioController;
 import co.edu.uniquindio.gimnasiouq.gimnasioapp.model.*;
+import co.edu.uniquindio.gimnasiouq.gimnasioapp.utils.AlertasUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import java.time.LocalDate;
-import java.util.Optional;
 import java.util.UUID;
 
 public class CrudMembresiaViewController {
@@ -45,63 +44,81 @@ public class CrudMembresiaViewController {
         limpiarFormulario();
     }
 
-    @FXML void onActionAgregar(ActionEvent event) { crearMembresia(); }
-    @FXML void onActionActualizar(ActionEvent event) { actualizarMembresia(); }
-    @FXML void onActionEliminar(ActionEvent event) { eliminarMembresia(); }
-    @FXML void onActionNuevo(ActionEvent event) { limpiarFormulario(); }
+    @FXML void onActionAgregar() { crearMembresia(); }
+    @FXML void onActionActualizar() { actualizarMembresia(); }
+    @FXML void onActionEliminar() { eliminarMembresia(); }
+    @FXML void onActionNuevo() { limpiarFormulario(); }
 
     private void crearMembresia() {
-        if (!validarCampos(true)) return;
-        if (membresiaController.crearMembresia(
-                txtCodigo.getText(),
-                comboUsuario.getValue(),
-                comboTipoMembresia.getValue(),
-                comboDuracion.getValue(),
-                LocalDate.now().toString(),
-                LocalDate.now().plusMonths(comboDuracion.getValue().getMeses()).toString(),
-                EstadoMembresia.ACTIVA
-        )) {
-            mostrarMensaje("Creación Exitosa", "La membresía ha sido creada.");
-            limpiarFormulario();
-        } else {
-            mostrarMensaje("Error", "No se pudo crear la membresía (posiblemente el usuario ya tiene una activa).");
+        try {
+            if (!validarCampos(true)) return;
+
+            if (membresiaController.crearMembresia(
+                    txtCodigo.getText(),
+                    comboUsuario.getValue(),
+                    comboTipoMembresia.getValue(),
+                    comboDuracion.getValue(),
+                    LocalDate.now().toString(),
+                    LocalDate.now().plusMonths(comboDuracion.getValue().getMeses()).toString(),
+                    EstadoMembresia.ACTIVA
+            )) {
+                listaMembresias = membresiaController.obtenerMembresias();
+                tableMembresia.setItems(listaMembresias);
+                AlertasUtil.mostrarInformacion("Creación Exitosa", "La membresía ha sido creada.");
+                limpiarFormulario();
+            } else {
+                AlertasUtil.mostrarError("No se pudo crear la membresía (posiblemente el usuario ya tiene una activa).");
+            }
+        } catch (Exception e) {
+            AlertasUtil.mostrarError("Ocurrió un error inesperado al crear la membresía: " + e.getMessage());
         }
     }
 
     private void actualizarMembresia() {
         if (membresiaSeleccionada == null) {
-            mostrarMensaje("Advertencia", "Debe seleccionar una membresía.");
+            AlertasUtil.mostrarAdvertencia("Debe seleccionar una membresía.");
             return;
         }
-        if (!validarCampos(false)) return;
-        
-        double costoCalculado = calcularCosto();
+        try {
+            if (!validarCampos(false)) return;
+            
+            double costoCalculado = calcularCosto();
 
-        Membresia membresiaActualizada = new Membresia(
-            membresiaSeleccionada.getCodigo(),
-            membresiaSeleccionada.getIdentificacionUsuario(),
-            comboTipoMembresia.getValue(),
-            comboDuracion.getValue(),
-            costoCalculado,
-            membresiaSeleccionada.getFechaInicio(),
-            LocalDate.parse(membresiaSeleccionada.getFechaInicio()).plusMonths(comboDuracion.getValue().getMeses()).toString(),
-            comboEstado.getValue()
-        );
+            Membresia membresiaActualizada = new Membresia(
+                membresiaSeleccionada.getCodigo(),
+                membresiaSeleccionada.getIdentificacionUsuario(),
+                comboTipoMembresia.getValue(),
+                comboDuracion.getValue(),
+                costoCalculado,
+                membresiaSeleccionada.getFechaInicio(),
+                LocalDate.parse(membresiaSeleccionada.getFechaInicio()).plusMonths(comboDuracion.getValue().getMeses()).toString(),
+                comboEstado.getValue()
+            );
 
-        if (membresiaController.actualizarMembresia(membresiaSeleccionada.getCodigo(), membresiaActualizada)) {
-            tableMembresia.refresh();
-            mostrarMensaje("Actualización Exitosa", "La membresía ha sido actualizada.");
-            limpiarFormulario();
-        } else {
-            mostrarMensaje("Error", "No se pudo actualizar la membresía.");
+            if (membresiaController.actualizarMembresia(membresiaSeleccionada.getCodigo(), membresiaActualizada)) {
+                tableMembresia.refresh();
+                AlertasUtil.mostrarInformacion("Actualización Exitosa", "La membresía ha sido actualizada.");
+                limpiarFormulario();
+            } else {
+                AlertasUtil.mostrarError("No se pudo actualizar la membresía.");
+            }
+        } catch (Exception e) {
+            AlertasUtil.mostrarError("Ocurrió un error inesperado al actualizar la membresía: " + e.getMessage());
         }
     }
 
     private void eliminarMembresia() {
-        if (membresiaSeleccionada != null && mostrarMensajeConfirmacion("¿Está seguro de que desea eliminar la membresía?")) {
-            if (membresiaController.eliminarMembresia(membresiaSeleccionada.getCodigo())) {
-                mostrarMensaje("Eliminación Exitosa", "La membresía ha sido eliminada.");
-                limpiarFormulario();
+        if (membresiaSeleccionada != null && AlertasUtil.mostrarConfirmacion("¿Está seguro de que desea eliminar la membresía?")) {
+            try {
+                if (membresiaController.eliminarMembresia(membresiaSeleccionada.getCodigo())) {
+                    listaMembresias.remove(membresiaSeleccionada);
+                    AlertasUtil.mostrarInformacion("Eliminación Exitosa", "La membresía ha sido eliminada.");
+                    limpiarFormulario();
+                } else {
+                    AlertasUtil.mostrarError("No se pudo eliminar la membresía.");
+                }
+            } catch (Exception e) {
+                AlertasUtil.mostrarError("Ocurrió un error inesperado al eliminar la membresía: " + e.getMessage());
             }
         }
     }
@@ -178,22 +195,23 @@ public class CrudMembresiaViewController {
         tableMembresia.getSelectionModel().clearSelection();
         txtCodigo.setDisable(false);
         comboUsuario.setDisable(false);
+        membresiaSeleccionada = null;
     }
 
     private boolean validarCampos(boolean validarUsuario) {
         if (validarUsuario && comboUsuario.getValue() == null) {
-            mostrarMensaje("Error de Validación", "Debe seleccionar un usuario.");
+            AlertasUtil.mostrarError("Debe seleccionar un usuario.");
             return false;
         }
         if (comboTipoMembresia.getValue() == null || comboDuracion.getValue() == null) {
-            mostrarMensaje("Error de Validación", "Debe seleccionar un tipo y duración.");
+            AlertasUtil.mostrarError("Debe seleccionar un tipo y duración para la membresía.");
+            return false;
+        }
+        if (membresiaSeleccionada != null && comboEstado.getValue() == null) {
+            AlertasUtil.mostrarError("Debe seleccionar un estado para la membresía.");
             return false;
         }
         return true;
-    }
-    
-    private boolean validarCampos() {
-        return validarCampos(true);
     }
     
     private double calcularCosto() {
@@ -214,21 +232,5 @@ public class CrudMembresiaViewController {
         } else {
             txtCosto.clear();
         }
-    }
-
-    private void mostrarMensaje(String titulo, String contenido) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(contenido);
-        alert.showAndWait();
-    }
-
-    private boolean mostrarMensajeConfirmacion(String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setHeaderText(null);
-        alert.setTitle("Confirmación");
-        alert.setContentText(mensaje);
-        return alert.showAndWait().filter(r -> r == ButtonType.OK).isPresent();
     }
 }

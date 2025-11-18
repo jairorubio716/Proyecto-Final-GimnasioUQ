@@ -1,114 +1,141 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="600.0" prefWidth="800.0"
-            xmlns="http://javafx.com/javafx/20.0.2"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller.CrudUsuarioViewController">
-
+<AnchorPane prefHeight="814.0" prefWidth="1315.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.uniquindio.gimnasiouq.gimnasioapp.viewcontroller.CrudUsuarioViewController">
     <children>
-        <SplitPane dividerPositions="0.5" orientation="VERTICAL"
-                   AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
-                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-
-            <items>
-
-                <AnchorPane prefHeight="300.0" prefWidth="770.0">
+        <ScrollPane fitToWidth="true" style="-fx-background-color: #FFFFFF;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <content>
+                <VBox spacing="20.0">
+                    <padding>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                    </padding>
                     <children>
-
-                        <Label layoutX="55.0" layoutY="33.0" text="Nombre:" />
-                        <Label layoutX="410.0" layoutY="33.0" text="Identificación:" />
-                        <Label layoutX="55.0" layoutY="78.0" text="Edad:" />
-                        <Label layoutX="410.0" layoutY="78.0" text="Teléfono:" />
-                        <Label layoutX="55.0" layoutY="123.0" text="Tipo Usuario:" />
-
-                        <TextField fx:id="txtNombre" layoutX="122.0" layoutY="29.0"
-                                   prefHeight="26.0" prefWidth="242.0"/>
-
-                        <TextField fx:id="txtIdentificacion" layoutX="520.0" layoutY="29.0"
-                                   prefHeight="26.0" prefWidth="182.0"/>
-
-                        <TextField fx:id="txtEdad" layoutX="122.0" layoutY="74.0"
-                                   prefHeight="26.0" prefWidth="242.0"/>
-
-                        <TextField fx:id="txtTelefono" layoutX="520.0" layoutY="74.0"
-                                   prefHeight="26.0" prefWidth="182.0"/>
-
-                        <ComboBox fx:id="comboTipoUsuario" layoutX="160.0" layoutY="119.0"
-                                  prefHeight="26.0" prefWidth="204.0"/>
-
-
-                        <Button fx:id="btnNuevo" layoutX="80.0" layoutY="180.0"
-                                prefHeight="26.0" prefWidth="133.0" text="Nuevo"
-                                onAction="#onActionNuevo"/>
-
-                        <Button fx:id="btnAgregar" layoutX="316.0" layoutY="180.0"
-                                prefHeight="26.0" prefWidth="133.0" text="Agregar"
-                                onAction="#onActionAgregar"/>
-
-                        <Button fx:id="btnActualizar" layoutX="524.0" layoutY="180.0"
-                                prefHeight="26.0" prefWidth="133.0" text="Actualizar"
-                                onAction="#onActionActualizar"/>
-
-                        <Button fx:id="btnEliminar" layoutX="316.0" layoutY="220.0"
-                                prefHeight="26.0" prefWidth="133.0" text="Eliminar"
-                                onAction="#onActionEliminar" />
-
-                        
-                        <AnchorPane fx:id="panelEstudiante" layoutX="55.0" layoutY="260.0"
-                                    prefWidth="664.0" prefHeight="80.0" style="-fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 10;">
+                        <HBox spacing="20.0">
                             <children>
-                                <Label layoutX="14.0" layoutY="14.0" text="Semestre:"/>
-                                <TextField fx:id="txtSemestre" layoutX="85.0" layoutY="10.0" prefWidth="100.0"/>
-                                <Label layoutX="200.0" layoutY="14.0" text="Programa:"/>
-                                <TextField fx:id="txtPrograma" layoutX="265.0" layoutY="10.0" prefWidth="200.0"/>
-                                <Label layoutX="14.0" layoutY="45.0" text="Estudiante" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                                <ImageView fx:id="escudofullcolor" fitHeight="250.0" fitWidth="250.0" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../../../../../imagenes/Gemini_Generated_Image_iued9giued9giued.png" />
+                                    </image>
+                                </ImageView>
+                                <VBox spacing="15.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <HBox spacing="10.0">
+                                            <children>
+                                                <ImageView fx:id="baner1" fitHeight="88.0" fitWidth="288.0" opacity="0.54">
+                                                    <image>
+                                                        <Image url="@../../../../../imagenes/banner-1.jpg" />
+                                                    </image>
+                                                </ImageView>
+                                                <ImageView fx:id="baner2" fitHeight="88.0" fitWidth="631.0" opacity="0.54" HBox.hgrow="ALWAYS">
+                                                    <image>
+                                                        <Image url="@../../../../../imagenes/baner3.jpeg" />
+                                                    </image>
+                                                </ImageView>
+                                            </children>
+                                        </HBox>
+                                        <GridPane hgap="10.0" vgap="10.0">
+                                            <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="240.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="180.0" />
+                                            </columnConstraints>
+                                            <rowConstraints>
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                            </rowConstraints>
+                                            <children>
+                                                <Label text="Nombre:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                                <TextField fx:id="txtNombre" style="-fx-border-color: #14b549;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                                <Label text="Identificación:" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                                                <TextField fx:id="txtIdentificacion" style="-fx-border-color: #14b549;" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                                                <Label text="Edad:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                                <TextField fx:id="txtEdad" style="-fx-border-color: #14b549;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <Label text="Teléfono:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                                <TextField fx:id="txtTelefono" style="-fx-border-color: #14b549;" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                            </children>
+                                        </GridPane>
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <Label text="Tipo Usuario:" />
+                                                <ComboBox fx:id="comboTipoUsuario" prefHeight="26.0" prefWidth="204.0" style="-fx-background-color: #14b549;" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
                             </children>
-                        </AnchorPane>
+                        </HBox>
 
-
-                        <AnchorPane fx:id="panelTrabajador" layoutX="55.0" layoutY="260.0"
-                                    prefWidth="664.0" prefHeight="80.0" style="-fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 10;">
+                        <StackPane>
                             <children>
-                                <Label layoutX="14.0" layoutY="14.0" text="Cargo:"/>
-                                <TextField fx:id="txtCargo" layoutX="85.0" layoutY="10.0" prefWidth="300.0"/>
-                                <Label layoutX="14.0" layoutY="45.0" text="Trabajador" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                                <AnchorPane fx:id="panelEstudiante" style="-fx-border-color: #14b549; -fx-border-radius: 5; -fx-padding: 10;">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <Label style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Estudiante |" />
+                                                <Label text="Semestre:" />
+                                                <TextField fx:id="txtSemestre" prefWidth="100.0" style="-fx-border-color: #14b549;" />
+                                                <Label text="Programa:" />
+                                                <TextField fx:id="txtPrograma" prefWidth="200.0" style="-fx-border-color: #14b549;" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </AnchorPane>
+                                <AnchorPane fx:id="panelTrabajador" style="-fx-border-color: #14b549; -fx-border-radius: 5; -fx-padding: 10;">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <Label style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Trabajador |" />
+                                                <Label text="Cargo:" />
+                                                <TextField fx:id="txtCargo" prefWidth="300.0" style="-fx-border-color: #14b549;" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </AnchorPane>
+                                <AnchorPane fx:id="panelExterno" style="-fx-border-color: #14b549; -fx-border-radius: 5; -fx-padding: 10;">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <Label style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Externo |" />
+                                                <Label text="Institución:" />
+                                                <TextField fx:id="txtInstitucion" prefWidth="300.0" style="-fx-border-color: #14b549;" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </AnchorPane>
                             </children>
-                        </AnchorPane>
+                        </StackPane>
 
-
-                        <AnchorPane fx:id="panelExterno" layoutX="55.0" layoutY="260.0"
-                                    prefWidth="664.0" prefHeight="80.0" style="-fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 10;">
+                        <HBox alignment="CENTER" spacing="20.0">
                             <children>
-                                <Label layoutX="14.0" layoutY="14.0" text="Institución:"/>
-                                <TextField fx:id="txtInstitucion" layoutX="85.0" layoutY="10.0" prefWidth="300.0"/>
-                                <Label layoutX="14.0" layoutY="45.0" text="Externo" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                                <Button fx:id="btnNuevo" onAction="#onActionNuevo" prefHeight="26.0" prefWidth="133.0" style="-fx-background-color: #14b549;" text="Nuevo" />
+                                <Button fx:id="btnAgregar" onAction="#onActionAgregar" prefHeight="26.0" prefWidth="133.0" style="-fx-background-color: #14b549;" text="Agregar" />
+                                <Button fx:id="btnEliminar" onAction="#onActionEliminar" prefHeight="26.0" prefWidth="133.0" style="-fx-background-color: #14b549;" text="Eliminar" />
+                                <Button fx:id="btnActualizar" onAction="#onActionActualizar" prefHeight="26.0" prefWidth="133.0" style="-fx-background-color: #14b549;" text="Actualizar" />
                             </children>
-                        </AnchorPane>
+                        </HBox>
 
-                    </children>
-                </AnchorPane>
-
-                <!-- TABLA INFERIOR -->
-                <AnchorPane prefHeight="300.0" prefWidth="770.0">
-                    <children>
-                        <TableView fx:id="tableUsuario" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
-                                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                        <TableView fx:id="tableUsuario" minHeight="250.0" style="-fx-border-color: #14b549;" VBox.vgrow="ALWAYS">
                             <columns>
-                                <TableColumn fx:id="tcNombre" prefWidth="150.0" text="Nombre"/>
-                                <TableColumn fx:id="tcIdentificacion" prefWidth="120.0" text="Identificación"/>
-                                <TableColumn fx:id="tcEdad" prefWidth="80.0" text="Edad"/>
-                                <TableColumn fx:id="tcTelefono" prefWidth="120.0" text="Teléfono"/>
-                                <TableColumn fx:id="tcTipoUsuario" prefWidth="100.0" text="Tipo Usuario"/>
-                                <TableColumn fx:id="tcDetalleEspecifico" prefWidth="150.0" text="Detalle Específico"/>
+                                <TableColumn fx:id="tcNombre" prefWidth="150.0" text="Nombre" />
+                                <TableColumn fx:id="tcIdentificacion" prefWidth="120.0" text="Identificación" />
+                                <TableColumn fx:id="tcEdad" prefWidth="80.0" text="Edad" />
+                                <TableColumn fx:id="tcTelefono" prefWidth="120.0" text="Teléfono" />
+                                <TableColumn fx:id="tcTipoUsuario" prefWidth="100.0" text="Tipo Usuario" />
+                                <TableColumn fx:id="tcDetalleEspecifico" prefWidth="150.0" text="Detalle Específico" />
                             </columns>
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                            </columnResizePolicy>
                         </TableView>
                     </children>
-                </AnchorPane>
-            </items>
-        </SplitPane>
+                </VBox>
+            </content>
+        </ScrollPane>
     </children>
 </AnchorPane>
