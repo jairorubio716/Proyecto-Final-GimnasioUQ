@@ -6,36 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="4323a86f-dde1-4793-ac13-d649f4ba60dd" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/controller/ClaseController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/controller/ClaseController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/controller/PersonalController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/factory/ModelFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/factory/ModelFactory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/model/GimnasioUQ.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/model/GimnasioUQ.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/model/Reserva.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/model/Reserva.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/model/Usuario.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/model/Usuario.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/utils/DataUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/utils/DataUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/viewcontroller/ControlAccesoViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/viewcontroller/ControlAccesoViewController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/viewcontroller/CrudClaseViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/viewcontroller/CrudClaseViewController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/viewcontroller/CrudEntrenadorViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/viewcontroller/CrudEntrenadorViewController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/viewcontroller/CrudMembresiaViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/viewcontroller/CrudMembresiaViewController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/viewcontroller/CrudReservaViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/viewcontroller/CrudReservaViewController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/viewcontroller/CrudUsuarioViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/viewcontroller/CrudUsuarioViewController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/viewcontroller/GestionPersonalViewController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/viewcontroller/GimnasioViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/viewcontroller/GimnasioViewController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/viewcontroller/ReportesAdminViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/co/edu/uniquindio/gimnasiouq/gimnasioapp/viewcontroller/ReportesAdminViewController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/AdminView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/AdminView.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/ControlAccesoView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/ControlAccesoView.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/CrudClasesView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/CrudClasesView.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/CrudEntrenadoresView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/CrudEntrenadoresView.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/CrudReservaView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/CrudReservaView.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/CrudUsuarioView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/CrudUsuarioView.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/GestionPersonalView.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/GimnasioView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/GimnasioView.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/LoginView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/LoginView.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/MembresiaView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/MembresiaView.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/RecepcionistaView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/RecepcionistaView.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/ReportesAdminView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/ReportesAdminView.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/ReportesView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/ReportesView.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/UsuariosDentroView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/co/edu/uniquindio/gimnasiouq/gimnasioapp/UsuariosDentroView.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -122,7 +93,7 @@
       <workItem from="1763258885928" duration="1491000" />
       <workItem from="1763260494796" duration="12000" />
       <workItem from="1763260812841" duration="2273000" />
-      <workItem from="1763424816574" duration="13458000" />
+      <workItem from="1763424816574" duration="15742000" />
     </task>
     <servers />
   </component>
